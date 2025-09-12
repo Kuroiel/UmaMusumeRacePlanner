@@ -1,0 +1,3314 @@
+[
+  {
+    "id": 0,
+    "name": "Junior Make Debut",
+    "date": "Year 1 - June - Late",
+    "grade": "Debut",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 1,
+    "name": "Junior Maiden Race",
+    "date": "Year 1 - July - Early",
+    "grade": "Maiden",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 2,
+    "name": "Chukyo Junior Stakes",
+    "date": "Year 1 - July - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 3,
+    "name": "Hakodate Junior Stakes",
+    "date": "Year 1 - July - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 4,
+    "name": "Cosmos Sho",
+    "date": "Year 1 - August - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 5,
+    "name": "Dahlia Sho",
+    "date": "Year 1 - August - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 6,
+    "name": "Phoenix Sho",
+    "date": "Year 1 - August - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 7,
+    "name": "Clover Sho",
+    "date": "Year 1 - August - Late",
+    "grade": "Open",
+    "distance": 1500,
+    "ground": "Turf"
+  },
+  {
+    "id": 8,
+    "name": "Niigata Junior Stakes",
+    "date": "Year 1 - August - Late",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 9,
+    "name": "Aster Sho",
+    "date": "Year 1 - September - Early",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 10,
+    "name": "Kokura Junior Stakes",
+    "date": "Year 1 - September - Early",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 11,
+    "name": "Nojigiku Stakes",
+    "date": "Year 1 - September - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 12,
+    "name": "Sapporo Junior Stakes",
+    "date": "Year 1 - September - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 13,
+    "name": "Suzuran Sho",
+    "date": "Year 1 - September - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 14,
+    "name": "Canna Stakes",
+    "date": "Year 1 - September - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 15,
+    "name": "Fuyo Stakes",
+    "date": "Year 1 - September - Late",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 16,
+    "name": "Kikyo Stakes",
+    "date": "Year 1 - September - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 17,
+    "name": "Saffron Sho",
+    "date": "Year 1 - September - Late",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 18,
+    "name": "Momiji Stakes",
+    "date": "Year 1 - October - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 19,
+    "name": "Platanus Sho",
+    "date": "Year 1 - October - Early",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 20,
+    "name": "Rindo Sho",
+    "date": "Year 1 - October - Early",
+    "grade": "1 Win Class",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 21,
+    "name": "Saudi Arabia Royal Cup",
+    "date": "Year 1 - October - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 22,
+    "name": "Shigiku Sho",
+    "date": "Year 1 - October - Early",
+    "grade": "1 Win Class",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 23,
+    "name": "Artemis Stakes",
+    "date": "Year 1 - October - Late",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 24,
+    "name": "Hagi Stakes",
+    "date": "Year 1 - October - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 25,
+    "name": "Ivy Stakes",
+    "date": "Year 1 - October - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 26,
+    "name": "Nadeshiko Sho",
+    "date": "Year 1 - October - Late",
+    "grade": "1 Win Class",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 27,
+    "name": "Daily Hai Junior Stakes",
+    "date": "Year 1 - November - Early",
+    "grade": "G2",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 28,
+    "name": "Fantasy Stakes",
+    "date": "Year 1 - November - Early",
+    "grade": "G3",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 29,
+    "name": "Fukushima Junior Stakes",
+    "date": "Year 1 - November - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 30,
+    "name": "Hyakunichiso Tokubetsu",
+    "date": "Year 1 - November - Early",
+    "grade": "1 Win Class",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 31,
+    "name": "Keio Hai Junior Stakes",
+    "date": "Year 1 - November - Early",
+    "grade": "G2",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 32,
+    "name": "Kigiku Sho",
+    "date": "Year 1 - November - Early",
+    "grade": "1 Win Class",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 33,
+    "name": "Kimmokusei Tokubetsu",
+    "date": "Year 1 - November - Early",
+    "grade": "1 Win Class",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 34,
+    "name": "Oxalis Sho",
+    "date": "Year 1 - November - Early",
+    "grade": "1 Win Class",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 35,
+    "name": "Akamatsu Sho",
+    "date": "Year 1 - November - Late",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 36,
+    "name": "Begonia Sho",
+    "date": "Year 1 - November - Late",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 37,
+    "name": "Cattleya Sho",
+    "date": "Year 1 - November - Late",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 38,
+    "name": "Habotan Sho",
+    "date": "Year 1 - November - Late",
+    "grade": "1 Win Class",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 39,
+    "name": "Koyamaki Sho",
+    "date": "Year 1 - November - Late",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 40,
+    "name": "Kyoto Junior Stakes",
+    "date": "Year 1 - November - Late",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 41,
+    "name": "Mochinoki Sho",
+    "date": "Year 1 - November - Late",
+    "grade": "1 Win Class",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 42,
+    "name": "Shiragiku Sho",
+    "date": "Year 1 - November - Late",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 43,
+    "name": "Shumeigiku Sho",
+    "date": "Year 1 - November - Late",
+    "grade": "1 Win Class",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 44,
+    "name": "Tokyo Sports Hai Junior Stakes",
+    "date": "Year 1 - November - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 45,
+    "name": "Asahi Hai Futurity Stakes",
+    "date": "Year 1 - December - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 46,
+    "name": "Erica Sho",
+    "date": "Year 1 - December - Early",
+    "grade": "1 Win Class",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 47,
+    "name": "Hanshin Juvenile Fillies",
+    "date": "Year 1 - December - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 48,
+    "name": "Hiiragi Sho",
+    "date": "Year 1 - December - Early",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 49,
+    "name": "Kantsubaki Sho",
+    "date": "Year 1 - December - Early",
+    "grade": "1 Win Class",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 50,
+    "name": "Kuromatsu Sho",
+    "date": "Year 1 - December - Early",
+    "grade": "1 Win Class",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 51,
+    "name": "Manryo Sho",
+    "date": "Year 1 - December - Early",
+    "grade": "1 Win Class",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 52,
+    "name": "Sazanka Sho",
+    "date": "Year 1 - December - Early",
+    "grade": "1 Win Class",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 53,
+    "name": "Tsuwabuki Sho",
+    "date": "Year 1 - December - Early",
+    "grade": "1 Win Class",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 54,
+    "name": "Christmas Rose Stakes",
+    "date": "Year 1 - December - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 55,
+    "name": "Hopeful Stakes",
+    "date": "Year 1 - December - Late",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 56,
+    "name": "Senryo Sho",
+    "date": "Year 1 - December - Late",
+    "grade": "1 Win Class",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 57,
+    "name": "Zen-Nippon Junior Yushun",
+    "date": "Year 1 - December - Late",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 58,
+    "name": "Fairy Stakes",
+    "date": "Year 2 - January - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 59,
+    "name": "Junior Cup",
+    "date": "Year 2 - January - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 60,
+    "name": "Keisei Hai",
+    "date": "Year 2 - January - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 61,
+    "name": "Kobai Stakes",
+    "date": "Year 2 - January - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 62,
+    "name": "Shinzan Kinen",
+    "date": "Year 2 - January - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 63,
+    "name": "Crocus Stakes",
+    "date": "Year 2 - January - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 64,
+    "name": "Wakagoma Stakes",
+    "date": "Year 2 - January - Late",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 65,
+    "name": "Elfin Stakes",
+    "date": "Year 2 - February - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 66,
+    "name": "Kisaragi Sho",
+    "date": "Year 2 - February - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 67,
+    "name": "Kyodo News Hai",
+    "date": "Year 2 - February - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 68,
+    "name": "Queen Cup",
+    "date": "Year 2 - February - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 69,
+    "name": "Hyacinth Stakes",
+    "date": "Year 2 - February - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 70,
+    "name": "Marguerite Stakes",
+    "date": "Year 2 - February - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 71,
+    "name": "Sumire Stakes",
+    "date": "Year 2 - February - Late",
+    "grade": "Open",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 72,
+    "name": "Anemone Stakes",
+    "date": "Year 2 - March - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 73,
+    "name": "Fillies' Revue",
+    "date": "Year 2 - March - Early",
+    "grade": "G2",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 74,
+    "name": "Shoryu Stakes",
+    "date": "Year 2 - March - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 75,
+    "name": "Tulip Sho",
+    "date": "Year 2 - March - Early",
+    "grade": "G2",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 76,
+    "name": "Yayoi Sho",
+    "date": "Year 2 - March - Early",
+    "grade": "G2",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 77,
+    "name": "Falcon Stakes",
+    "date": "Year 2 - March - Late",
+    "grade": "G3",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 78,
+    "name": "Flower Cup",
+    "date": "Year 2 - March - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 79,
+    "name": "Mainichi Hai",
+    "date": "Year 2 - March - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 80,
+    "name": "Spring Stakes",
+    "date": "Year 2 - March - Late",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 81,
+    "name": "Wakaba Stakes",
+    "date": "Year 2 - March - Late",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 82,
+    "name": "Arlington Cup",
+    "date": "Year 2 - April - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 83,
+    "name": "Fukuryu Stakes",
+    "date": "Year 2 - April - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 84,
+    "name": "Marine Cup",
+    "date": "Year 2 - April - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 85,
+    "name": "New Zealand Trophy",
+    "date": "Year 2 - April - Early",
+    "grade": "G2",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 86,
+    "name": "Oka Sho",
+    "date": "Year 2 - April - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 87,
+    "name": "Satsuki Sho",
+    "date": "Year 2 - April - Early",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 88,
+    "name": "Wasurenagusa Sho",
+    "date": "Year 2 - April - Early",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 89,
+    "name": "Aoba Sho",
+    "date": "Year 2 - April - Late",
+    "grade": "G2",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 90,
+    "name": "Flora Stakes",
+    "date": "Year 2 - April - Late",
+    "grade": "G2",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 91,
+    "name": "Sweetpea Stakes",
+    "date": "Year 2 - April - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 92,
+    "name": "Tachibana Stakes",
+    "date": "Year 2 - April - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 93,
+    "name": "Tango Stakes",
+    "date": "Year 2 - April - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 94,
+    "name": "Kyoto Shimbun Hai",
+    "date": "Year 2 - May - Early",
+    "grade": "G2",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 95,
+    "name": "NHK Mile Cup",
+    "date": "Year 2 - May - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 96,
+    "name": "Principal Stakes",
+    "date": "Year 2 - May - Early",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 97,
+    "name": "Seiryu Stakes",
+    "date": "Year 2 - May - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 98,
+    "name": "Aoi Stakes",
+    "date": "Year 2 - May - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 99,
+    "name": "Hosu Stakes",
+    "date": "Year 2 - May - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 100,
+    "name": "Japanese Oaks",
+    "date": "Year 2 - May - Late",
+    "grade": "G1",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 101,
+    "name": "Shirayuri Stakes",
+    "date": "Year 2 - May - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 102,
+    "name": "Tokyo Yushun (Japanese Derby)",
+    "date": "Year 2 - May - Late",
+    "grade": "G1",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 103,
+    "name": "Epsom Cup",
+    "date": "Year 2 - June - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 104,
+    "name": "Kanto Oaks",
+    "date": "Year 2 - June - Early",
+    "grade": "G2",
+    "distance": 2100,
+    "ground": "Dirt"
+  },
+  {
+    "id": 105,
+    "name": "Mermaid Stakes",
+    "date": "Year 2 - June - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 106,
+    "name": "Naruo Kinen",
+    "date": "Year 2 - June - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 107,
+    "name": "Sleipnir Stakes",
+    "date": "Year 2 - June - Early",
+    "grade": "Open",
+    "distance": 2100,
+    "ground": "Dirt"
+  },
+  {
+    "id": 108,
+    "name": "Tempozan Stakes",
+    "date": "Year 2 - June - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 109,
+    "name": "Yasuda Kinen",
+    "date": "Year 2 - June - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 110,
+    "name": "Akhalteke Stakes",
+    "date": "Year 2 - June - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 111,
+    "name": "Hakodate Sprint Stakes",
+    "date": "Year 2 - June - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 112,
+    "name": "Onuma Stakes",
+    "date": "Year 2 - June - Late",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 113,
+    "name": "Paradise Stakes",
+    "date": "Year 2 - June - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 114,
+    "name": "Sannomiya Stakes",
+    "date": "Year 2 - June - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 115,
+    "name": "Takarazuka Kinen",
+    "date": "Year 2 - June - Late",
+    "grade": "G1",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 116,
+    "name": "Unicorn Stakes",
+    "date": "Year 2 - June - Late",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 117,
+    "name": "Yonago Stakes",
+    "date": "Year 2 - June - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 118,
+    "name": "CBC Sho",
+    "date": "Year 2 - July - Early",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 119,
+    "name": "Hakodate Kinen",
+    "date": "Year 2 - July - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 120,
+    "name": "Japan Dirt Derby",
+    "date": "Year 2 - July - Early",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 121,
+    "name": "Marine Stakes",
+    "date": "Year 2 - July - Early",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 122,
+    "name": "Meitetsu Hai",
+    "date": "Year 2 - July - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 123,
+    "name": "Procyon Stakes",
+    "date": "Year 2 - July - Early",
+    "grade": "G3",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 124,
+    "name": "Radio Nikkei Sho",
+    "date": "Year 2 - July - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 125,
+    "name": "Sparking Lady Cup",
+    "date": "Year 2 - July - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 126,
+    "name": "Tanabata Sho",
+    "date": "Year 2 - July - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 127,
+    "name": "Tomoe Sho",
+    "date": "Year 2 - July - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 128,
+    "name": "Chukyo Kinen",
+    "date": "Year 2 - July - Late",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 129,
+    "name": "Fukushima TV Open",
+    "date": "Year 2 - July - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 130,
+    "name": "Ibis Summer Dash",
+    "date": "Year 2 - July - Late",
+    "grade": "G3",
+    "distance": 1000,
+    "ground": "Turf"
+  },
+  {
+    "id": 131,
+    "name": "Mercury Cup",
+    "date": "Year 2 - July - Late",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 132,
+    "name": "Queen Stakes",
+    "date": "Year 2 - July - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 133,
+    "name": "Aso Stakes",
+    "date": "Year 2 - August - Early",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 134,
+    "name": "Elm Stakes",
+    "date": "Year 2 - August - Early",
+    "grade": "G3",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 135,
+    "name": "Kanetsu Stakes",
+    "date": "Year 2 - August - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 136,
+    "name": "Kokura Kinen",
+    "date": "Year 2 - August - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 137,
+    "name": "Leopard Stakes",
+    "date": "Year 2 - August - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 138,
+    "name": "Sapporo Nikkei Open",
+    "date": "Year 2 - August - Early",
+    "grade": "Open",
+    "distance": 2600,
+    "ground": "Turf"
+  },
+  {
+    "id": 139,
+    "name": "Sekiya Kinen",
+    "date": "Year 2 - August - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 140,
+    "name": "UHB Sho",
+    "date": "Year 2 - August - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 141,
+    "name": "BSN Sho",
+    "date": "Year 2 - August - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 142,
+    "name": "Cluster Cup",
+    "date": "Year 2 - August - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 143,
+    "name": "Keeneland Cup",
+    "date": "Year 2 - August - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 144,
+    "name": "Kitakyushu Kinen",
+    "date": "Year 2 - August - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 145,
+    "name": "Kokura Nikkei Open",
+    "date": "Year 2 - August - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 146,
+    "name": "NST Sho",
+    "date": "Year 2 - August - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 147,
+    "name": "Sapporo Kinen",
+    "date": "Year 2 - August - Late",
+    "grade": "G2",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 148,
+    "name": "Toki Stakes",
+    "date": "Year 2 - August - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 149,
+    "name": "Centaur Stakes",
+    "date": "Year 2 - September - Early",
+    "grade": "G2",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 150,
+    "name": "Enif Stakes",
+    "date": "Year 2 - September - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 151,
+    "name": "Keisei Hai Autumn Handicap",
+    "date": "Year 2 - September - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 152,
+    "name": "Niigata Kinen",
+    "date": "Year 2 - September - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 153,
+    "name": "Prix Niel",
+    "date": "Year 2 - September - Early",
+    "grade": "G2",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 154,
+    "name": "Radio Nippon Sho",
+    "date": "Year 2 - September - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 155,
+    "name": "Rose Stakes",
+    "date": "Year 2 - September - Early",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 156,
+    "name": "Shion Stakes",
+    "date": "Year 2 - September - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 157,
+    "name": "Tancho Stakes",
+    "date": "Year 2 - September - Early",
+    "grade": "Open",
+    "distance": 2600,
+    "ground": "Turf"
+  },
+  {
+    "id": 158,
+    "name": "All Comers",
+    "date": "Year 2 - September - Late",
+    "grade": "G2",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 159,
+    "name": "Kobe Shimbun Hai",
+    "date": "Year 2 - September - Late",
+    "grade": "G2",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 160,
+    "name": "Nagatsuki Stakes",
+    "date": "Year 2 - September - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 161,
+    "name": "Port Island Stakes",
+    "date": "Year 2 - September - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 162,
+    "name": "Sazanka TV Hai",
+    "date": "Year 2 - September - Late",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 163,
+    "name": "Sirius Stakes",
+    "date": "Year 2 - September - Late",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 164,
+    "name": "Sprinters Stakes",
+    "date": "Year 2 - September - Late",
+    "grade": "G1",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 165,
+    "name": "St. Lite Kinen",
+    "date": "Year 2 - September - Late",
+    "grade": "G2",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 166,
+    "name": "Fuchu Umamusume Stakes",
+    "date": "Year 2 - October - Early",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 167,
+    "name": "Green Channel Cup",
+    "date": "Year 2 - October - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 168,
+    "name": "Kyoto Daishoten",
+    "date": "Year 2 - October - Early",
+    "grade": "G2",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 169,
+    "name": "Ladies' Prelude",
+    "date": "Year 2 - October - Early",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 170,
+    "name": "Mainichi Okan",
+    "date": "Year 2 - October - Early",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 171,
+    "name": "Mile Championship Nambu Hai",
+    "date": "Year 2 - October - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 172,
+    "name": "October Stakes",
+    "date": "Year 2 - October - Early",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 173,
+    "name": "Opal Stakes",
+    "date": "Year 2 - October - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 174,
+    "name": "Shinetsu Stakes",
+    "date": "Year 2 - October - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 175,
+    "name": "Tokyo Hai",
+    "date": "Year 2 - October - Early",
+    "grade": "G2",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 176,
+    "name": "Uzumasa Stakes",
+    "date": "Year 2 - October - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 177,
+    "name": "Brazil Cup",
+    "date": "Year 2 - October - Late",
+    "grade": "Open",
+    "distance": 2100,
+    "ground": "Dirt"
+  },
+  {
+    "id": 178,
+    "name": "Cassiopeia Stakes",
+    "date": "Year 2 - October - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 179,
+    "name": "Fuji Stakes",
+    "date": "Year 2 - October - Late",
+    "grade": "G2",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 180,
+    "name": "Kikuka Sho",
+    "date": "Year 2 - October - Late",
+    "grade": "G1",
+    "distance": 3000,
+    "ground": "Turf"
+  },
+  {
+    "id": 181,
+    "name": "Lumiere Autumn Dash",
+    "date": "Year 2 - October - Late",
+    "grade": "Open",
+    "distance": 1000,
+    "ground": "Turf"
+  },
+  {
+    "id": 182,
+    "name": "Muromachi Stakes",
+    "date": "Year 2 - October - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 183,
+    "name": "Shuka Sho",
+    "date": "Year 2 - October - Late",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 184,
+    "name": "Swan Stakes",
+    "date": "Year 2 - October - Late",
+    "grade": "G2",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 185,
+    "name": "Tenno Sho (Autumn)",
+    "date": "Year 2 - October - Late",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 186,
+    "name": "Copa Republica Argentina",
+    "date": "Year 2 - November - Early",
+    "grade": "G2",
+    "distance": 2500,
+    "ground": "Turf"
+  },
+  {
+    "id": 187,
+    "name": "Fukushima Kinen",
+    "date": "Year 2 - November - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 188,
+    "name": "JBC Classic",
+    "date": "Year 2 - November - Early",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 189,
+    "name": "JBC Ladies’ Classic",
+    "date": "Year 2 - November - Early",
+    "grade": "G1",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 190,
+    "name": "JBC Sprint",
+    "date": "Year 2 - November - Early",
+    "grade": "G1",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 191,
+    "name": "Miyako Stakes",
+    "date": "Year 2 - November - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 192,
+    "name": "Musashino Stakes",
+    "date": "Year 2 - November - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 193,
+    "name": "Oro Cup",
+    "date": "Year 2 - November - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 194,
+    "name": "Queen Elizabeth II Cup",
+    "date": "Year 2 - November - Early",
+    "grade": "G1",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 195,
+    "name": "Andromeda Stakes",
+    "date": "Year 2 - November - Late",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 196,
+    "name": "Autumn Leaf Stakes",
+    "date": "Year 2 - November - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 197,
+    "name": "Capital Stakes",
+    "date": "Year 2 - November - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 198,
+    "name": "Fukushima Minyu Cup",
+    "date": "Year 2 - November - Late",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 199,
+    "name": "Japan Cup",
+    "date": "Year 2 - November - Late",
+    "grade": "G1",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 200,
+    "name": "Keihan Hai",
+    "date": "Year 2 - November - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 201,
+    "name": "Mile Championship",
+    "date": "Year 2 - November - Late",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 202,
+    "name": "Shimotsuki Stakes",
+    "date": "Year 2 - November - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 203,
+    "name": "Capella Stakes",
+    "date": "Year 2 - December - Early",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 204,
+    "name": "Challenge Cup",
+    "date": "Year 2 - December - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 205,
+    "name": "Champions Cup",
+    "date": "Year 2 - December - Early",
+    "grade": "G1",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 206,
+    "name": "Chunichi Shimbun Hai",
+    "date": "Year 2 - December - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 207,
+    "name": "December Stakes",
+    "date": "Year 2 - December - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 208,
+    "name": "Lapis Lazuli Stakes",
+    "date": "Year 2 - December - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 209,
+    "name": "Queen Sho",
+    "date": "Year 2 - December - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 210,
+    "name": "Rigel Stakes",
+    "date": "Year 2 - December - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 211,
+    "name": "Shiwasu Stakes",
+    "date": "Year 2 - December - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 212,
+    "name": "Stayers Stakes",
+    "date": "Year 2 - December - Early",
+    "grade": "G2",
+    "distance": 3600,
+    "ground": "Turf"
+  },
+  {
+    "id": 213,
+    "name": "Tanzanite Stakes",
+    "date": "Year 2 - December - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 214,
+    "name": "Turquoise Stakes",
+    "date": "Year 2 - December - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 215,
+    "name": "Arima Kinen",
+    "date": "Year 2 - December - Late",
+    "grade": "G1",
+    "distance": 2500,
+    "ground": "Turf"
+  },
+  {
+    "id": 216,
+    "name": "Betelgeuse Stakes",
+    "date": "Year 2 - December - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 217,
+    "name": "Galaxy Stakes",
+    "date": "Year 2 - December - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 218,
+    "name": "Hanshin Cup",
+    "date": "Year 2 - December - Late",
+    "grade": "G2",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 219,
+    "name": "Tokyo Daishoten",
+    "date": "Year 2 - December - Late",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 220,
+    "name": "Aichi Hai",
+    "date": "Year 3 - January - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 221,
+    "name": "Carbuncle Stakes",
+    "date": "Year 3 - January - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 222,
+    "name": "January Stakes",
+    "date": "Year 3 - January - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 223,
+    "name": "Kyoto Kimpai",
+    "date": "Year 3 - January - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 224,
+    "name": "Manyo Stakes",
+    "date": "Year 3 - January - Early",
+    "grade": "Open",
+    "distance": 3000,
+    "ground": "Turf"
+  },
+  {
+    "id": 225,
+    "name": "Nakayama Kimpai",
+    "date": "Year 3 - January - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 226,
+    "name": "New Year Stakes",
+    "date": "Year 3 - January - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 227,
+    "name": "Nikkei Shinshun Hai",
+    "date": "Year 3 - January - Early",
+    "grade": "G2",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 228,
+    "name": "Pollux Stakes",
+    "date": "Year 3 - January - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 229,
+    "name": "Yodo Tankyori Stakes",
+    "date": "Year 3 - January - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 230,
+    "name": "American JCC",
+    "date": "Year 3 - January - Late",
+    "grade": "G2",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 231,
+    "name": "Negishi Stakes",
+    "date": "Year 3 - January - Late",
+    "grade": "G3",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 232,
+    "name": "Shirafuji Stakes",
+    "date": "Year 3 - January - Late",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 233,
+    "name": "Silk Road Stakes",
+    "date": "Year 3 - January - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 234,
+    "name": "Subaru Stakes",
+    "date": "Year 3 - January - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 235,
+    "name": "TCK Jo-O Hai",
+    "date": "Year 3 - January - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 236,
+    "name": "Tokai Stakes",
+    "date": "Year 3 - January - Late",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 237,
+    "name": "Aldebaran Stakes",
+    "date": "Year 3 - February - Early",
+    "grade": "Open",
+    "distance": 1900,
+    "ground": "Dirt"
+  },
+  {
+    "id": 238,
+    "name": "Kawasaki Kinen",
+    "date": "Year 3 - February - Early",
+    "grade": "G1",
+    "distance": 2100,
+    "ground": "Dirt"
+  },
+  {
+    "id": 239,
+    "name": "Kyoto Kinen",
+    "date": "Year 3 - February - Early",
+    "grade": "G2",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 240,
+    "name": "Rakuyo Stakes",
+    "date": "Year 3 - February - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 241,
+    "name": "Tokyo Shimbun Hai",
+    "date": "Year 3 - February - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 242,
+    "name": "Valentine Stakes",
+    "date": "Year 3 - February - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 243,
+    "name": "Yamato Stakes",
+    "date": "Year 3 - February - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 244,
+    "name": "Diamond Stakes",
+    "date": "Year 3 - February - Late",
+    "grade": "G3",
+    "distance": 3400,
+    "ground": "Turf"
+  },
+  {
+    "id": 245,
+    "name": "February Stakes",
+    "date": "Year 3 - February - Late",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 246,
+    "name": "Hankyu Hai",
+    "date": "Year 3 - February - Late",
+    "grade": "G3",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 247,
+    "name": "Kitakyushu Tankyori Stakes",
+    "date": "Year 3 - February - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 248,
+    "name": "Kokura Daishoten",
+    "date": "Year 3 - February - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 249,
+    "name": "Kyoto Umamusume Stakes",
+    "date": "Year 3 - February - Late",
+    "grade": "G3",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 250,
+    "name": "Nakayama Kinen",
+    "date": "Year 3 - February - Late",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 251,
+    "name": "Sobu Stakes",
+    "date": "Year 3 - February - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 252,
+    "name": "Empress Hai",
+    "date": "Year 3 - March - Early",
+    "grade": "G2",
+    "distance": 2100,
+    "ground": "Dirt"
+  },
+  {
+    "id": 253,
+    "name": "Kinko Sho",
+    "date": "Year 3 - March - Early",
+    "grade": "G2",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 254,
+    "name": "Kochi Stakes",
+    "date": "Year 3 - March - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 255,
+    "name": "Nakayama Umamusume Stakes",
+    "date": "Year 3 - March - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 256,
+    "name": "Nigawa Stakes",
+    "date": "Year 3 - March - Early",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 257,
+    "name": "Ocean Stakes",
+    "date": "Year 3 - March - Early",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 258,
+    "name": "Osakajo Stakes",
+    "date": "Year 3 - March - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 259,
+    "name": "Polaris Stakes",
+    "date": "Year 3 - March - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 260,
+    "name": "Chiba Stakes",
+    "date": "Year 3 - March - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 261,
+    "name": "Diolite Kinen",
+    "date": "Year 3 - March - Late",
+    "grade": "G2",
+    "distance": 2400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 262,
+    "name": "Hanshin Daishoten",
+    "date": "Year 3 - March - Late",
+    "grade": "G2",
+    "distance": 3000,
+    "ground": "Turf"
+  },
+  {
+    "id": 263,
+    "name": "March Stakes",
+    "date": "Year 3 - March - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 264,
+    "name": "Nikkei Sho",
+    "date": "Year 3 - March - Late",
+    "grade": "G2",
+    "distance": 2500,
+    "ground": "Turf"
+  },
+  {
+    "id": 265,
+    "name": "Osaka Hai",
+    "date": "Year 3 - March - Late",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 266,
+    "name": "Rokko Stakes",
+    "date": "Year 3 - March - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 267,
+    "name": "Takamatsunomiya Kinen",
+    "date": "Year 3 - March - Late",
+    "grade": "G1",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 268,
+    "name": "Antares Stakes",
+    "date": "Year 3 - April - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 269,
+    "name": "Azumakofuji Stakes",
+    "date": "Year 3 - April - Early",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 270,
+    "name": "Coral Stakes",
+    "date": "Year 3 - April - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 271,
+    "name": "Fukushima Mimpo Hai",
+    "date": "Year 3 - April - Early",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 272,
+    "name": "Hanshin Umamusume Stakes",
+    "date": "Year 3 - April - Early",
+    "grade": "G2",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 273,
+    "name": "Keiyo Stakes",
+    "date": "Year 3 - April - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 274,
+    "name": "Lord Derby Challenge Trophy",
+    "date": "Year 3 - April - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 275,
+    "name": "Marine Cup",
+    "date": "Year 3 - April - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 276,
+    "name": "Shunrai Stakes",
+    "date": "Year 3 - April - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 277,
+    "name": "Fukushima Umamusume Stakes",
+    "date": "Year 3 - April - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 278,
+    "name": "Milers Cup",
+    "date": "Year 3 - April - Late",
+    "grade": "G2",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 279,
+    "name": "Oasis Stakes",
+    "date": "Year 3 - April - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 280,
+    "name": "Tenno Sho (Spring)",
+    "date": "Year 3 - April - Late",
+    "grade": "G1",
+    "distance": 3200,
+    "ground": "Turf"
+  },
+  {
+    "id": 281,
+    "name": "Tennozan Stakes",
+    "date": "Year 3 - April - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 282,
+    "name": "Tokyo Sprint",
+    "date": "Year 3 - April - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 283,
+    "name": "Brilliant Stakes",
+    "date": "Year 3 - May - Early",
+    "grade": "Open",
+    "distance": 2100,
+    "ground": "Dirt"
+  },
+  {
+    "id": 284,
+    "name": "Kashiwa Kinen",
+    "date": "Year 3 - May - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 285,
+    "name": "Keio Hai Spring Cup",
+    "date": "Year 3 - May - Early",
+    "grade": "G2",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 286,
+    "name": "Kurama Stakes",
+    "date": "Year 3 - May - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 287,
+    "name": "Metropolitan Stakes",
+    "date": "Year 3 - May - Early",
+    "grade": "Open",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 288,
+    "name": "Miyakooji Stakes",
+    "date": "Year 3 - May - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 289,
+    "name": "Niigata Daishoten",
+    "date": "Year 3 - May - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 290,
+    "name": "Ritto Stakes",
+    "date": "Year 3 - May - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 291,
+    "name": "Tanigawadake Stakes",
+    "date": "Year 3 - May - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 292,
+    "name": "Victoria Mile",
+    "date": "Year 3 - May - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 293,
+    "name": "Azuchijo Stakes",
+    "date": "Year 3 - May - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 294,
+    "name": "Heian Stakes",
+    "date": "Year 3 - May - Late",
+    "grade": "G3",
+    "distance": 1900,
+    "ground": "Dirt"
+  },
+  {
+    "id": 295,
+    "name": "Idaten Stakes",
+    "date": "Year 3 - May - Late",
+    "grade": "Open",
+    "distance": 1000,
+    "ground": "Turf"
+  },
+  {
+    "id": 296,
+    "name": "Keyaki Stakes",
+    "date": "Year 3 - May - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 297,
+    "name": "May Stakes",
+    "date": "Year 3 - May - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 298,
+    "name": "Meguro Kinen",
+    "date": "Year 3 - May - Late",
+    "grade": "G2",
+    "distance": 2500,
+    "ground": "Turf"
+  },
+  {
+    "id": 299,
+    "name": "Epsom Cup",
+    "date": "Year 3 - June - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 300,
+    "name": "Mermaid Stakes",
+    "date": "Year 3 - June - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 301,
+    "name": "Naruo Kinen",
+    "date": "Year 3 - June - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 302,
+    "name": "Sleipnir Stakes",
+    "date": "Year 3 - June - Early",
+    "grade": "Open",
+    "distance": 2100,
+    "ground": "Dirt"
+  },
+  {
+    "id": 303,
+    "name": "Tempozan Stakes",
+    "date": "Year 3 - June - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 304,
+    "name": "Yasuda Kinen",
+    "date": "Year 3 - June - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 305,
+    "name": "Akhalteke Stakes",
+    "date": "Year 3 - June - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 306,
+    "name": "Hakodate Sprint Stakes",
+    "date": "Year 3 - June - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 307,
+    "name": "Onuma Stakes",
+    "date": "Year 3 - June - Late",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 308,
+    "name": "Paradise Stakes",
+    "date": "Year 3 - June - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 309,
+    "name": "Sannomiya Stakes",
+    "date": "Year 3 - June - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 310,
+    "name": "Takarazuka Kinen",
+    "date": "Year 3 - June - Late",
+    "grade": "G1",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 311,
+    "name": "Teio Sho",
+    "date": "Year 3 - June - Late",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 312,
+    "name": "Yonago Stakes",
+    "date": "Year 3 - June - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 313,
+    "name": "CBC Sho",
+    "date": "Year 3 - July - Early",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 314,
+    "name": "Hakodate Kinen",
+    "date": "Year 3 - July - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 315,
+    "name": "Marine Stakes",
+    "date": "Year 3 - July - Early",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 316,
+    "name": "Meitetsu Hai",
+    "date": "Year 3 - July - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 317,
+    "name": "Procyon Stakes",
+    "date": "Year 3 - July - Early",
+    "grade": "G3",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 318,
+    "name": "Sparking Lady Cup",
+    "date": "Year 3 - July - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 319,
+    "name": "Tanabata Sho",
+    "date": "Year 3 - July - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 320,
+    "name": "Tomoe Sho",
+    "date": "Year 3 - July - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 321,
+    "name": "Chukyo Kinen",
+    "date": "Year 3 - July - Late",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 322,
+    "name": "Fukushima TV Open",
+    "date": "Year 3 - July - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 323,
+    "name": "Ibis Summer Dash",
+    "date": "Year 3 - July - Late",
+    "grade": "G3",
+    "distance": 1000,
+    "ground": "Turf"
+  },
+  {
+    "id": 324,
+    "name": "Mercury Cup",
+    "date": "Year 3 - July - Late",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 325,
+    "name": "Queen Stakes",
+    "date": "Year 3 - July - Late",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 326,
+    "name": "Aso Stakes",
+    "date": "Year 3 - August - Early",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 327,
+    "name": "Elm Stakes",
+    "date": "Year 3 - August - Early",
+    "grade": "G3",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 328,
+    "name": "Kanetsu Stakes",
+    "date": "Year 3 - August - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 329,
+    "name": "Kokura Kinen",
+    "date": "Year 3 - August - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 330,
+    "name": "Sapporo Nikkei Open",
+    "date": "Year 3 - August - Early",
+    "grade": "Open",
+    "distance": 2600,
+    "ground": "Turf"
+  },
+  {
+    "id": 331,
+    "name": "Sekiya Kinen",
+    "date": "Year 3 - August - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 332,
+    "name": "UHB Sho",
+    "date": "Year 3 - August - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 333,
+    "name": "BSN Sho",
+    "date": "Year 3 - August - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 334,
+    "name": "Cluster Cup",
+    "date": "Year 3 - August - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 335,
+    "name": "Keeneland Cup",
+    "date": "Year 3 - August - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 336,
+    "name": "Kitakyushu Kinen",
+    "date": "Year 3 - August - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 337,
+    "name": "Kokura Nikkei Open",
+    "date": "Year 3 - August - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 338,
+    "name": "NST Sho",
+    "date": "Year 3 - August - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 339,
+    "name": "Sapporo Kinen",
+    "date": "Year 3 - August - Late",
+    "grade": "G2",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 340,
+    "name": "Toki Stakes",
+    "date": "Year 3 - August - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 341,
+    "name": "Centaur Stakes",
+    "date": "Year 3 - September - Early",
+    "grade": "G2",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 342,
+    "name": "Enif Stakes",
+    "date": "Year 3 - September - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 343,
+    "name": "Keisei Hai Autumn Handicap",
+    "date": "Year 3 - September - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 344,
+    "name": "Niigata Kinen",
+    "date": "Year 3 - September - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 345,
+    "name": "Prix Foy",
+    "date": "Year 3 - September - Early",
+    "grade": "G2",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 346,
+    "name": "Radio Nippon Sho",
+    "date": "Year 3 - September - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 347,
+    "name": "Tancho Stakes",
+    "date": "Year 3 - September - Early",
+    "grade": "Open",
+    "distance": 2600,
+    "ground": "Turf"
+  },
+  {
+    "id": 348,
+    "name": "All Comers",
+    "date": "Year 3 - September - Late",
+    "grade": "G2",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 349,
+    "name": "Nagatsuki Stakes",
+    "date": "Year 3 - September - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 350,
+    "name": "Port Island Stakes",
+    "date": "Year 3 - September - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 351,
+    "name": "Sazanka TV Hai",
+    "date": "Year 3 - September - Late",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 352,
+    "name": "Sirius Stakes",
+    "date": "Year 3 - September - Late",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 353,
+    "name": "Sprinters Stakes",
+    "date": "Year 3 - September - Late",
+    "grade": "G1",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 354,
+    "name": "Fuchu Umamusume Stakes",
+    "date": "Year 3 - October - Early",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 355,
+    "name": "Green Channel Cup",
+    "date": "Year 3 - October - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 356,
+    "name": "Kyoto Daishoten",
+    "date": "Year 3 - October - Early",
+    "grade": "G2",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 357,
+    "name": "Ladies' Prelude",
+    "date": "Year 3 - October - Early",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 358,
+    "name": "Mainichi Okan",
+    "date": "Year 3 - October - Early",
+    "grade": "G2",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 359,
+    "name": "Mile Championship Nambu Hai",
+    "date": "Year 3 - October - Early",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 360,
+    "name": "October Stakes",
+    "date": "Year 3 - October - Early",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 361,
+    "name": "Opal Stakes",
+    "date": "Year 3 - October - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 362,
+    "name": "Shinetsu Stakes",
+    "date": "Year 3 - October - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 363,
+    "name": "Tokyo Hai",
+    "date": "Year 3 - October - Early",
+    "grade": "G2",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 364,
+    "name": "Uzumasa Stakes",
+    "date": "Year 3 - October - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 365,
+    "name": "Brazil Cup",
+    "date": "Year 3 - October - Late",
+    "grade": "Open",
+    "distance": 2100,
+    "ground": "Dirt"
+  },
+  {
+    "id": 366,
+    "name": "Cassiopeia Stakes",
+    "date": "Year 3 - October - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 367,
+    "name": "Fuji Stakes",
+    "date": "Year 3 - October - Late",
+    "grade": "G2",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 368,
+    "name": "Lumiere Autumn Dash",
+    "date": "Year 3 - October - Late",
+    "grade": "Open",
+    "distance": 1000,
+    "ground": "Turf"
+  },
+  {
+    "id": 369,
+    "name": "Muromachi Stakes",
+    "date": "Year 3 - October - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 370,
+    "name": "Swan Stakes",
+    "date": "Year 3 - October - Late",
+    "grade": "G2",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 371,
+    "name": "Tenno Sho (Autumn)",
+    "date": "Year 3 - October - Late",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 372,
+    "name": "Copa Republica Argentina",
+    "date": "Year 3 - November - Early",
+    "grade": "G2",
+    "distance": 2500,
+    "ground": "Turf"
+  },
+  {
+    "id": 373,
+    "name": "Fukushima Kinen",
+    "date": "Year 3 - November - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 374,
+    "name": "JBC Classic",
+    "date": "Year 3 - November - Early",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 375,
+    "name": "JBC Ladies’ Classic",
+    "date": "Year 3 - November - Early",
+    "grade": "G1",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 376,
+    "name": "JBC Sprint",
+    "date": "Year 3 - November - Early",
+    "grade": "G1",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 377,
+    "name": "Miyako Stakes",
+    "date": "Year 3 - November - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 378,
+    "name": "Musashino Stakes",
+    "date": "Year 3 - November - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Dirt"
+  },
+  {
+    "id": 379,
+    "name": "Oro Cup",
+    "date": "Year 3 - November - Early",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 380,
+    "name": "Queen Elizabeth II Cup",
+    "date": "Year 3 - November - Early",
+    "grade": "G1",
+    "distance": 2200,
+    "ground": "Turf"
+  },
+  {
+    "id": 381,
+    "name": "Andromeda Stakes",
+    "date": "Year 3 - November - Late",
+    "grade": "Open",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 382,
+    "name": "Autumn Leaf Stakes",
+    "date": "Year 3 - November - Late",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 383,
+    "name": "Capital Stakes",
+    "date": "Year 3 - November - Late",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 384,
+    "name": "Fukushima Minyu Cup",
+    "date": "Year 3 - November - Late",
+    "grade": "Open",
+    "distance": 1700,
+    "ground": "Dirt"
+  },
+  {
+    "id": 385,
+    "name": "Japan Cup",
+    "date": "Year 3 - November - Late",
+    "grade": "G1",
+    "distance": 2400,
+    "ground": "Turf"
+  },
+  {
+    "id": 386,
+    "name": "Keihan Hai",
+    "date": "Year 3 - November - Late",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 387,
+    "name": "Mile Championship",
+    "date": "Year 3 - November - Late",
+    "grade": "G1",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 388,
+    "name": "Shimotsuki Stakes",
+    "date": "Year 3 - November - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 389,
+    "name": "Capella Stakes",
+    "date": "Year 3 - December - Early",
+    "grade": "G3",
+    "distance": 1200,
+    "ground": "Dirt"
+  },
+  {
+    "id": 390,
+    "name": "Challenge Cup",
+    "date": "Year 3 - December - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 391,
+    "name": "Champions Cup",
+    "date": "Year 3 - December - Early",
+    "grade": "G1",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 392,
+    "name": "Chunichi Shimbun Hai",
+    "date": "Year 3 - December - Early",
+    "grade": "G3",
+    "distance": 2000,
+    "ground": "Turf"
+  },
+  {
+    "id": 393,
+    "name": "December Stakes",
+    "date": "Year 3 - December - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Turf"
+  },
+  {
+    "id": 394,
+    "name": "Lapis Lazuli Stakes",
+    "date": "Year 3 - December - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 395,
+    "name": "Queen Sho",
+    "date": "Year 3 - December - Early",
+    "grade": "G3",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 396,
+    "name": "Rigel Stakes",
+    "date": "Year 3 - December - Early",
+    "grade": "Open",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 397,
+    "name": "Shiwasu Stakes",
+    "date": "Year 3 - December - Early",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 398,
+    "name": "Stayers Stakes",
+    "date": "Year 3 - December - Early",
+    "grade": "G2",
+    "distance": 3600,
+    "ground": "Turf"
+  },
+  {
+    "id": 399,
+    "name": "Tanzanite Stakes",
+    "date": "Year 3 - December - Early",
+    "grade": "Open",
+    "distance": 1200,
+    "ground": "Turf"
+  },
+  {
+    "id": 400,
+    "name": "Turquoise Stakes",
+    "date": "Year 3 - December - Early",
+    "grade": "G3",
+    "distance": 1600,
+    "ground": "Turf"
+  },
+  {
+    "id": 401,
+    "name": "Arima Kinen",
+    "date": "Year 3 - December - Late",
+    "grade": "G1",
+    "distance": 2500,
+    "ground": "Turf"
+  },
+  {
+    "id": 402,
+    "name": "Betelgeuse Stakes",
+    "date": "Year 3 - December - Late",
+    "grade": "Open",
+    "distance": 1800,
+    "ground": "Dirt"
+  },
+  {
+    "id": 403,
+    "name": "Galaxy Stakes",
+    "date": "Year 3 - December - Late",
+    "grade": "Open",
+    "distance": 1400,
+    "ground": "Dirt"
+  },
+  {
+    "id": 404,
+    "name": "Hanshin Cup",
+    "date": "Year 3 - December - Late",
+    "grade": "G2",
+    "distance": 1400,
+    "ground": "Turf"
+  },
+  {
+    "id": 405,
+    "name": "Tokyo Daishoten",
+    "date": "Year 3 - December - Late",
+    "grade": "G1",
+    "distance": 2000,
+    "ground": "Dirt"
+  },
+  {
+    "id": 406,
+    "name": "URA Finals Qualifier",
+    "date": "Year 4 - Unknown - Early",
+    "grade": "G1",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 407,
+    "name": "URA Finals Semifinal",
+    "date": "Year 4 - Unknown - Late",
+    "grade": "G1",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 408,
+    "name": "Grand Masters",
+    "date": "Year 4 - Unknown - Late",
+    "grade": "G1",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 409,
+    "name": "Twinkle Star Climax",
+    "date": "Year 4 - Unknown - Late",
+    "grade": "G1",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 410,
+    "name": "URA Finals Final (Aoharu)",
+    "date": "Year 4 - Unknown - Late",
+    "grade": "G1",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 411,
+    "name": "URA Finals Final (Grand Live)",
+    "date": "Year 4 - Unknown - Late",
+    "grade": "G1",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 412,
+    "name": "URA Finals Final (URA)",
+    "date": "Year 4 - Unknown - Late",
+    "grade": "G1",
+    "distance": 99999,
+    "ground": "Dirt"
+  },
+  {
+    "id": 413,
+    "name": "Prix de l'Arc de Triomphe",
+    "date": "Year 7 - October - Early",
+    "grade": "G1",
+    "distance": 2400,
+    "ground": "Turf"
+  }
+]
