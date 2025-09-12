@@ -372,17 +372,8 @@ function Planner({
           </>
         )}
         <ChecklistManager {...managerProps} />
-        <div className="panel-section known-issues">
-          <h2>Known Issues</h2>
-          <ul>
-            <li>
-              Alternative career objectives (from tooltips on the source
-              website) are not yet implemented.
-            </li>
-          </ul>
-        </div>
-      </div>{" "}
-      <div className="race-list-panel"></div>
+      </div>
+
       <div className="race-list-panel">
         <h2>Available Races ({displayRaces.length})</h2>
         <table>

@@ -493,12 +493,3 @@ tr:hover {
   cursor: pointer;
   font-weight: bold;
 }
-
-.known-issues ul {
-  padding-left: 20px;
-  margin: 0;
-}
-.known-issues li {
-  font-size: 0.9em;
-  color: #555;
-}
