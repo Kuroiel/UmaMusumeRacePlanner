@@ -1,0 +1,12 @@
+# Ignore the entire scraper folder
+/scraper
+
+# Ignore all Node.js dependency folders
+/node_modules
+/client/node_modules
+
+# Ignore the production build folder (it's handled by gh-pages)
+/client/build
+
+# Ignore system files
+.DS_Store
