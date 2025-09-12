@@ -4,6 +4,10 @@ import Planner from "./Planner";
 import Checklist from "./Checklist";
 import "./App.css";
 
+// --- DEFINITIVE FIX: Import data directly ---
+import raceData from "./data/races.json";
+import charData from "./data/characters.json";
+
 function App() {
   // --- CORE STATE ---
   const [page, setPage] = useState("planner");
@@ -11,14 +15,13 @@ function App() {
   const [allCharacters, setAllCharacters] = useState([]);
   const [raceExclusivity, setRaceExclusivity] = useState(new Map());
 
-  // --- LIFTED STATE FOR PERSISTENCE ---
+  // --- PERSISTENT STATE ---
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [modifiedAptitudes, setModifiedAptitudes] = useState(null);
   const [selectedRaces, setSelectedRaces] = useState(new Set());
   const [checklistData, setChecklistData] = useState({});
   const [savedChecklists, setSavedChecklists] = useState([]);
-  // NEW: Filters are now managed here so they can be saved and restored
   const [filters, setFilters] = useState({
     trackIsAPlus: false,
     distanceIsAPlus: false,
@@ -31,29 +34,27 @@ function App() {
   });
   const [showOptionalGrades, setShowOptionalGrades] = useState(false);
 
-  // --- DATA FETCHING & INITIAL LOAD ---
+  // --- DATA PROCESSING & INITIAL LOAD ---
   useEffect(() => {
-    Promise.all([
-      fetch("/data/races.json").then((res) => res.json()),
-      fetch("/data/characters.json").then((res) => res.json()),
-    ]).then(([raceData, charData]) => {
-      setAllRaces(raceData);
-      setAllCharacters(charData.sort((a, b) => a.name.localeCompare(b.name)));
-      const counts = new Map();
-      raceData.forEach((race) =>
-        counts.set(race.name, (counts.get(race.name) || 0) + 1)
-      );
-      setRaceExclusivity(counts);
-    });
+    // FIX: No more fetching! The data is already here from the import.
+    // We just need to process it and put it into state.
+    setAllRaces(raceData);
+    setAllCharacters(charData.sort((a, b) => a.name.localeCompare(b.name)));
+    const counts = new Map();
+    raceData.forEach((race) =>
+      counts.set(race.name, (counts.get(race.name) || 0) + 1)
+    );
+    setRaceExclusivity(counts);
+
     try {
       const storedChecklists = localStorage.getItem("umamusume-checklists");
       if (storedChecklists) setSavedChecklists(JSON.parse(storedChecklists));
     } catch (error) {
       console.error("Error parsing checklists from localStorage:", error);
     }
-  }, []);
+  }, []); // This still runs only once on startup
 
-  // --- HANDLERS ---
+  // ... (All other handler functions remain exactly the same)
   const handleChecklistDataChange = (raceId, field, value) => {
     setChecklistData((prev) => {
       const currentData = prev[raceId] || { ran: false, won: false, notes: "" };
@@ -63,13 +64,10 @@ function App() {
       return { ...prev, [raceId]: newData };
     });
   };
-
   const updateLocalStorage = (newChecklists) => {
     setSavedChecklists(newChecklists);
     localStorage.setItem("umamusume-checklists", JSON.stringify(newChecklists));
   };
-
-  // NEW: Handler to reset Ran/Won status
   const handleResetChecklistStatus = () => {
     if (
       window.confirm(
@@ -85,8 +83,6 @@ function App() {
       });
     }
   };
-
-  // NEW: Handler to clear all notes
   const handleClearChecklistNotes = () => {
     if (
       window.confirm(
@@ -102,9 +98,7 @@ function App() {
       });
     }
   };
-
   const handleSaveChecklist = (name) => {
-    // FIX: Include filters in the saved object
     const newChecklist = {
       name,
       characterName: selectedCharacter?.name || "Unknown",
@@ -113,13 +107,12 @@ function App() {
       checklistData,
       filters,
       gradeFilters,
-      showOptionalGrades, // Save all filter states
+      showOptionalGrades,
       savedAt: new Date().toISOString(),
     };
     const existingIndex = savedChecklists.findIndex((c) => c.name === name);
     let newChecklists;
     if (existingIndex > -1) {
-      // FIX: Add confirmation before overwriting an existing checklist
       if (
         window.confirm(
           `A checklist named "${name}" already exists. Do you want to overwrite it?`
@@ -128,7 +121,7 @@ function App() {
         newChecklists = [...savedChecklists];
         newChecklists[existingIndex] = newChecklist;
       } else {
-        return; // User cancelled the overwrite
+        return;
       }
     } else {
       newChecklists = [...savedChecklists, newChecklist];
@@ -136,7 +129,6 @@ function App() {
     updateLocalStorage(newChecklists);
     alert(`Checklist "${name}" saved!`);
   };
-
   const handleLoadChecklist = (name) => {
     const checklistToLoad = savedChecklists.find((c) => c.name === name);
     if (checklistToLoad) {
@@ -147,7 +139,6 @@ function App() {
         setSelectedCharacter(character);
         setSearchTerm(character.name);
       }
-      // Restore all state, including filters
       setModifiedAptitudes(checklistToLoad.modifiedAptitudes);
       setSelectedRaces(new Set(checklistToLoad.selectedRaceIds));
       setChecklistData(checklistToLoad.checklistData || {});
@@ -165,7 +156,6 @@ function App() {
       alert(`Checklist "${name}" loaded!`);
     }
   };
-
   const handleDeleteChecklist = (name) => {
     if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
       updateLocalStorage(savedChecklists.filter((c) => c.name !== name));
@@ -221,7 +211,6 @@ function App() {
     showOptionalGrades,
     setShowOptionalGrades,
   };
-
   const checklistProps = {
     races: allRaces.filter((r) => selectedRaces.has(r.id)),
     checklistData,
