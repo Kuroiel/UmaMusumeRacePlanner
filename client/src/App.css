@@ -1,19 +1,107 @@
+/* src/App.css */
+
+/* === THEME VARIABLES === */
+:root {
+  /* ... Light Mode Palette ... */
+  --color-background: #f4f7f6;
+  --color-text-primary: #333;
+  --color-text-secondary: #555;
+  --color-text-light: white;
+  --color-panel-bg: white;
+  --color-header-bg: #2c3e50;
+  --color-border: #ddd;
+  --color-border-light: #eee;
+  --color-border-medium: #ccc;
+  --color-border-heavy: #bdc3c7;
+  --color-interactive-bg: #ecf0f1;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  --color-shadow-header: rgba(0, 0, 0, 0.2);
+  --color-shadow-modal: rgba(0, 0, 0, 0.3);
+  --color-backdrop: rgba(0, 0, 0, 0.6);
+  --color-highlight-bg: #d4edda;
+  --color-highlight-hover: #f9f9f9;
+  --color-warning-bg: #fff9e6;
+  --color-warning-bg-hover: #fff2d1;
+  --color-warning-border: #e67e22;
+  --color-warning-icon-bg: #fce1d0;
+  --color-warning-icon-text: #e67e22;
+  --color-tooltip-bg: #2c3e50;
+  --color-checklist-tooltip-bg: #f39c12;
+  --color-checklist-tooltip-text: #2c3e50;
+
+  /* Accent Colors */
+  --color-accent-blue: #3498db;
+  --color-accent-blue-hover: #2980b9;
+  --color-accent-green: #27ae60;
+  --color-accent-green-hover: #2ecc71;
+  --color-accent-red: #e74c3c;
+  --color-accent-red-hover: #c0392b;
+  --color-accent-orange: #f39c12;
+  --color-accent-orange-hover: #e67e22;
+  --color-accent-gray: #95a5a6;
+  --color-accent-gray-hover: #7f8c8d;
+  --color-accent-dark-blue: #34495e;
+  --color-accent-dark-blue-hover: #2c3e50;
+}
+
+body.dark-mode {
+  /* ... Dark Mode Palette ... */
+  --color-background: #121212;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #a0a0a0;
+  --color-text-light: #e0e0e0;
+  --color-panel-bg: #1e1e1e;
+  --color-header-bg: #1e1e1e;
+  --color-border: #333;
+  --color-border-light: #2a2a2a;
+  --color-border-medium: #444;
+  --color-border-heavy: #555;
+  --color-interactive-bg: #2c2c2c;
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-shadow-header: rgba(0, 0, 0, 0.5);
+  --color-shadow-modal: rgba(0, 0, 0, 0.5);
+  --color-backdrop: rgba(0, 0, 0, 0.7);
+  --color-highlight-bg: #2a4a3a;
+  --color-highlight-hover: #252525;
+  --color-warning-bg: #4a412a;
+  --color-warning-bg-hover: #5a513a;
+  --color-warning-border: #f39c12;
+  --color-warning-icon-bg: #5c3f2f;
+  --color-warning-icon-text: #f39c12;
+  --color-tooltip-bg: #f0f0f0;
+  --color-checklist-tooltip-bg: #f39c12;
+  --color-checklist-tooltip-text: #121212;
+
+  --color-accent-blue: #3498db;
+  --color-accent-green: #2ecc71;
+}
+
 /* === GLOBAL & LAYOUT === */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  background-color: #f4f7f6;
-  color: #333;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 .App-header {
-  background-color: #2c3e50;
+  background-color: var(--color-header-bg);
   padding: 20px;
-  color: white;
+  color: var(--color-text-light);
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px var(--color-shadow-header);
   z-index: 100;
   position: relative;
+  display: flex; /* Make header a flex container */
+  justify-content: space-between; /* Space out items */
+  align-items: center; /* Vertically align items */
+}
+.App-header h1 {
+  margin: 0;
+  flex-grow: 1; /* Allow h1 to take up available space */
+  text-align: center; /* Re-center the text */
+  padding-left: 80px; /* Add padding to re-center title, adjust as needed */
 }
 .container {
   display: flex;
@@ -30,16 +118,16 @@ body {
   min-width: 350px;
 }
 .panel-section {
-  background: white;
+  background: var(--color-panel-bg);
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--color-shadow);
 }
 h2 {
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 1.2em;
-  border-bottom: 2px solid #ecf0f1;
+  border-bottom: 2px solid var(--color-interactive-bg);
   padding-bottom: 10px;
 }
 h4 {
@@ -52,9 +140,11 @@ h4 {
   width: calc(100% - 22px);
   padding: 10px;
   margin-bottom: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-medium);
   border-radius: 4px;
   font-size: 1em;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
 }
 .character-list {
   list-style-type: none;
@@ -62,17 +152,17 @@ h4 {
   margin: 0;
   max-height: 250px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
 }
 .character-list li {
   padding: 10px;
   cursor: pointer;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border-light);
 }
 .character-list li:hover {
-  background-color: #3498db;
-  color: white;
+  background-color: var(--color-accent-blue);
+  color: var(--color-text-light);
 }
 .aptitude-editor .aptitude-group {
   margin-bottom: 15px;
@@ -94,10 +184,12 @@ h4 {
 .aptitude-item select {
   padding: 5px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-medium);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
 }
 .free-play-toggle {
-  background-color: #ecf0f1;
+  background-color: var(--color-interactive-bg);
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
@@ -128,7 +220,7 @@ h4 {
 .filter-group hr {
   width: 100%;
   border: none;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-border-light);
   margin: 5px 0;
 }
 .aptitude-filter-item {
@@ -139,12 +231,14 @@ h4 {
 .aptitude-filter-item select {
   padding: 5px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-medium);
   flex-grow: 1;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
 }
 .generate-button {
-  background-color: #27ae60;
-  color: white;
+  background-color: var(--color-accent-green);
+  color: var(--color-text-light);
   border: none;
   padding: 15px;
   font-size: 1.2em;
@@ -153,10 +247,10 @@ h4 {
   margin-top: 10px;
 }
 .generate-button:hover {
-  background-color: #2ecc71;
+  background-color: var(--color-accent-green-hover);
 }
 .data-source a {
-  color: #3498db;
+  color: var(--color-accent-blue);
   text-decoration: none;
 }
 .data-source a:hover {
@@ -168,7 +262,7 @@ h4 {
 }
 .known-issues li {
   font-size: 0.9em;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 /* === RACE LIST & STICKY HEADER === */
@@ -176,10 +270,10 @@ h4 {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  background: white;
+  background: var(--color-panel-bg);
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--color-shadow);
   max-height: 90vh;
 }
 .race-list-header {
@@ -204,30 +298,31 @@ thead {
   z-index: 10;
 }
 th {
-  background-color: #ecf0f1;
+  background-color: var(--color-interactive-bg);
   padding: 10px 8px;
   text-align: left;
   font-size: 14px;
   white-space: nowrap;
-  border-bottom: 2px solid #bdc3c7;
+  border-bottom: 2px solid var(--color-border-heavy);
 }
 td {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
   padding: 10px 8px;
   text-align: left;
   font-size: 14px;
   white-space: nowrap;
 }
 tr:hover {
-  background-color: #f9f9f9;
+  background-color: var(--color-highlight-hover);
 }
 .highlighted-race {
-  background-color: #d4edda !important;
+  background-color: var(--color-highlight-bg) !important;
   font-weight: bold;
 }
 .date-group-start td {
-  border-top: 2px solid #3498db;
+  border-top: 2px solid var(--color-accent-blue);
 }
+/* ... (rest of table column styles remain the same) ... */
 .distance-name-column {
   text-transform: capitalize;
 }
@@ -275,19 +370,29 @@ tr:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--color-backdrop);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 .modal-content {
-  background: white;
+  background: var(--color-panel-bg);
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 5px 15px var(--color-shadow-modal);
   width: 90%;
   max-width: 500px;
+}
+.modal-input {
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid var(--color-border-medium);
+  border-radius: 4px;
+  font-size: 1em;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
 }
 .modal-body p {
   margin: 10px 0;
@@ -307,18 +412,20 @@ tr:hover {
   font-size: 1em;
   font-weight: bold;
 }
+
 .modal-button.confirm {
-  background-color: #e74c3c;
-  color: white;
+  background-color: var(--color-accent-green);
+  color: var(--color-text-light);
 }
+
 .modal-button.cancel {
-  background-color: #2ecc71;
-  color: white;
+  background-color: var(--color-accent-red);
+  color: var(--color-text-light);
 }
 .manager-button {
   width: 100%;
-  background-color: #34495e;
-  color: white;
+  background-color: var(--color-accent-dark-blue);
+  color: var(--color-text-light);
   border: none;
   padding: 10px;
   font-size: 1em;
@@ -327,10 +434,10 @@ tr:hover {
   margin-top: 5px;
 }
 .manager-button:hover {
-  background-color: #2c3e50;
+  background-color: var(--color-accent-dark-blue-hover);
 }
 .manager-button:disabled {
-  background-color: #95a5a6;
+  background-color: var(--color-accent-gray);
   cursor: not-allowed;
 }
 .saved-checklists-list {
@@ -343,7 +450,7 @@ tr:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f9f9f9;
+  background: var(--color-highlight-hover);
   padding: 8px;
   border-radius: 4px;
 }
@@ -356,41 +463,20 @@ tr:hover {
   padding: 3px 6px;
   margin-left: 5px;
   cursor: pointer;
-  border: 1px solid #bdc3c7;
-  background: white;
+  border: 1px solid var(--color-border-heavy);
+  background: var(--color-panel-bg);
+  color: var(--color-text-primary);
   border-radius: 3px;
 }
 .checklist-actions .delete-button {
-  background: #e74c3c;
-  color: white;
-  border-color: #e74c3c;
+  background: var(--color-accent-red);
+  color: var(--color-text-light);
+  border-color: var(--color-accent-red);
 }
 .io-buttons {
   display: flex;
   gap: 10px;
   margin-top: 15px;
-}
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 90%;
-  max-width: 500px;
-}
-
-.modal-input {
-  width: calc(100% - 22px);
-  padding: 10px;
-  margin-top: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1em;
-}
-
-.modal-body p {
-  margin: 10px 0;
-  line-height: 1.5;
 }
 
 /* === CHECKLIST PAGE & BUTTON FIX === */
@@ -413,8 +499,8 @@ tr:hover {
 .back-button {
   grid-column: 1;
   justify-self: start;
-  background: #3498db;
-  color: white;
+  background: var(--color-accent-blue);
+  color: var(--color-text-light);
   border: none;
   padding: 10px 20px;
   font-size: 1em;
@@ -422,7 +508,7 @@ tr:hover {
   cursor: pointer;
 }
 .back-button:hover {
-  background: #2980b9;
+  background: var(--color-accent-blue-hover);
 }
 .checklist-page-actions {
   grid-column: 3;
@@ -431,8 +517,8 @@ tr:hover {
   gap: 10px;
 }
 .action-button {
-  background-color: #95a5a6;
-  color: white;
+  background-color: var(--color-accent-gray);
+  color: var(--color-text-light);
   border: none;
   padding: 8px 12px;
   font-size: 0.9em;
@@ -440,13 +526,13 @@ tr:hover {
   cursor: pointer;
 }
 .action-button:hover {
-  background-color: #7f8c8d;
+  background-color: var(--color-accent-gray-hover);
 }
 .clear-button {
-  background-color: #f39c12;
+  background-color: var(--color-accent-orange);
 }
 .clear-button:hover {
-  background-color: #e67e22;
+  background-color: var(--color-accent-orange-hover);
 }
 .checklist-container {
   display: flex;
@@ -457,9 +543,9 @@ tr:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: white;
+  background: var(--color-panel-bg);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--color-shadow);
   padding: 15px;
   gap: 20px;
 }
@@ -474,7 +560,7 @@ tr:hover {
 }
 .checklist-item-info span {
   font-size: 0.9em;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 .checklist-item-actions {
   display: flex;
@@ -494,13 +580,15 @@ tr:hover {
   white-space: nowrap;
 }
 .checklist-item-actions textarea {
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-medium);
   border-radius: 4px;
   padding: 8px;
   font-family: inherit;
   min-height: 20px;
   width: 250px;
   resize: vertical;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
 }
 .grade-counter {
   display: flex;
@@ -509,7 +597,7 @@ tr:hover {
   align-items: center;
 }
 .grade-counter span {
-  background-color: #ecf0f1;
+  background-color: var(--color-interactive-bg);
   padding: 5px 10px;
   border-radius: 10px;
   font-weight: bold;
@@ -517,13 +605,13 @@ tr:hover {
 .grade-counter .counter-label {
   background-color: transparent;
   padding: 0;
-  color: #333;
+  color: var(--color-text-primary);
 }
 .checklist-page-counter {
   justify-content: center;
   margin-bottom: 20px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #ecf0f1;
+  border-bottom: 2px solid var(--color-interactive-bg);
 }
 .checklist-page-counter .counter-label {
   margin-left: 20px;
@@ -534,15 +622,15 @@ tr:hover {
 
 /* === WARNINGS & TOOLTIPS === */
 .warning-race-row {
-  background-color: #fff9e6 !important;
-  border-left: 3px solid #e67e22;
+  background-color: var(--color-warning-bg) !important;
+  border-left: 3px solid var(--color-warning-border);
 }
 .warning-race-row:hover {
-  background-color: #fff2d1 !important;
+  background-color: var(--color-warning-bg-hover) !important;
 }
 .warning-icon {
-  color: #e67e22;
-  background-color: #fce1d0;
+  color: var(--color-warning-icon-text);
+  background-color: var(--color-warning-icon-bg);
   font-weight: bold;
   font-size: 1.1em;
   border-radius: 50%;
@@ -553,7 +641,7 @@ tr:hover {
   justify-content: center;
   margin-left: 8px;
   cursor: help;
-  border: 1px solid #e67e22;
+  border: 1px solid var(--color-warning-icon-text);
 }
 .tooltip-container {
   position: relative;
@@ -563,8 +651,8 @@ tr:hover {
 .tooltip-text {
   visibility: hidden;
   width: 240px;
-  background-color: #2c3e50;
-  color: #fff;
+  background-color: var(--color-tooltip-bg);
+  color: var(--color-text-primary);
   text-align: center;
   border-radius: 6px;
   padding: 8px;
@@ -578,22 +666,21 @@ tr:hover {
   pointer-events: none;
   white-space: normal;
 }
-
 .status-column .tooltip-text {
   left: -15px;
   transform: none;
 }
-
 .tooltip-container:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
 }
 .checklist-tooltip {
-  background-color: #f39c12;
-  color: #2c3e50;
+  background-color: var(--color-checklist-tooltip-bg);
+  color: var(--color-checklist-tooltip-text);
   font-weight: bold;
 }
-/* === NEW: TOAST NOTIFICATION STYLES === */
+
+/* === TOAST NOTIFICATION STYLES === */
 .confirmation-toast {
   display: flex;
   flex-direction: column;
@@ -603,8 +690,10 @@ tr:hover {
   max-width: 300px;
 }
 .toast-buttons {
+  width: 100%;
   display: flex;
   gap: 8px;
+  justify-content: flex-end;
 }
 .toast-button {
   border: none;
@@ -614,17 +703,19 @@ tr:hover {
   cursor: pointer;
   font-size: 0.9em;
 }
+
 .toast-button.confirm {
-  background-color: #27ae60;
-  color: white;
+  background-color: var(--color-accent-green);
+  color: var(--color-text-light);
 }
 .toast-button.confirm:hover {
-  background-color: #2ecc71;
+  background-color: var(--color-accent-green-hover);
 }
+
 .toast-button.cancel {
-  background-color: #e74c3c;
-  color: white;
+  background-color: var(--color-accent-red);
+  color: var(--color-text-light);
 }
 .toast-button.cancel:hover {
-  background-color: #c0392b;
+  background-color: var(--color-accent-red-hover);
 }

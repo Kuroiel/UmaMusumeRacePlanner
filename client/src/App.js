@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Planner from "./Planner";
 import Checklist from "./Checklist";
+import ThemeToggle from "./ThemeToggle";
 import "./App.css";
 import raceData from "./data/races.json";
 import charData from "./data/characters.json";
@@ -10,15 +11,7 @@ const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
   <div className="confirmation-toast">
     <span>{message}</span>
     <div className="toast-buttons">
-      <button
-        className="toast-button confirm"
-        onClick={() => {
-          onConfirm();
-          toast.dismiss(t.id);
-        }}
-      >
-        Confirm
-      </button>
+      {/* UPDATED: Swapped button order */}
       <button
         className="toast-button cancel"
         onClick={() => {
@@ -27,6 +20,15 @@ const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
         }}
       >
         Cancel
+      </button>
+      <button
+        className="toast-button confirm"
+        onClick={() => {
+          onConfirm();
+          toast.dismiss(t.id);
+        }}
+      >
+        Confirm
       </button>
     </div>
   </div>
@@ -65,8 +67,33 @@ const getTurnValue = (dateString) => {
 };
 
 function App() {
+  // --- NEW: Dark Mode State Management ---
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      return savedTheme === "dark";
+    }
+    // If no theme is saved, use the user's system preference
+    return (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDarkMode]);
+  // --- END of Dark Mode State Management ---
+
   const [page, setPage] = useState("planner");
   const [allRaces, setAllRaces] = useState([]);
+  // ... (rest of your state variables remain the same) ...
   const [allCharacters, setAllCharacters] = useState([]);
   const [raceExclusivity, setRaceExclusivity] = useState(new Map());
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,6 +147,7 @@ function App() {
     }
   }, []);
 
+  // ... (all your other useMemo hooks and handlers remain exactly the same) ...
   const warningRaceIds = useMemo(() => {
     const warnings = new Set();
     if (selectedRaces.size < 3) return warnings;
@@ -431,10 +459,14 @@ function App() {
 
   return (
     <div className="App">
-      {/* Add the Toaster component here */}
       <Toaster position="top-center" reverseOrder={false} />
       <header className="App-header">
         <h1>Umamusume Race Scheduler</h1>
+        {/* NEW: Render the toggle and pass props */}
+        <ThemeToggle
+          isDarkMode={isDarkMode}
+          onToggle={() => setIsDarkMode(!isDarkMode)}
+        />
       </header>
       <main>
         {page === "planner" && <Planner {...plannerProps} />}

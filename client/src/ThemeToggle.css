@@ -1,0 +1,77 @@
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  cursor: pointer;
+}
+
+.theme-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #7f8c8d;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #3498db;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  pointer-events: none; /* Allows clicks to pass through to the label */
+}
+
+.icon.sun {
+  left: 7px;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.icon.moon {
+  right: 7px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+input:checked ~ .icon.sun {
+  opacity: 0;
+}
+
+input:checked ~ .icon.moon {
+  opacity: 1;
+}
