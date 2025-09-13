@@ -519,7 +519,7 @@ function Planner({
           )}
           <ChecklistManager {...managerProps} />
           <div className="panel-section data-source">
-            <h2>Data Sources</h2>
+            <h2>Data Sources/Inspiration</h2>
             <p>
               Race data, Character career and aptitude data from{" "}
               <a
@@ -528,6 +528,16 @@ function Planner({
                 rel="noopener noreferrer"
               >
                 GameTora
+              </a>
+            </p>
+            <p>
+              Race filtering inspired by GameTora's{" "}
+              <a
+                href="https://gametora.com/umamusume/race-scheduler"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                race scheduler
               </a>
             </p>
           </div>
