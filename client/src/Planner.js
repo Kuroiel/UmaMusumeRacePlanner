@@ -540,6 +540,11 @@ function Planner({
                 Debut and scenario specific races are hidden by default and not
                 counted in the win total
               </li>
+              <li>
+                Loading a new checklist will always clear old optional races, to
+                keep selected optional races, select a different character
+                instead.
+              </li>
             </ul>
           </div>
         </div>
