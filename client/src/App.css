@@ -494,7 +494,6 @@ tr:hover {
   text-align: center;
   margin-bottom: 0;
 }
-/* NEW: Style for checklist name */
 .current-checklist-name {
   margin: 4px 0 0 0;
   font-size: 0.9em;
@@ -563,9 +562,13 @@ tr:hover {
   display: flex;
   align-items: center;
 }
-.checklist-item-info span {
+/* UPDATED: Renamed span to meta and added alignment */
+.checklist-item-meta {
   font-size: 0.9em;
   color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .checklist-item-actions {
   display: flex;
@@ -594,6 +597,16 @@ tr:hover {
   resize: vertical;
   background-color: var(--color-background);
   color: var(--color-text-primary);
+}
+/* UPDATED: New "pill" style for the date */
+.checklist-item-date {
+  background-color: var(--color-interactive-bg);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: var(--color-text-primary);
+  font-size: 0.9em;
+  white-space: nowrap;
 }
 .grade-counter {
   display: flex;

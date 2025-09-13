@@ -10,7 +10,7 @@ const getDistanceCategory = (distance) => {
 
 const formatChecklistDate = (dateString) => {
   const parts = dateString.split(" - ");
-  if (parts.length !== 3) return dateString;
+  if (parts.length !== 3) return dateString; // Fallback for unexpected formats
 
   const [yearPart, monthPart, halfPart] = parts;
 
@@ -85,7 +85,6 @@ function Checklist({
               <div className="checklist-item-info">
                 <h3>
                   {race.name}
-
                   {isWarning && (
                     <div className="tooltip-container">
                       <span className="warning-icon">!</span>
@@ -97,8 +96,11 @@ function Checklist({
                   )}
                 </h3>
 
-                <span>
-                  {formatChecklistDate(race.date)} |{" "}
+                <span className="checklist-item-meta">
+                  <span className="checklist-item-date">
+                    🗓️ {formatChecklistDate(race.date)}
+                  </span>
+                  {" | "}
                   {gradeNameMap[race.grade] || race.grade} | {race.ground}{" "}
                   {getDistanceCategory(race.distance)} ({race.distance}m)
                 </span>
