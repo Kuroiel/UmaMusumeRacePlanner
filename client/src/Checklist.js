@@ -8,6 +8,20 @@ const getDistanceCategory = (distance) => {
   return "long";
 };
 
+const formatChecklistDate = (dateString) => {
+  const parts = dateString.split(" - ");
+  if (parts.length !== 3) return dateString;
+
+  const [yearPart, monthPart, halfPart] = parts;
+
+  let formattedYear = yearPart;
+  if (yearPart === "Year 1") formattedYear = "Junior Year";
+  else if (yearPart === "Year 2") formattedYear = "Classic Year";
+  else if (yearPart === "Year 3") formattedYear = "Senior Year";
+
+  return `${formattedYear} - ${halfPart} ${monthPart}`;
+};
+
 function Checklist({
   races,
   checklistData,
@@ -18,6 +32,7 @@ function Checklist({
   warningRaceIds,
   gradeCounts,
   wonCount,
+  currentChecklistName,
 }) {
   return (
     <div className="checklist-page">
@@ -25,7 +40,12 @@ function Checklist({
         <button className="back-button" onClick={() => setPage("planner")}>
           &larr; Back to Planner
         </button>
-        <h2>Active Checklist</h2>
+        <div style={{ textAlign: "center", gridColumn: 2 }}>
+          <h2>Active Checklist</h2>
+          {currentChecklistName && (
+            <h4 className="current-checklist-name">({currentChecklistName})</h4>
+          )}
+        </div>
         <div className="checklist-page-actions">
           <button className="action-button" onClick={onResetStatus}>
             Reset Ran/Won Status
@@ -65,7 +85,7 @@ function Checklist({
               <div className="checklist-item-info">
                 <h3>
                   {race.name}
-                  {/* FIX 2: Tooltip will now show thanks to CSS fix */}
+
                   {isWarning && (
                     <div className="tooltip-container">
                       <span className="warning-icon">!</span>
@@ -76,10 +96,11 @@ function Checklist({
                     </div>
                   )}
                 </h3>
+
                 <span>
-                  {race.date} | {gradeNameMap[race.grade] || race.grade} |{" "}
-                  {race.ground} {getDistanceCategory(race.distance)} (
-                  {race.distance}m)
+                  {formatChecklistDate(race.date)} |{" "}
+                  {gradeNameMap[race.grade] || race.grade} | {race.ground}{" "}
+                  {getDistanceCategory(race.distance)} ({race.distance}m)
                 </span>
               </div>
               <div className="checklist-item-actions">

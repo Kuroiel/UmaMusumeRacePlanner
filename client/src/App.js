@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Planner from "./Planner";
 import Checklist from "./Checklist";
@@ -11,7 +11,6 @@ const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
   <div className="confirmation-toast">
     <span>{message}</span>
     <div className="toast-buttons">
-      {/* UPDATED: Swapped button order */}
       <button
         className="toast-button cancel"
         onClick={() => {
@@ -66,6 +65,51 @@ const getTurnValue = (dateString) => {
   return (yearMatch - 1) * 24 + (month - 1) * 2 + half;
 };
 
+// BUG 1 FIX: Moved helper functions here to be accessible by handlers
+const normalizeDateForMatching = (dateString) => {
+  const yearMatch = dateString.match(/Junior|Year 1/i)
+    ? "Y1"
+    : dateString.match(/Classic|Year 2/i)
+    ? "Y2"
+    : dateString.match(/Senior|Year 3/i)
+    ? "Y3"
+    : null;
+  const monthMatch = dateString.match(
+    /(January|February|March|April|May|June|July|August|September|October|November|December)/i
+  );
+  const halfMatch = dateString.match(/(Early|Late)/i);
+  if (!yearMatch || !monthMatch || !halfMatch) return null;
+  return `${yearMatch}-${monthMatch[0]}-${halfMatch[0]}`;
+};
+
+const getCareerRacesForCharUtil = (character, allRaces) => {
+  const ids = new Set();
+  if (!character || !character.careerObjectives) return ids;
+
+  character.careerObjectives.forEach((obj) => {
+    if (obj.type === "Race") {
+      const processObjective = (objective) => {
+        if (!objective) return;
+        const raceNameMatch = objective.description.match(
+          /(?:in the|the)\s+(.*)/
+        );
+        if (!raceNameMatch) return;
+        const raceName = raceNameMatch[1].trim();
+        if (raceName.toLowerCase().includes("make debut")) return;
+        const normalizedDate = normalizeDateForMatching(objective.details);
+        if (!normalizedDate) return;
+        const foundRace = allRaces.find((race) => {
+          const raceDate = normalizeDateForMatching(race.date);
+          return race.name.trim() === raceName && raceDate === normalizedDate;
+        });
+        if (foundRace) ids.add(foundRace.id);
+      };
+      processObjective(obj);
+    }
+  });
+  return ids;
+};
+
 function App() {
   // --- NEW: Dark Mode State Management ---
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -102,6 +146,7 @@ function App() {
   const [selectedRaces, setSelectedRaces] = useState(new Set());
   const [checklistData, setChecklistData] = useState({});
   const [savedChecklists, setSavedChecklists] = useState([]);
+  const [currentChecklistName, setCurrentChecklistName] = useState(null);
   const [filters, setFilters] = useState({
     trackAptitude: "A",
     distanceAptitude: "A",
@@ -184,6 +229,13 @@ function App() {
       (raceId) => checklistData[raceId]?.won
     ).length;
   }, [selectedRaces, checklistData]);
+
+  const getCareerRacesForChar = useCallback(
+    (character) => {
+      return getCareerRacesForCharUtil(character, allRaces);
+    },
+    [allRaces]
+  );
 
   const allHandlers = useMemo(
     () => ({
@@ -269,6 +321,7 @@ function App() {
             const newChecklists = [...savedChecklists];
             newChecklists[existingIndex] = newChecklist;
             allHandlers.updateLocalStorage(newChecklists);
+            setCurrentChecklistName(name);
             toast.success(`Checklist "${name}" overwritten!`);
           };
           toast(
@@ -284,6 +337,7 @@ function App() {
         } else {
           const newChecklists = [...savedChecklists, newChecklist];
           allHandlers.updateLocalStorage(newChecklists);
+          setCurrentChecklistName(name);
           toast.success(`Checklist "${name}" saved!`);
         }
       },
@@ -293,10 +347,19 @@ function App() {
           const character = allCharacters.find(
             (c) => c.name === checklistToLoad.characterName
           );
+
+          // BUG 1 FIX: Recalculate and set careerRaceIds for the loaded character
           if (character) {
+            const newCareerRaceIds = getCareerRacesForChar(character);
+            setCareerRaceIds(newCareerRaceIds);
             setSelectedCharacter(character);
             setSearchTerm(character.name);
+          } else {
+            setCareerRaceIds(new Set()); // No character, no career races
+            setSelectedCharacter(null);
+            setSearchTerm("");
           }
+
           setModifiedAptitudes(checklistToLoad.modifiedAptitudes);
           setSelectedRaces(new Set(checklistToLoad.selectedRaceIds));
           setChecklistData(checklistToLoad.checklistData || {});
@@ -312,6 +375,7 @@ function App() {
             checklistToLoad.gradeFilters || { G1: true, G2: true, G3: true }
           );
           setShowOptionalGrades(checklistToLoad.showOptionalGrades || false);
+          setCurrentChecklistName(name);
           toast.success(`Checklist "${name}" loaded!`);
         }
       },
@@ -320,6 +384,9 @@ function App() {
           allHandlers.updateLocalStorage(
             savedChecklists.filter((c) => c.name !== name)
           );
+          if (currentChecklistName === name) {
+            setCurrentChecklistName(null);
+          }
           toast.success(`Deleted "${name}".`);
         };
         toast(
@@ -347,6 +414,9 @@ function App() {
             c.name === oldName ? { ...c, name: newName } : c
           )
         );
+        if (currentChecklistName === oldName) {
+          setCurrentChecklistName(newName);
+        }
         toast.success(`Renamed to "${newName}".`);
       },
       handleImportChecklists: (importedChecklists) => {
@@ -387,6 +457,7 @@ function App() {
         if (validatedChecklists.length > 0) {
           const importAction = () => {
             allHandlers.updateLocalStorage(validatedChecklists);
+            setCurrentChecklistName(null);
             toast.success(`Imported ${validatedChecklists.length} checklists!`);
           };
           toast(
@@ -414,6 +485,8 @@ function App() {
       gradeFilters,
       showOptionalGrades,
       allCharacters,
+      currentChecklistName,
+      getCareerRacesForChar, // Add as dependency
     ]
   );
 
@@ -442,6 +515,8 @@ function App() {
     setCareerRaceIds,
     warningRaceIds,
     gradeCounts,
+    setCurrentChecklistName,
+    getCareerRacesForChar, // Pass function to Planner
   };
   const checklistProps = {
     races: allRaces
@@ -455,6 +530,7 @@ function App() {
     warningRaceIds,
     gradeCounts,
     wonCount,
+    currentChecklistName,
   };
 
   return (
@@ -462,7 +538,6 @@ function App() {
       <Toaster position="top-center" reverseOrder={false} />
       <header className="App-header">
         <h1>Umamusume Race Scheduler</h1>
-        {/* NEW: Render the toggle and pass props */}
         <ThemeToggle
           isDarkMode={isDarkMode}
           onToggle={() => setIsDarkMode(!isDarkMode)}

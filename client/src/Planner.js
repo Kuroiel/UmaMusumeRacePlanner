@@ -10,21 +10,7 @@ const getDistanceCategory = (distance) => {
   if (distance <= 2400) return "medium";
   return "long";
 };
-const normalizeDateForMatching = (dateString) => {
-  const yearMatch = dateString.match(/Junior|Year 1/i)
-    ? "Y1"
-    : dateString.match(/Classic|Year 2/i)
-    ? "Y2"
-    : dateString.match(/Senior|Year 3/i)
-    ? "Y3"
-    : null;
-  const monthMatch = dateString.match(
-    /(January|February|March|April|May|June|July|August|September|October|November|December)/i
-  );
-  const halfMatch = dateString.match(/(Early|Late)/i);
-  if (!yearMatch || !monthMatch || !halfMatch) return null;
-  return `${yearMatch}-${monthMatch[0]}-${halfMatch[0]}`;
-};
+
 const isSummerRace = (date) =>
   (date.includes("Year 2") || date.includes("Year 3")) &&
   (date.includes("July") || date.includes("August"));
@@ -60,43 +46,16 @@ function Planner({
   setCareerRaceIds,
   warningRaceIds,
   gradeCounts,
+  setCurrentChecklistName,
+  getCareerRacesForChar, // Receive function from App
 }) {
   const [isNoCareerMode, setIsNoCareerMode] = useState(false);
+  const [alwaysShowCareer, setAlwaysShowCareer] = useState(true);
   const [modalState, setModalState] = useState({
     isOpen: false,
     characterToSelect: null,
   });
 
-  const getCareerRacesForChar = useCallback(
-    (character) => {
-      const ids = new Set();
-      character.careerObjectives.forEach((obj) => {
-        if (obj.type === "Race") {
-          const processObjective = (objective) => {
-            if (!objective) return;
-            const raceNameMatch = objective.description.match(
-              /(?:in the|the)\s+(.*)/
-            );
-            if (!raceNameMatch) return;
-            const raceName = raceNameMatch[1].trim();
-            if (raceName.toLowerCase().includes("make debut")) return;
-            const normalizedDate = normalizeDateForMatching(objective.details);
-            if (!normalizedDate) return;
-            const foundRace = allRaces.find((race) => {
-              const raceDate = normalizeDateForMatching(race.date);
-              return (
-                race.name.trim() === raceName && raceDate === normalizedDate
-              );
-            });
-            if (foundRace) ids.add(foundRace.id);
-          };
-          processObjective(obj);
-        }
-      });
-      return ids;
-    },
-    [allRaces]
-  );
   const updateCharacterState = useCallback(
     (character, finalRaceSelection, newCareerRaceIds) => {
       setSelectedCharacter(character);
@@ -104,6 +63,7 @@ function Planner({
       setSearchTerm(character.name);
       setSelectedRaces(finalRaceSelection);
       setCareerRaceIds(newCareerRaceIds);
+      setCurrentChecklistName(null);
     },
     [
       setCareerRaceIds,
@@ -111,6 +71,7 @@ function Planner({
       setSelectedCharacter,
       setSelectedRaces,
       setSearchTerm,
+      setCurrentChecklistName,
     ]
   );
 
@@ -118,13 +79,18 @@ function Planner({
     (character) => {
       if (selectedCharacter && character.name === selectedCharacter.name)
         return;
+
       const optionalRaces = new Set(
         [...selectedRaces].filter((id) => !careerRaceIds.has(id))
       );
-      if (selectedCharacter && optionalRaces.size > 0) {
+
+      // BUG 2 FIX: Rely on careerRaceIds.size instead of selectedCharacter,
+      // as selectedCharacter becomes null during search.
+      if (!isNoCareerMode && careerRaceIds.size > 0 && optionalRaces.size > 0) {
         setModalState({ isOpen: true, characterToSelect: character });
         return;
       }
+
       const newCareerRaceIds = getCareerRacesForChar(character);
       const finalSelection = isNoCareerMode ? new Set() : newCareerRaceIds;
       updateCharacterState(character, finalSelection, newCareerRaceIds);
@@ -207,8 +173,9 @@ function Planner({
       setIsNoCareerMode(isNowNoCareer);
       setCareerRaceIds(new Set());
       setSelectedRaces(new Set());
+      setCurrentChecklistName(null);
       if (!isNowNoCareer && selectedCharacter) {
-        handleCharacterSelect(selectedCharacter, false);
+        handleCharacterSelect(selectedCharacter);
       }
     },
     [
@@ -217,6 +184,7 @@ function Planner({
       handleCharacterSelect,
       setCareerRaceIds,
       setSelectedRaces,
+      setCurrentChecklistName,
     ]
   );
 
@@ -247,6 +215,7 @@ function Planner({
       [event.target.name]: event.target.checked,
     }));
   const handleRaceCheck = (clickedRace) => {
+    setCurrentChecklistName(null);
     const newSet = new Set(selectedRaces);
     if (!newSet.has(clickedRace.id)) {
       allRaces.forEach((race) => {
@@ -302,6 +271,11 @@ function Planner({
       (g) => gradeFilters[g]
     );
     return allRaces.filter((race) => {
+      const isCareerRace = careerRaceIds.has(race.id);
+      if (alwaysShowCareer && isCareerRace) {
+        return true;
+      }
+
       if (filters.hideSummer && isSummerRace(race.date)) return false;
       const isCorrectYear =
         race.date.startsWith("Year 1") ||
@@ -336,6 +310,7 @@ function Planner({
     careerRaceDates,
     careerRaceIds,
     isNoCareerMode,
+    alwaysShowCareer,
   ]);
 
   let lastDate = null;
@@ -359,18 +334,19 @@ function Planner({
           confirmText="Reset Optional"
           cancelText="Keep Optional"
         >
-          {" "}
           <p>
             You have optional races selected. How would you like to proceed?
-          </p>{" "}
+          </p>
           <p>
             <b>Reset Optional:</b> Clears all non-career races and loads the new
             character's career.
-          </p>{" "}
+          </p>
           <p>
             <b>Keep Optional:</b> Keeps your selected optional races, removing
-            only those that conflict with the new character's career.
-          </p>{" "}
+            only those that conflict with the new character's career. This will
+            also change your filters to ensure all optional races show, make
+            sure to double check filters and aptitudes after.
+          </p>
         </Modal>
       )}
       <div className="container">
@@ -470,6 +446,16 @@ function Planner({
                     <label>
                       <input
                         type="checkbox"
+                        checked={alwaysShowCareer}
+                        onChange={(e) => setAlwaysShowCareer(e.target.checked)}
+                        disabled={isNoCareerMode}
+                      />{" "}
+                      Always Show Career
+                    </label>
+                    <hr />
+                    <label>
+                      <input
+                        type="checkbox"
                         name="G1"
                         checked={gradeFilters.G1}
                         onChange={handleGradeFilterChange}
@@ -550,13 +536,16 @@ function Planner({
                 be present in EN yet.
               </li>
               <li>Mobile friendly view not supported at this time</li>
+              <li>
+                Debut and scenario specific races are hidden by default and not
+                counted in the win total
+              </li>
             </ul>
           </div>
         </div>
         <div className="race-list-panel">
           <div className="race-list-header">
             <h2>Available Races ({displayRaces.length})</h2>
-            {/* Added "Total selected" text and label class */}
             <div className="grade-counter">
               <span className="counter-label">Total selected:</span>
               <span>G1: {gradeCounts.G1}</span>
