@@ -1,27 +1,57 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import PromptModal from "./PromptModal";
 
 function ChecklistManager({
-  savedChecklists,
+  savedChecklists = [],
   onSave,
   onLoad,
   onDelete,
   onRename,
   onImport,
+  selectedCharacter,
 }) {
   const fileInputRef = useRef(null);
+  const [renameModalState, setRenameModalState] = useState({
+    isOpen: false,
+    oldName: "",
+  });
+  const [saveModalState, setSaveModalState] = useState({
+    isOpen: false,
+    defaultValue: "",
+  });
 
   const handleSaveClick = () => {
-    const name = prompt("Enter a name for this checklist:", "");
+    const defaultName = selectedCharacter
+      ? `${selectedCharacter.name} - Plan`
+      : `My Plan`;
+    setSaveModalState({ isOpen: true, defaultValue: defaultName });
+  };
+
+  const handleSaveConfirm = (name) => {
     if (name) {
       onSave(name);
     }
+    setSaveModalState({ isOpen: false, defaultValue: "" });
+  };
+
+  const handleSaveCancel = () => {
+    setSaveModalState({ isOpen: false, defaultValue: "" });
   };
 
   const handleRenameClick = (oldName) => {
-    const newName = prompt(`Enter a new name for "${oldName}":`, oldName);
+    setRenameModalState({ isOpen: true, oldName });
+  };
+
+  const handleRenameConfirm = (newName) => {
+    const { oldName } = renameModalState;
     if (newName && newName !== oldName) {
       onRename(oldName, newName);
     }
+    setRenameModalState({ isOpen: false, oldName: "" });
+  };
+
+  const handleRenameCancel = () => {
+    setRenameModalState({ isOpen: false, oldName: "" });
   };
 
   const handleExportClick = () => {
@@ -51,66 +81,93 @@ function ChecklistManager({
           if (Array.isArray(importedData)) {
             onImport(importedData);
           } else {
-            alert(
-              "Invalid file format. Please import a valid checklist JSON file."
-            );
+            alert("Invalid file format.");
           }
         } catch (error) {
           alert("Error reading or parsing the file.");
         }
       };
       reader.readAsText(file);
-      event.target.value = null; // Reset the input so you can import the same file again
+      event.target.value = null;
     }
   };
 
   return (
-    <div className="panel-section">
-      <h2>Checklist Manager</h2>
-      <button className="manager-button" onClick={handleSaveClick}>
-        Save Current Checklist
-      </button>
-
-      {savedChecklists.length > 0 && (
-        <div className="saved-checklists-list">
-          {savedChecklists.map(({ name }) => (
-            <div key={name} className="saved-checklist-item">
-              <span className="checklist-name">{name}</span>
-              <div className="checklist-actions">
-                <button onClick={() => onLoad(name)}>Load</button>
-                <button onClick={() => handleRenameClick(name)}>Rename</button>
-                <button
-                  className="delete-button"
-                  onClick={() => onDelete(name)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+    <>
+      {renameModalState.isOpen && (
+        <PromptModal
+          title="Rename Checklist"
+          message={`Enter a new name for "${renameModalState.oldName}":`}
+          initialValue={renameModalState.oldName}
+          onConfirm={handleRenameConfirm}
+          onCancel={handleRenameCancel}
+          confirmText="Rename"
+        />
       )}
 
-      <div className="io-buttons">
+      {saveModalState.isOpen && (
+        <PromptModal
+          title="Save Checklist"
+          message="Enter a name for this checklist:"
+          initialValue={saveModalState.defaultValue}
+          onConfirm={handleSaveConfirm}
+          onCancel={handleSaveCancel}
+          confirmText="Save"
+        />
+      )}
+
+      <div className="panel-section">
+        <h2>Checklist Manager</h2>
         <button
           className="manager-button"
-          onClick={handleExportClick}
-          disabled={savedChecklists.length === 0}
+          onClick={handleSaveClick}
+          disabled={!selectedCharacter}
         >
-          Export All
+          Save Current Checklist
         </button>
-        <button className="manager-button" onClick={handleImportClick}>
-          Import All
-        </button>
-        <input
-          type="file"
-          accept=".json"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
+
+        {savedChecklists.length > 0 && (
+          <div className="saved-checklists-list">
+            {savedChecklists.map(({ name }) => (
+              <div key={name} className="saved-checklist-item">
+                <span className="checklist-name">{name}</span>
+                <div className="checklist-actions">
+                  <button onClick={() => onLoad(name)}>Load</button>
+                  <button onClick={() => handleRenameClick(name)}>
+                    Rename
+                  </button>
+                  <button
+                    className="delete-button"
+                    onClick={() => onDelete(name)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="io-buttons">
+          <button
+            className="manager-button"
+            onClick={handleExportClick}
+            disabled={savedChecklists.length === 0}
+          >
+            Export All
+          </button>
+          <button className="manager-button" onClick={handleImportClick}>
+            Import All
+          </button>
+          <input
+            type="file"
+            accept=".json"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

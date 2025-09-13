@@ -1,12 +1,11 @@
-// src/Planner.js
 import React, { useState, useMemo, useCallback } from "react";
 import AptitudeEditor from "./AptitudeEditor";
 import ChecklistManager from "./ChecklistManager";
+import Modal from "./Modal";
 
 const gradeNameMap = { "1 Win Class": "Pre-OP", Open: "OP" };
-const isRankAPlus = (rank) => rank === "A" || rank === "S";
 const getDistanceCategory = (distance) => {
-  if (distance <= 1400) return "short";
+  if (distance < 1600) return "sprint";
   if (distance <= 1800) return "mile";
   if (distance <= 2400) return "medium";
   return "long";
@@ -26,6 +25,11 @@ const normalizeDateForMatching = (dateString) => {
   if (!yearMatch || !monthMatch || !halfMatch) return null;
   return `${yearMatch}-${monthMatch[0]}-${halfMatch[0]}`;
 };
+const isSummerRace = (date) =>
+  (date.includes("Year 2") || date.includes("Year 3")) &&
+  (date.includes("July") || date.includes("August"));
+const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"];
+const APTITUDE_VALUES = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: -1 };
 
 function Planner({
   allRaces,
@@ -46,40 +50,26 @@ function Planner({
   handleDeleteChecklist,
   handleRenameChecklist,
   handleImportChecklists,
+  filters,
+  setFilters,
+  gradeFilters,
+  setGradeFilters,
+  showOptionalGrades,
+  setShowOptionalGrades,
+  careerRaceIds,
+  setCareerRaceIds,
+  warningRaceIds,
+  gradeCounts,
 }) {
-  const [filters, setFilters] = useState({
-    trackIsAPlus: false,
-    distanceIsAPlus: false,
-    hideNonHighlighted: false,
-  });
-  const [gradeFilters, setGradeFilters] = useState({
-    G1: true,
-    G2: true,
-    G3: true,
-  });
-  const [showOptionalGrades, setShowOptionalGrades] = useState(false);
   const [isNoCareerMode, setIsNoCareerMode] = useState(false);
-  const [careerRaceIds, setCareerRaceIds] = useState(new Set());
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    characterToSelect: null,
+  });
 
-  const handleCharacterSelect = (character) => {
-    if (
-      selectedCharacter &&
-      selectedRaces.size > 0 &&
-      character.name !== selectedCharacter.name
-    ) {
-      if (
-        !window.confirm(
-          "Changing characters will reset your current checklist. Are you sure?"
-        )
-      )
-        return;
-    }
-    setSelectedCharacter(character);
-    setModifiedAptitudes({ ...character.aptitudes });
-    setSearchTerm(character.name);
-
-    if (!isNoCareerMode) {
-      const raceIdsToSelect = new Set();
+  const getCareerRacesForChar = useCallback(
+    (character) => {
+      const ids = new Set();
       character.careerObjectives.forEach((obj) => {
         if (obj.type === "Race") {
           const processObjective = (objective) => {
@@ -98,95 +88,208 @@ function Planner({
                 race.name.trim() === raceName && raceDate === normalizedDate
               );
             });
-            if (foundRace) raceIdsToSelect.add(foundRace.id);
+            if (foundRace) ids.add(foundRace.id);
           };
           processObjective(obj);
         }
       });
-      setSelectedRaces(raceIdsToSelect);
-      setCareerRaceIds(raceIdsToSelect);
-    } else {
-      setSelectedRaces(new Set());
-      setCareerRaceIds(new Set());
-    }
-  };
+      return ids;
+    },
+    [allRaces]
+  );
+  const updateCharacterState = useCallback(
+    (character, finalRaceSelection, newCareerRaceIds) => {
+      setSelectedCharacter(character);
+      setModifiedAptitudes({ ...character.aptitudes });
+      setSearchTerm(character.name);
+      setSelectedRaces(finalRaceSelection);
+      setCareerRaceIds(newCareerRaceIds);
+    },
+    [
+      setCareerRaceIds,
+      setModifiedAptitudes,
+      setSelectedCharacter,
+      setSelectedRaces,
+      setSearchTerm,
+    ]
+  );
 
-  const handleNoCareerToggle = (e) => {
-    const isNowNoCareer = e.target.checked;
-    if (isNowNoCareer && selectedRaces.size > 0) {
-      if (
-        !window.confirm(
-          "Checking 'No career objectives' will clear your current checklist. Continue?"
-        )
-      ) {
+  const handleCharacterSelect = useCallback(
+    (character) => {
+      if (selectedCharacter && character.name === selectedCharacter.name)
+        return;
+      const optionalRaces = new Set(
+        [...selectedRaces].filter((id) => !careerRaceIds.has(id))
+      );
+      if (selectedCharacter && optionalRaces.size > 0) {
+        setModalState({ isOpen: true, characterToSelect: character });
         return;
       }
+      const newCareerRaceIds = getCareerRacesForChar(character);
+      const finalSelection = isNoCareerMode ? new Set() : newCareerRaceIds;
+      updateCharacterState(character, finalSelection, newCareerRaceIds);
+    },
+    [
+      selectedCharacter,
+      selectedRaces,
+      careerRaceIds,
+      getCareerRacesForChar,
+      isNoCareerMode,
+      updateCharacterState,
+    ]
+  );
+
+  const executeCharacterSwap = (keepOptional) => {
+    const { characterToSelect } = modalState;
+    if (!characterToSelect) return;
+    const newCareerRaceIds = getCareerRacesForChar(characterToSelect);
+    let finalRaceSelection = newCareerRaceIds;
+    if (keepOptional) {
+      const newCareerDates = new Set();
+      allRaces.forEach((race) => {
+        if (newCareerRaceIds.has(race.id)) newCareerDates.add(race.date);
+      });
+      const optionalRaces = new Set(
+        [...selectedRaces].filter((id) => !careerRaceIds.has(id))
+      );
+      const keptOptionalRaces = new Set(
+        [...optionalRaces].filter((id) => {
+          const raceDate = allRaces.find((r) => r.id === id)?.date;
+          return !newCareerDates.has(raceDate);
+        })
+      );
+      finalRaceSelection = new Set([...newCareerRaceIds, ...keptOptionalRaces]);
+      let minTrackApt = "S";
+      let minDistApt = "S";
+      keptOptionalRaces.forEach((raceId) => {
+        const race = allRaces.find((r) => r.id === raceId);
+        if (race) {
+          const groundApt =
+            race.ground === "Turf"
+              ? characterToSelect.aptitudes.turf
+              : characterToSelect.aptitudes.dirt;
+          const distApt =
+            characterToSelect.aptitudes[getDistanceCategory(race.distance)];
+          if (APTITUDE_VALUES[groundApt] < APTITUDE_VALUES[minTrackApt])
+            minTrackApt = groundApt;
+          if (APTITUDE_VALUES[distApt] < APTITUDE_VALUES[minDistApt])
+            minDistApt = distApt;
+        }
+      });
+      const newFilters = { ...filters };
+      if (APTITUDE_VALUES[minTrackApt] < APTITUDE_VALUES[filters.trackAptitude])
+        newFilters.trackAptitude = minTrackApt;
+      if (
+        APTITUDE_VALUES[minDistApt] < APTITUDE_VALUES[filters.distanceAptitude]
+      )
+        newFilters.distanceAptitude = minDistApt;
+      setFilters(newFilters);
     }
-    setIsNoCareerMode(isNowNoCareer);
-    setSelectedRaces(new Set());
-    setCareerRaceIds(new Set());
-    if (!isNowNoCareer && selectedCharacter) {
-      handleCharacterSelect(selectedCharacter);
-    }
+    updateCharacterState(
+      characterToSelect,
+      finalRaceSelection,
+      newCareerRaceIds
+    );
+    setModalState({ isOpen: false, characterToSelect: null });
   };
 
+  const handleNoCareerToggle = useCallback(
+    (e) => {
+      const isNowNoCareer = e.target.checked;
+      if (isNowNoCareer && selectedRaces.size > 0) {
+        if (
+          !window.confirm("This will clear your current checklist. Continue?")
+        ) {
+          e.target.checked = false;
+          return;
+        }
+      }
+      setIsNoCareerMode(isNowNoCareer);
+      setCareerRaceIds(new Set());
+      setSelectedRaces(new Set());
+      if (!isNowNoCareer && selectedCharacter) {
+        handleCharacterSelect(selectedCharacter, false);
+      }
+    },
+    [
+      selectedRaces,
+      selectedCharacter,
+      handleCharacterSelect,
+      setCareerRaceIds,
+      setSelectedRaces,
+    ]
+  );
+
   const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    if (selectedCharacter) {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    if (
+      selectedCharacter &&
+      newSearchTerm.toLowerCase() !== selectedCharacter.name.toLowerCase()
+    ) {
       setSelectedCharacter(null);
       setModifiedAptitudes(null);
-      setSelectedRaces(new Set());
-      setCareerRaceIds(new Set());
     }
   };
 
   const handleAptitudeChange = (aptitudeName, newValue) =>
     setModifiedAptitudes((prev) => ({ ...prev, [aptitudeName]: newValue }));
-  const handleFilterChange = (event) =>
+  const handleFilterChange = (event) => {
+    const { name, value, type, checked } = event.target;
     setFilters((prev) => ({
       ...prev,
-      [event.target.name]: event.target.checked,
+      [name]: type === "checkbox" ? checked : value,
     }));
+  };
   const handleGradeFilterChange = (event) =>
     setGradeFilters((prev) => ({
       ...prev,
       [event.target.name]: event.target.checked,
     }));
-  const handleRaceCheck = (raceId) => {
+  const handleRaceCheck = (clickedRace) => {
     const newSet = new Set(selectedRaces);
-    if (newSet.has(raceId)) newSet.delete(raceId);
-    else newSet.add(raceId);
+    if (!newSet.has(clickedRace.id)) {
+      allRaces.forEach((race) => {
+        if (race.date === clickedRace.date && race.id !== clickedRace.id)
+          newSet.delete(race.id);
+      });
+      newSet.add(clickedRace.id);
+    } else {
+      newSet.delete(clickedRace.id);
+    }
     setSelectedRaces(newSet);
   };
 
   const filteredCharacters = useMemo(() => {
-    if (searchTerm === "" || selectedCharacter) return [];
+    if (
+      searchTerm === "" ||
+      (selectedCharacter &&
+        searchTerm.toLowerCase() === selectedCharacter.name.toLowerCase())
+    )
+      return [];
     return allCharacters.filter((char) =>
       char.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [allCharacters, searchTerm, selectedCharacter]);
   const shouldHighlightRace = useCallback(
     (race) => {
-      if (
-        !modifiedAptitudes ||
-        (!filters.trackIsAPlus && !filters.distanceIsAPlus)
-      )
-        return false;
+      if (!modifiedAptitudes) return false;
       const groundAptitude =
         race.ground === "Turf"
           ? modifiedAptitudes.turf
           : modifiedAptitudes.dirt;
       const distanceAptitude =
         modifiedAptitudes[getDistanceCategory(race.distance)];
-      const trackMatch = !filters.trackIsAPlus || isRankAPlus(groundAptitude);
+      const trackMatch =
+        APTITUDE_VALUES[groundAptitude] >=
+        APTITUDE_VALUES[filters.trackAptitude];
       const distanceMatch =
-        !filters.distanceIsAPlus || isRankAPlus(distanceAptitude);
+        APTITUDE_VALUES[distanceAptitude] >=
+        APTITUDE_VALUES[filters.distanceAptitude];
       return trackMatch && distanceMatch;
     },
-    [modifiedAptitudes, filters.trackIsAPlus, filters.distanceIsAPlus]
+    [modifiedAptitudes, filters.trackAptitude, filters.distanceAptitude]
   );
-
-  // --- MODIFIED: Moved this logic block before displayRaces ---
   const careerRaceDates = useMemo(() => {
     const dates = new Set();
     allRaces.forEach((race) => {
@@ -194,28 +297,23 @@ function Planner({
     });
     return dates;
   }, [careerRaceIds, allRaces]);
-
   const displayRaces = useMemo(() => {
     const activeGradeFilters = Object.keys(gradeFilters).filter(
       (g) => gradeFilters[g]
     );
     return allRaces.filter((race) => {
+      if (filters.hideSummer && isSummerRace(race.date)) return false;
       const isCorrectYear =
         race.date.startsWith("Year 1") ||
         race.date.startsWith("Year 2") ||
         race.date.startsWith("Year 3");
       if (!isCorrectYear) return false;
-
-      // --- NEW: Logic to hide conflicting races ---
-      // If it's a career day, only show the career race, unless in No Career mode.
       if (
         !isNoCareerMode &&
         careerRaceDates.has(race.date) &&
         !careerRaceIds.has(race.id)
-      ) {
+      )
         return false;
-      }
-
       const displayGrade = gradeNameMap[race.grade] || race.grade;
       if (displayGrade === "Debut" || displayGrade === "Maiden") return false;
       if (
@@ -233,16 +331,17 @@ function Planner({
     allRaces,
     gradeFilters,
     showOptionalGrades,
-    filters.hideNonHighlighted,
+    filters,
     shouldHighlightRace,
-    isNoCareerMode,
     careerRaceDates,
     careerRaceIds,
+    isNoCareerMode,
   ]);
 
   let lastDate = null;
   const managerProps = {
     savedChecklists,
+    selectedCharacter,
     onSave: handleSaveChecklist,
     onLoad: handleLoadChecklist,
     onDelete: handleDeleteChecklist,
@@ -251,182 +350,292 @@ function Planner({
   };
 
   return (
-    <div className="container">
-      <div className="left-panel">
-        <div className="panel-section">
-          <h2>1. Select Character</h2>
-          <div className="free-play-toggle">
-            <label>
-              <input
-                type="checkbox"
-                checked={isNoCareerMode}
-                onChange={handleNoCareerToggle}
-              />{" "}
-              No career objectives
-            </label>
-          </div>
-          <input
-            type="text"
-            placeholder="Search..."
-            className="search-bar"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-          <ul className="character-list">
-            {filteredCharacters.map((char) => (
-              <li key={char.name} onClick={() => handleCharacterSelect(char)}>
-                {char.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-        {selectedCharacter && (
-          <>
-            <div className="panel-section">
-              <AptitudeEditor
-                aptitudes={modifiedAptitudes}
-                onAptitudeChange={handleAptitudeChange}
-              />
+    <>
+      {modalState.isOpen && (
+        <Modal
+          title="Switch Character"
+          onConfirm={() => executeCharacterSwap(false)}
+          onCancel={() => executeCharacterSwap(true)}
+          confirmText="Reset Optional"
+          cancelText="Keep Optional"
+        >
+          {" "}
+          <p>
+            You have optional races selected. How would you like to proceed?
+          </p>{" "}
+          <p>
+            <b>Reset Optional:</b> Clears all non-career races and loads the new
+            character's career.
+          </p>{" "}
+          <p>
+            <b>Keep Optional:</b> Keeps your selected optional races, removing
+            only those that conflict with the new character's career.
+          </p>{" "}
+        </Modal>
+      )}
+      <div className="container">
+        <div className="left-panel">
+          {/* ... Left Panel Content ... */}
+          <div className="panel-section">
+            <h2>1. Select Character</h2>
+            <div className="free-play-toggle">
+              <label>
+                <input
+                  id="no-career-checkbox"
+                  type="checkbox"
+                  checked={isNoCareerMode}
+                  onChange={handleNoCareerToggle}
+                />{" "}
+                No career objectives
+              </label>
             </div>
-            <div className="panel-section">
-              <h2>3. Filters</h2>
-              <div className="filter-grid">
-                <div className="filter-group">
-                  <h4>Highlighting</h4>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="trackIsAPlus"
-                      checked={filters.trackIsAPlus}
-                      onChange={handleFilterChange}
-                    />{" "}
-                    Track is A+
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="distanceIsAPlus"
-                      checked={filters.distanceIsAPlus}
-                      onChange={handleFilterChange}
-                    />{" "}
-                    Distance is A+
-                  </label>
-                  <hr />
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="hideNonHighlighted"
-                      checked={filters.hideNonHighlighted}
-                      onChange={handleFilterChange}
-                    />{" "}
-                    Hide Unsuitable
-                  </label>
-                </div>
-                <div className="filter-group">
-                  <h4>Grade</h4>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="G1"
-                      checked={gradeFilters.G1}
-                      onChange={handleGradeFilterChange}
-                    />{" "}
-                    G1
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="G2"
-                      checked={gradeFilters.G2}
-                      onChange={handleGradeFilterChange}
-                    />{" "}
-                    G2
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="G3"
-                      checked={gradeFilters.G3}
-                      onChange={handleGradeFilterChange}
-                    />{" "}
-                    G3
-                  </label>
-                  <hr />
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={showOptionalGrades}
-                      onChange={(e) => setShowOptionalGrades(e.target.checked)}
-                    />{" "}
-                    Show Pre-OP/OP
-                  </label>
+            <input
+              type="text"
+              placeholder="Search..."
+              className="search-bar"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <ul className="character-list">
+              {filteredCharacters.map((char) => (
+                <li key={char.name} onClick={() => handleCharacterSelect(char)}>
+                  {char.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {selectedCharacter && (
+            <>
+              <div className="panel-section">
+                <AptitudeEditor
+                  aptitudes={modifiedAptitudes}
+                  onAptitudeChange={handleAptitudeChange}
+                />
+              </div>
+              <div className="panel-section">
+                <h2>3. Filters</h2>
+                <div className="filter-grid">
+                  <div className="filter-group">
+                    <h4>Highlighting &amp; Hiding</h4>
+                    <div className="aptitude-filter-item">
+                      <label>Track Apt. &ge;</label>
+                      <select
+                        name="trackAptitude"
+                        value={filters.trackAptitude}
+                        onChange={handleFilterChange}
+                      >
+                        {APTITUDE_RANKS.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="aptitude-filter-item">
+                      <label>Dist. Apt. &ge;</label>
+                      <select
+                        name="distanceAptitude"
+                        value={filters.distanceAptitude}
+                        onChange={handleFilterChange}
+                      >
+                        {APTITUDE_RANKS.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <hr />
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="hideNonHighlighted"
+                        checked={filters.hideNonHighlighted}
+                        onChange={handleFilterChange}
+                      />{" "}
+                      Hide Unsuitable
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="hideSummer"
+                        checked={filters.hideSummer}
+                        onChange={handleFilterChange}
+                      />{" "}
+                      Hide Summer Races
+                    </label>
+                  </div>
+                  <div className="filter-group">
+                    <h4>Grade</h4>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="G1"
+                        checked={gradeFilters.G1}
+                        onChange={handleGradeFilterChange}
+                      />{" "}
+                      G1
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="G2"
+                        checked={gradeFilters.G2}
+                        onChange={handleGradeFilterChange}
+                      />{" "}
+                      G2
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="G3"
+                        checked={gradeFilters.G3}
+                        onChange={handleGradeFilterChange}
+                      />{" "}
+                      G3
+                    </label>
+                    <hr />
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={showOptionalGrades}
+                        onChange={(e) =>
+                          setShowOptionalGrades(e.target.checked)
+                        }
+                      />{" "}
+                      Show Pre-OP/OP
+                    </label>
+                  </div>
                 </div>
               </div>
+              <button
+                className="generate-button"
+                onClick={() => setPage("checklist")}
+                disabled={selectedRaces.size === 0}
+              >
+                View Checklist ({selectedRaces.size})
+              </button>
+            </>
+          )}
+          <ChecklistManager {...managerProps} />
+          <div className="panel-section data-source">
+            <h2>Data Sources</h2>
+            <p>
+              Race data, Character career and aptitude data from{" "}
+              <a
+                href="https://gametora.com/umamusume"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                GameTora
+              </a>
+            </p>
+          </div>
+          <div className="panel-section known-issues">
+            <h2>Known Issues/Caveats</h2>
+            <ul>
+              <li>Alternative career objectives are not yet implemented.</li>
+              <li>
+                Races from the JP version of the game are included which may not
+                be present in EN yet.
+              </li>
+              <li>Mobile friendly view not supported at this time</li>
+            </ul>
+          </div>
+        </div>
+        <div className="race-list-panel">
+          <div className="race-list-header">
+            <h2>Available Races ({displayRaces.length})</h2>
+            {/* Added "Total selected" text and label class */}
+            <div className="grade-counter">
+              <span className="counter-label">Total selected:</span>
+              <span>G1: {gradeCounts.G1}</span>
+              <span>G2: {gradeCounts.G2}</span>
+              <span>G3: {gradeCounts.G3}</span>
             </div>
-            <button
-              className="generate-button"
-              onClick={() => setPage("checklist")}
-            >
-              View Checklist ({selectedRaces.size})
-            </button>
-          </>
-        )}
-        <ChecklistManager {...managerProps} />
-      </div>
-
-      <div className="race-list-panel">
-        <h2>Available Races ({displayRaces.length})</h2>
-        <table>
-          {/* --- MODIFIED: Column order changed --- */}
-          <thead>
-            <tr>
-              <th>Select</th>
-              <th>Career</th>
-              <th>Date</th>
-              <th>Grade</th>
-              <th>Name</th>
-              <th>Track</th>
-              <th>Distance</th>
-              <th>Exclusive</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayRaces.map((race) => {
-              const currentDate = race.date;
-              const isNewDateGroup =
-                lastDate !== null && currentDate !== lastDate;
-              lastDate = currentDate;
-              const isCareerRace = careerRaceIds.has(race.id);
-              // --- MODIFIED: Simplified locking logic ---
-              const isCheckboxDisabled = !isNoCareerMode && isCareerRace;
-              const rowClass = [];
-              if (shouldHighlightRace(race)) rowClass.push("highlighted-race");
-              if (isNewDateGroup) rowClass.push("date-group-start");
-              return (
-                <tr key={race.id} className={rowClass.join(" ")}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedRaces.has(race.id)}
-                      onChange={() => handleRaceCheck(race.id)}
-                      disabled={isCheckboxDisabled}
-                    />
-                  </td>
-                  {/* --- MODIFIED: Column order changed --- */}
-                  <td>{isCareerRace ? "Yes" : "No"}</td>
-                  <td>{race.date}</td>
-                  <td>{gradeNameMap[race.grade] || race.grade}</td>
-                  <td>{race.name}</td>
-                  <td>{race.ground}</td>
-                  <td>{race.distance}m</td>
-                  <td>{raceExclusivity.get(race.name) === 1 ? "Yes" : "No"}</td>
+          </div>
+          <div className="table-container">
+            <table>
+              <colgroup>
+                <col className="col-select" />
+                <col className="col-status" />
+                <col className="col-career" />
+                <col className="col-date" />
+                <col className="col-grade" />
+                <col className="col-name" />
+                <col className="col-track" />
+                <col className="col-dist-name" />
+                <col className="col-dist-m" />
+                <col className="col-exclusive" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Select</th>
+                  <th>Status</th>
+                  <th>Career</th>
+                  <th>Date</th>
+                  <th>Grade</th>
+                  <th>Name</th>
+                  <th>Track</th>
+                  <th>Distance</th>
+                  <th>(m)</th>
+                  <th>Year Exclusive</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {displayRaces.map((race) => {
+                  const isCareerRace = careerRaceIds.has(race.id);
+                  const isWarning = warningRaceIds.has(race.id);
+                  const isCheckboxDisabled = !isNoCareerMode && isCareerRace;
+                  const rowClass = [];
+                  if (shouldHighlightRace(race))
+                    rowClass.push("highlighted-race");
+                  if (lastDate !== null && race.date !== lastDate)
+                    rowClass.push("date-group-start");
+                  if (isWarning) rowClass.push("warning-race-row");
+                  lastDate = race.date;
+                  return (
+                    <tr key={race.id} className={rowClass.join(" ")}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedRaces.has(race.id)}
+                          onChange={() => handleRaceCheck(race)}
+                          disabled={isCheckboxDisabled}
+                        />
+                      </td>
+                      <td className="status-column">
+                        {isWarning && (
+                          <div className="tooltip-container">
+                            <span className="warning-icon">!</span>
+                            <span className="tooltip-text">
+                              Warning: 3+ consecutive races might cause skin
+                              condition and mood down.
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                      <td>{isCareerRace ? "Yes" : "No"}</td>
+                      <td>{race.date}</td>
+                      <td>{gradeNameMap[race.grade] || race.grade}</td>
+                      <td>{race.name}</td>
+                      <td>{race.ground}</td>
+                      <td className="distance-name-column">
+                        {getDistanceCategory(race.distance)}
+                      </td>
+                      <td>{race.distance}</td>
+                      <td>
+                        {raceExclusivity.get(race.name) === 1 ? "Yes" : "No"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

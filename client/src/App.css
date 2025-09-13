@@ -1,3 +1,4 @@
+/* === GLOBAL & LAYOUT === */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -11,6 +12,8 @@ body {
   color: white;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  position: relative;
 }
 .container {
   display: flex;
@@ -24,6 +27,7 @@ body {
   flex-direction: column;
   gap: 20px;
   max-width: 400px;
+  min-width: 350px;
 }
 .panel-section {
   background: white;
@@ -40,10 +44,12 @@ h2 {
 }
 h4 {
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
+
+/* === LEFT PANEL COMPONENTS === */
 .search-bar {
-  width: calc(100% - 20px);
+  width: calc(100% - 22px);
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
@@ -64,15 +70,10 @@ h4 {
   cursor: pointer;
   border-bottom: 1px solid #eee;
 }
-.character-list li:last-child {
-  border-bottom: none;
-}
 .character-list li:hover {
   background-color: #3498db;
   color: white;
 }
-
-/* --- Aptitude Editor --- */
 .aptitude-editor .aptitude-group {
   margin-bottom: 15px;
 }
@@ -95,8 +96,19 @@ h4 {
   border-radius: 4px;
   border: 1px solid #ccc;
 }
-
-/* --- Filters --- */
+.free-play-toggle {
+  background-color: #ecf0f1;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.free-play-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
 .filter-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -119,6 +131,17 @@ h4 {
   border-top: 1px solid #eee;
   margin: 5px 0;
 }
+.aptitude-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.aptitude-filter-item select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  flex-grow: 1;
+}
 .generate-button {
   background-color: #27ae60;
   color: white;
@@ -132,33 +155,68 @@ h4 {
 .generate-button:hover {
   background-color: #2ecc71;
 }
+.data-source a {
+  color: #3498db;
+  text-decoration: none;
+}
+.data-source a:hover {
+  text-decoration: underline;
+}
+.known-issues ul {
+  padding-left: 20px;
+  margin: 0;
+}
+.known-issues li {
+  font-size: 0.9em;
+  color: #555;
+}
 
-/* --- Race List --- */
+/* === RACE LIST & STICKY HEADER === */
 .race-list-panel {
-  flex: 3;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
   background: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  max-height: 85vh;
+  max-height: 90vh;
+}
+.race-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  padding-bottom: 10px;
+}
+.table-container {
+  flex-grow: 1;
   overflow-y: auto;
 }
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
-th,
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+th {
+  background-color: #ecf0f1;
+  padding: 10px 8px;
+  text-align: left;
+  font-size: 14px;
+  white-space: nowrap;
+  border-bottom: 2px solid #bdc3c7;
+}
 td {
   border-bottom: 1px solid #ddd;
   padding: 10px 8px;
   text-align: left;
   font-size: 14px;
-}
-th {
-  background-color: #ecf0f1;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  white-space: nowrap;
 }
 tr:hover {
   background-color: #f9f9f9;
@@ -167,221 +225,96 @@ tr:hover {
   background-color: #d4edda !important;
   font-weight: bold;
 }
-
-/* --- Checklist Page --- */
-.checklist-page {
-  padding: 20px;
-  max-width: 900px;
-  margin: auto;
-}
-.back-button {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 20px;
-}
-.back-button:hover {
-  background: #2980b9;
-}
-.checklist-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-.checklist-item {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-.checklist-item-header {
-  background-color: #ecf0f1;
-  padding: 10px 15px;
-  border-bottom: 1px solid #ddd;
-}
-.checklist-item-header h3 {
-  margin: 0;
-  font-size: 1.1em;
-}
-.checklist-item-header span {
-  font-size: 0.9em;
-  color: #555;
-}
-.checklist-item-body {
-  display: flex;
-  padding: 15px;
-  gap: 15px;
-}
-.checklist-item-controls {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-.checklist-item-controls label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.checklist-item-body textarea {
-  flex-grow: 1;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 8px;
-  font-family: inherit;
-  min-height: 50px;
-}
-
-.checklist-page {
-  padding: 20px;
-  max-width: 1000px;
-  margin: auto;
-}
-.back-button {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 20px;
-}
-.back-button:hover {
-  background: #2980b9;
-}
-.checklist-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-.checklist-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  gap: 20px;
-}
-.checklist-item-info {
-  flex-grow: 1;
-}
-.checklist-item-info h3 {
-  margin: 0 0 5px 0;
-  font-size: 1.1em;
-}
-.checklist-item-info span {
-  font-size: 0.9em;
-  color: #555;
-}
-.checklist-item-actions {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  flex-shrink: 0;
-}
-.checklist-item-controls {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-.checklist-item-controls label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-.checklist-item-actions textarea {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 8px;
-  font-family: inherit;
-  min-height: 20px;
-  width: 250px;
-  resize: vertical;
-}
-
-/* --- Checklist Page --- */
-.checklist-page {
-  padding: 20px;
-  max-width: 1000px;
-  margin: auto;
-}
-.back-button {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 20px;
-}
-.back-button:hover {
-  background: #2980b9;
-}
-.checklist-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-.checklist-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  gap: 20px;
-}
-.checklist-item-info {
-  flex-grow: 1;
-}
-.checklist-item-info h3 {
-  margin: 0 0 5px 0;
-  font-size: 1.1em;
-}
-.checklist-item-info span {
-  font-size: 0.9em;
-  color: #555;
-}
-.checklist-item-actions {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  flex-shrink: 0;
-}
-.checklist-item-controls {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-.checklist-item-controls label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-.checklist-item-actions textarea {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 8px;
-  font-family: inherit;
-  min-height: 20px;
-  width: 250px;
-  resize: vertical;
-}
-
 .date-group-start td {
-  border-top: 2px solid #3498db; /* A distinct blue top border */
+  border-top: 2px solid #3498db;
+}
+.distance-name-column {
+  text-transform: capitalize;
+}
+.col-select,
+.col-status,
+.col-career,
+.col-exclusive {
+  text-align: center;
+}
+.col-select {
+  width: 4%;
+}
+.col-status {
+  width: 5%;
+}
+.col-career {
+  width: 5%;
+}
+.col-date {
+  width: 17%;
+}
+.col-grade {
+  width: 7%;
+}
+.col-name {
+  width: 25%;
+}
+.col-track {
+  width: 7%;
+}
+.col-dist-name {
+  width: 8%;
+}
+.col-dist-m {
+  width: 6%;
+}
+.col-exclusive {
+  width: 12%;
 }
 
+/* === MODAL & CHECKLIST MANAGER === */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+}
+.modal-body p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+.modal-footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.modal-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+}
+.modal-button.confirm {
+  background-color: #e74c3c;
+  color: white;
+}
+.modal-button.cancel {
+  background-color: #2ecc71;
+  color: white;
+}
 .manager-button {
   width: 100%;
   background-color: #34495e;
@@ -400,14 +333,12 @@ tr:hover {
   background-color: #95a5a6;
   cursor: not-allowed;
 }
-
 .saved-checklists-list {
   margin-top: 15px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
 .saved-checklist-item {
   display: flex;
   justify-content: space-between;
@@ -416,12 +347,10 @@ tr:hover {
   padding: 8px;
   border-radius: 4px;
 }
-
 .checklist-name {
   font-weight: bold;
   font-size: 0.9em;
 }
-
 .checklist-actions button {
   font-size: 0.8em;
   padding: 3px 6px;
@@ -436,31 +365,71 @@ tr:hover {
   color: white;
   border-color: #e74c3c;
 }
-
 .io-buttons {
   display: flex;
   gap: 10px;
   margin-top: 15px;
 }
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+}
 
+.modal-input {
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.modal-body p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+/* === CHECKLIST PAGE & BUTTON FIX === */
+.checklist-page {
+  padding: 20px;
+  max-width: 1000px;
+  margin: auto;
+}
 .checklist-page-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 20px;
-  flex-wrap: wrap; /* Allows wrapping on smaller screens */
 }
-
 .checklist-page-header h2 {
-  margin: 0;
-  flex-grow: 1; /* Allows h2 to take up space */
+  grid-column: 2;
+  text-align: center;
+  margin-bottom: 0;
 }
-
+.back-button {
+  grid-column: 1;
+  justify-self: start;
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.back-button:hover {
+  background: #2980b9;
+}
 .checklist-page-actions {
+  grid-column: 3;
+  justify-self: end;
   display: flex;
   gap: 10px;
 }
-
 .action-button {
   background-color: #95a5a6;
   color: white;
@@ -479,17 +448,183 @@ tr:hover {
 .clear-button:hover {
   background-color: #e67e22;
 }
-
-.free-play-toggle {
-  background-color: #ecf0f1;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
+.checklist-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
-.free-play-toggle label {
+.checklist-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
+  justify-content: space-between;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  gap: 20px;
+}
+.checklist-item-info {
+  flex-grow: 1;
+}
+.checklist-item-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.1em;
+  display: flex;
+  align-items: center;
+}
+.checklist-item-info span {
+  font-size: 0.9em;
+  color: #555;
+}
+.checklist-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+}
+.checklist-item-controls {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.checklist-item-controls label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.checklist-item-actions textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  font-family: inherit;
+  min-height: 20px;
+  width: 250px;
+  resize: vertical;
+}
+.grade-counter {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9em;
+  align-items: center;
+}
+.grade-counter span {
+  background-color: #ecf0f1;
+  padding: 5px 10px;
+  border-radius: 10px;
   font-weight: bold;
+}
+.grade-counter .counter-label {
+  background-color: transparent;
+  padding: 0;
+  color: #333;
+}
+.checklist-page-counter {
+  justify-content: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #ecf0f1;
+}
+.checklist-page-counter .counter-label {
+  margin-left: 20px;
+}
+.checklist-page-counter .counter-label:first-of-type {
+  margin-left: 0;
+}
+
+/* === WARNINGS & TOOLTIPS === */
+.warning-race-row {
+  background-color: #fff9e6 !important;
+  border-left: 3px solid #e67e22;
+}
+.warning-race-row:hover {
+  background-color: #fff2d1 !important;
+}
+.warning-icon {
+  color: #e67e22;
+  background-color: #fce1d0;
+  font-weight: bold;
+  font-size: 1.1em;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  cursor: help;
+  border: 1px solid #e67e22;
+}
+.tooltip-container {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+}
+.tooltip-text {
+  visibility: hidden;
+  width: 240px;
+  background-color: #2c3e50;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 20;
+  bottom: 150%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.1s;
+  pointer-events: none;
+  white-space: normal;
+}
+
+.status-column .tooltip-text {
+  left: -15px;
+  transform: none;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+.checklist-tooltip {
+  background-color: #f39c12;
+  color: #2c3e50;
+  font-weight: bold;
+}
+/* === NEW: TOAST NOTIFICATION STYLES === */
+.confirmation-toast {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  max-width: 300px;
+}
+.toast-buttons {
+  display: flex;
+  gap: 8px;
+}
+.toast-button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.toast-button.confirm {
+  background-color: #27ae60;
+  color: white;
+}
+.toast-button.confirm:hover {
+  background-color: #2ecc71;
+}
+.toast-button.cancel {
+  background-color: #e74c3c;
+  color: white;
+}
+.toast-button.cancel:hover {
+  background-color: #c0392b;
 }

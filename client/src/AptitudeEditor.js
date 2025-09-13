@@ -1,17 +1,14 @@
-// src/AptitudeEditor.js
 import React from "react";
 
 const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"];
 
-// IMPROVEMENT: Removed 'Strategy' as requested
 const APTITUDE_GROUPS = {
   Surface: ["turf", "dirt"],
-  Distance: ["short", "mile", "medium", "long"],
+  Distance: ["sprint", "mile", "medium", "long"],
 };
 
 function AptitudeEditor({ aptitudes, onAptitudeChange }) {
   if (!aptitudes) return null;
-
   return (
     <div className="aptitude-editor">
       <h2>2. Edit Aptitudes</h2>
@@ -41,4 +38,4 @@ function AptitudeEditor({ aptitudes, onAptitudeChange }) {
   );
 }
 
-export default AptitudeEditor; // Ensure only ONE default export
+export default AptitudeEditor;
