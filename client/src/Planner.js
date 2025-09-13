@@ -47,10 +47,17 @@ function Planner({
   warningRaceIds,
   gradeCounts,
   setCurrentChecklistName,
-  getCareerRacesForChar, // Receive function from App
+  getCareerRacesForChar,
+  // --- NEW: Receive lifted state and setters as props ---
+  isNoCareerMode,
+  setIsNoCareerMode,
+  alwaysShowCareer,
+  setAlwaysShowCareer,
 }) {
-  const [isNoCareerMode, setIsNoCareerMode] = useState(false);
-  const [alwaysShowCareer, setAlwaysShowCareer] = useState(true);
+  // --- REMOVED: Local state now managed by App.js ---
+  // const [isNoCareerMode, setIsNoCareerMode] = useState(false);
+  // const [alwaysShowCareer, setAlwaysShowCareer] = useState(true);
+
   const [modalState, setModalState] = useState({
     isOpen: false,
     characterToSelect: null,
@@ -84,8 +91,6 @@ function Planner({
         [...selectedRaces].filter((id) => !careerRaceIds.has(id))
       );
 
-      // BUG 2 FIX: Rely on careerRaceIds.size instead of selectedCharacter,
-      // as selectedCharacter becomes null during search.
       if (!isNoCareerMode && careerRaceIds.size > 0 && optionalRaces.size > 0) {
         setModalState({ isOpen: true, characterToSelect: character });
         return;
@@ -170,7 +175,7 @@ function Planner({
           return;
         }
       }
-      setIsNoCareerMode(isNowNoCareer);
+      setIsNoCareerMode(isNowNoCareer); // Use prop setter
       setCareerRaceIds(new Set());
       setSelectedRaces(new Set());
       setCurrentChecklistName(null);
@@ -185,6 +190,7 @@ function Planner({
       setCareerRaceIds,
       setSelectedRaces,
       setCurrentChecklistName,
+      setIsNoCareerMode, // Add setter to dependency array
     ]
   );
 
@@ -544,6 +550,10 @@ function Planner({
                 Loading a new checklist will always clear old optional races, to
                 keep selected optional races, select a different character
                 instead.
+              </li>
+              <li>
+                Choosing races and finding a character that can run those races
+                is not supported. Please use GameTora for that functionality.
               </li>
             </ul>
           </div>

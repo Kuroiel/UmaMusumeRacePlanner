@@ -22,7 +22,7 @@ function ChecklistManager({
 
   const handleSaveClick = () => {
     const defaultName = selectedCharacter
-      ? `${selectedCharacter.name} - Plan`
+      ? `${selectedCharacter.name} Run`
       : `My Plan`;
     setSaveModalState({ isOpen: true, defaultValue: defaultName });
   };

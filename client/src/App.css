@@ -1,5 +1,8 @@
 /* === THEME VARIABLES === */
 :root {
+  /* NEW: Signal to browsers that we handle our own theming */
+  color-scheme: light;
+
   /* ... Light Mode Palette ... */
   --color-background: #f4f7f6;
   --color-text-primary: #333;
@@ -24,6 +27,8 @@
   --color-warning-icon-bg: #fce1d0;
   --color-warning-icon-text: #e67e22;
   --color-tooltip-bg: #2c3e50;
+  /* NEW: Dedicated text color for tooltips for better contrast */
+  --color-tooltip-text: white;
   --color-checklist-tooltip-bg: #f39c12;
   --color-checklist-tooltip-text: #2c3e50;
 
@@ -43,6 +48,9 @@
 }
 
 body.dark-mode {
+  /* NEW: Signal to browsers that we handle our own theming */
+  color-scheme: dark;
+
   /* ... Dark Mode Palette ... */
   --color-background: #121212;
   --color-text-primary: #e0e0e0;
@@ -67,6 +75,8 @@ body.dark-mode {
   --color-warning-icon-bg: #5c3f2f;
   --color-warning-icon-text: #f39c12;
   --color-tooltip-bg: #f0f0f0;
+  /* NEW: Dedicated text color for tooltips for better contrast */
+  --color-tooltip-text: #121212;
   --color-checklist-tooltip-bg: #f39c12;
   --color-checklist-tooltip-text: #121212;
 
@@ -670,7 +680,8 @@ tr:hover {
   visibility: hidden;
   width: 240px;
   background-color: var(--color-tooltip-bg);
-  color: var(--color-text-primary);
+  /* UPDATED: Use the new dedicated variable */
+  color: var(--color-tooltip-text);
   text-align: center;
   border-radius: 6px;
   padding: 8px;

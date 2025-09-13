@@ -7,6 +7,26 @@ import "./App.css";
 import raceData from "./data/races.json";
 import charData from "./data/characters.json";
 
+// --- START: AUTOSAVE IMPLEMENTATION ---
+const AUTOSAVE_KEY = "umamusume-autosave-session";
+
+// Helper function to load state from localStorage
+const loadAutosavedState = () => {
+  try {
+    const savedStateJSON = localStorage.getItem(AUTOSAVE_KEY);
+    if (savedStateJSON) {
+      return JSON.parse(savedStateJSON);
+    }
+  } catch (error) {
+    console.error("Failed to parse autosaved state:", error);
+    localStorage.removeItem(AUTOSAVE_KEY); // Clear corrupted data
+  }
+  return null;
+};
+
+const initialAutosavedState = loadAutosavedState();
+// --- END: AUTOSAVE IMPLEMENTATION ---
+
 const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
   <div className="confirmation-toast">
     <span>{message}</span>
@@ -65,7 +85,6 @@ const getTurnValue = (dateString) => {
   return (yearMatch - 1) * 24 + (month - 1) * 2 + half;
 };
 
-// BUG 1 FIX: Moved helper functions here to be accessible by handlers
 const normalizeDateForMatching = (dateString) => {
   const yearMatch = dateString.match(/Junior|Year 1/i)
     ? "Y1"
@@ -111,13 +130,11 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
 };
 
 function App() {
-  // --- NEW: Dark Mode State Management ---
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       return savedTheme === "dark";
     }
-    // If no theme is saved, use the user's system preference
     return (
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -133,34 +150,59 @@ function App() {
       localStorage.setItem("theme", "light");
     }
   }, [isDarkMode]);
-  // --- END of Dark Mode State Management ---
 
   const [page, setPage] = useState("planner");
   const [allRaces, setAllRaces] = useState([]);
-  // ... (rest of your state variables remain the same) ...
   const [allCharacters, setAllCharacters] = useState([]);
   const [raceExclusivity, setRaceExclusivity] = useState(new Map());
-  const [searchTerm, setSearchTerm] = useState("");
+  const [isAppInitialized, setIsAppInitialized] = useState(false);
+
+  // --- START: AUTOSAVED STATE ---
+  // Initialize state with loaded data or defaults
+  const [searchTerm, setSearchTerm] = useState(
+    initialAutosavedState?.searchTerm ?? ""
+  );
   const [selectedCharacter, setSelectedCharacter] = useState(null);
-  const [modifiedAptitudes, setModifiedAptitudes] = useState(null);
-  const [selectedRaces, setSelectedRaces] = useState(new Set());
-  const [checklistData, setChecklistData] = useState({});
+  const [modifiedAptitudes, setModifiedAptitudes] = useState(
+    initialAutosavedState?.modifiedAptitudes || null
+  );
+  const [selectedRaces, setSelectedRaces] = useState(
+    new Set(initialAutosavedState?.selectedRaces || [])
+  );
+  const [checklistData, setChecklistData] = useState(
+    initialAutosavedState?.checklistData || {}
+  );
+  const [filters, setFilters] = useState(
+    initialAutosavedState?.filters || {
+      trackAptitude: "A",
+      distanceAptitude: "A",
+      hideNonHighlighted: false,
+      hideSummer: false,
+    }
+  );
+  const [gradeFilters, setGradeFilters] = useState(
+    initialAutosavedState?.gradeFilters || { G1: true, G2: true, G3: true }
+  );
+  const [showOptionalGrades, setShowOptionalGrades] = useState(
+    initialAutosavedState?.showOptionalGrades ?? false
+  );
+  // State lifted from Planner.js
+  const [isNoCareerMode, setIsNoCareerMode] = useState(
+    initialAutosavedState?.isNoCareerMode ?? false
+  );
+  const [alwaysShowCareer, setAlwaysShowCareer] = useState(
+    initialAutosavedState?.alwaysShowCareer ?? true
+  );
+  // --- END: AUTOSAVED STATE ---
+
+  // Manually managed state
   const [savedChecklists, setSavedChecklists] = useState([]);
   const [currentChecklistName, setCurrentChecklistName] = useState(null);
-  const [filters, setFilters] = useState({
-    trackAptitude: "A",
-    distanceAptitude: "A",
-    hideNonHighlighted: false,
-    hideSummer: false,
-  });
-  const [gradeFilters, setGradeFilters] = useState({
-    G1: true,
-    G2: true,
-    G3: true,
-  });
-  const [showOptionalGrades, setShowOptionalGrades] = useState(false);
+
+  // Derived state
   const [careerRaceIds, setCareerRaceIds] = useState(new Set());
 
+  // Effect for loading initial data (characters, races, named checklists)
   useEffect(() => {
     const racesWithTurns = raceData.map((race) => ({
       ...race,
@@ -190,9 +232,66 @@ function App() {
       console.error("Error parsing checklists from localStorage:", error);
       localStorage.removeItem("umamusume-checklists");
     }
+    setIsAppInitialized(true); // Signal that initial data load is complete
   }, []);
 
-  // ... (all your other useMemo hooks and handlers remain exactly the same) ...
+  // NEW: Effect to restore character from autosaved state once data is loaded
+  useEffect(() => {
+    if (
+      allCharacters.length > 0 &&
+      initialAutosavedState?.selectedCharacterName
+    ) {
+      const character = allCharacters.find(
+        (c) => c.name === initialAutosavedState.selectedCharacterName
+      );
+      if (character) {
+        setSelectedCharacter(character);
+        if (!initialAutosavedState.modifiedAptitudes) {
+          setModifiedAptitudes({ ...character.aptitudes });
+        }
+        const newCareerRaceIds = getCareerRacesForCharUtil(character, allRaces);
+        setCareerRaceIds(newCareerRaceIds);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allCharacters, allRaces]);
+
+  // NEW: Effect for AUTOSAVING the current session
+  useEffect(() => {
+    if (!isAppInitialized) {
+      return; // Don't save until app has loaded initial data and restored state
+    }
+    const stateToSave = {
+      searchTerm,
+      selectedCharacterName: selectedCharacter ? selectedCharacter.name : null,
+      modifiedAptitudes,
+      selectedRaces: Array.from(selectedRaces),
+      checklistData,
+      filters,
+      gradeFilters,
+      showOptionalGrades,
+      isNoCareerMode,
+      alwaysShowCareer,
+    };
+    try {
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(stateToSave));
+    } catch (error) {
+      console.error("Failed to autosave state:", error);
+    }
+  }, [
+    isAppInitialized,
+    searchTerm,
+    selectedCharacter,
+    modifiedAptitudes,
+    selectedRaces,
+    checklistData,
+    filters,
+    gradeFilters,
+    showOptionalGrades,
+    isNoCareerMode,
+    alwaysShowCareer,
+  ]);
+
   const warningRaceIds = useMemo(() => {
     const warnings = new Set();
     if (selectedRaces.size < 3) return warnings;
@@ -348,14 +447,13 @@ function App() {
             (c) => c.name === checklistToLoad.characterName
           );
 
-          // BUG 1 FIX: Recalculate and set careerRaceIds for the loaded character
           if (character) {
             const newCareerRaceIds = getCareerRacesForChar(character);
             setCareerRaceIds(newCareerRaceIds);
             setSelectedCharacter(character);
             setSearchTerm(character.name);
           } else {
-            setCareerRaceIds(new Set()); // No character, no career races
+            setCareerRaceIds(new Set());
             setSelectedCharacter(null);
             setSearchTerm("");
           }
@@ -486,7 +584,7 @@ function App() {
       showOptionalGrades,
       allCharacters,
       currentChecklistName,
-      getCareerRacesForChar, // Add as dependency
+      getCareerRacesForChar,
     ]
   );
 
@@ -516,7 +614,12 @@ function App() {
     warningRaceIds,
     gradeCounts,
     setCurrentChecklistName,
-    getCareerRacesForChar, // Pass function to Planner
+    getCareerRacesForChar,
+    // Pass lifted state down to Planner
+    isNoCareerMode,
+    setIsNoCareerMode,
+    alwaysShowCareer,
+    setAlwaysShowCareer,
   };
   const checklistProps = {
     races: allRaces
@@ -537,7 +640,7 @@ function App() {
     <div className="App">
       <Toaster position="top-center" reverseOrder={false} />
       <header className="App-header">
-        <h1>Umamusume Race Scheduler</h1>
+        <h1>UmaMusume Race Scheduler</h1>
         <ThemeToggle
           isDarkMode={isDarkMode}
           onToggle={() => setIsDarkMode(!isDarkMode)}
