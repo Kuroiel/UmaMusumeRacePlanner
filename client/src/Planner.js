@@ -510,6 +510,43 @@ function Planner({
             </>
           )}
           <ChecklistManager {...managerProps} />
+          <div className="panel-section epithet-list">
+            <h2>Epithet Bonus Races</h2>
+            <ul>
+              <li>
+                <strong>Classic Triple Crown:</strong> Satsuki Sho, Tokyo
+                Yushun, Kikuka Sho
+              </li>
+              <li>
+                <strong>Triple Tiara:</strong> Oka Sho, Japanese Oaks, Shuka Sho
+              </li>
+              <li>
+                <strong>Spring Senior Triple Crown:</strong> Osaka Hai, Tenno
+                Sho (Spring), Takarazuka Kinen
+              </li>
+              <li>
+                <strong>Autumn Senior Triple Crown:</strong> Tenno Sho (Autumn),
+                Japan Cup, Arima Kinen
+              </li>
+              <li>
+                <strong>Tenno Sweep:</strong> Tenno Sho (Spring), Tenno Sho
+                (Autumn)
+              </li>
+              <li>
+                <strong>Dual Gran Prix:</strong> Takarazuka Kinen, Arima Kinen
+              </li>
+              <li>
+                <strong>Dual Miles:</strong> Yasuda Kinen, Mile Championship
+              </li>
+              <li>
+                <strong>Dual Sprints:</strong> Takamatsunomiya Kinen, Sprinters
+                Stakes
+              </li>
+              <li>
+                <strong>Dual Dirt:</strong> Champions Cup, February Stakes
+              </li>
+            </ul>
+          </div>
           <div className="panel-section data-source">
             <h2>Data Sources/Inspiration</h2>
             <p>

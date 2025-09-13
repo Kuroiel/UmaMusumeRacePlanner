@@ -272,6 +272,24 @@ h4 {
   font-size: 0.9em;
   color: var(--color-text-secondary);
 }
+.epithet-list ul {
+  padding-left: 20px;
+  margin: 0;
+  list-style-type: disc;
+}
+.epithet-list li {
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.epithet-list li:last-child {
+  margin-bottom: 0;
+}
+.epithet-list li strong {
+  color: var(--color-text-primary);
+  font-weight: bold;
+}
 
 /* === RACE LIST & STICKY HEADER === */
 .race-list-panel {
@@ -548,6 +566,52 @@ tr:hover {
 .clear-button:hover {
   background-color: var(--color-accent-orange-hover);
 }
+.progress-helper {
+  background-color: var(--color-interactive-bg);
+  border: 1px solid var(--color-border-medium);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.progress-helper-complete {
+  background-color: var(--color-highlight-bg);
+  border-color: var(--color-accent-green);
+  font-weight: bold;
+  font-size: 1.2em;
+}
+.progress-label {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+.progress-race-name {
+  font-size: 1.3em;
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+.progress-race-date {
+  font-size: 1em;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+.next-race-item {
+  border-left: 4px solid var(--color-accent-green);
+  box-shadow: 0 4px 8px var(--color-shadow); /* Add a subtle lift */
+}
+.career-race-indicator {
+  background-color: var(--color-accent-blue);
+  color: var(--color-text-light);
+  font-size: 0.7em;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 10px;
+  vertical-align: middle; /* Align with text */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 .checklist-container {
   display: flex;
   flex-direction: column;
@@ -596,6 +660,10 @@ tr:hover {
   align-items: center;
   gap: 5px;
   white-space: nowrap;
+}
+.checklist-item-controls label.control-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 .checklist-item-actions textarea {
   border: 1px solid var(--color-border-medium);

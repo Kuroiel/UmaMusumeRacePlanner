@@ -344,10 +344,20 @@ function App() {
             ran: false,
             won: false,
             notes: "",
+            skipped: false,
           };
           const newData = { ...currentData, [field]: value };
-          if (field === "won" && value === true) newData.ran = true;
-          if (field === "ran" && value === false) newData.won = false;
+          if (field === "won" && value === true) {
+            newData.ran = true;
+            newData.skipped = false;
+          } else if (field === "ran" && value === true) {
+            newData.skipped = false;
+          } else if (field === "ran" && value === false) {
+            newData.won = false;
+          } else if (field === "skipped" && value === true) {
+            newData.ran = false;
+            newData.won = false;
+          }
           return { ...prev, [raceId]: newData };
         });
       },
@@ -363,11 +373,16 @@ function App() {
           setChecklistData((prev) => {
             const newData = { ...prev };
             Object.keys(newData).forEach((raceId) => {
-              newData[raceId] = { ...newData[raceId], ran: false, won: false };
+              newData[raceId] = {
+                ...newData[raceId],
+                ran: false,
+                won: false,
+                skipped: false,
+              };
             });
             return newData;
           });
-          toast.success("Ran/Won statuses have been reset.");
+          toast.success("Ran/Won/Skipped statuses have been reset.");
         };
         toast(
           (t) => (
@@ -615,7 +630,6 @@ function App() {
     gradeCounts,
     setCurrentChecklistName,
     getCareerRacesForChar,
-    // Pass lifted state down to Planner
     isNoCareerMode,
     setIsNoCareerMode,
     alwaysShowCareer,
@@ -634,6 +648,8 @@ function App() {
     gradeCounts,
     wonCount,
     currentChecklistName,
+    careerRaceIds,
+    selectedCharacter,
   };
 
   return (

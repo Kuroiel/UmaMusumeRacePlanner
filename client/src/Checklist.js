@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 const gradeNameMap = { "1 Win Class": "Pre-OP", Open: "OP" };
 const getDistanceCategory = (distance) => {
@@ -22,6 +22,26 @@ const formatChecklistDate = (dateString) => {
   return `${formattedYear} - ${halfPart} ${monthPart}`;
 };
 
+const ProgressHelper = ({ nextRace }) => {
+  if (!nextRace) {
+    return (
+      <div className="progress-helper progress-helper-complete">
+        🎉 Checklist Complete! 🎉
+      </div>
+    );
+  }
+
+  return (
+    <div className="progress-helper">
+      <div className="progress-label">Next Race:</div>
+      <div className="progress-race-name">{nextRace.name}</div>
+      <div className="progress-race-date">
+        🗓️ {formatChecklistDate(nextRace.date)}
+      </div>
+    </div>
+  );
+};
+
 function Checklist({
   races,
   checklistData,
@@ -33,7 +53,16 @@ function Checklist({
   gradeCounts,
   wonCount,
   currentChecklistName,
+  careerRaceIds,
+  selectedCharacter,
 }) {
+  const nextRace = useMemo(() => {
+    return races.find((race) => {
+      const data = checklistData[race.id];
+      return !(data?.ran || data?.won || data?.skipped);
+    });
+  }, [races, checklistData]);
+
   return (
     <div className="checklist-page">
       <div className="checklist-page-header">
@@ -48,7 +77,7 @@ function Checklist({
         </div>
         <div className="checklist-page-actions">
           <button className="action-button" onClick={onResetStatus}>
-            Reset Ran/Won Status
+            Reset All Status
           </button>
           <button className="action-button clear-button" onClick={onClearNotes}>
             Clear All Notes
@@ -57,16 +86,21 @@ function Checklist({
       </div>
 
       {races.length > 0 && (
-        <div className="grade-counter checklist-page-counter">
-          <span className="counter-label">Total selected:</span>
-          <span>G1: {gradeCounts.G1}</span>
-          <span>G2: {gradeCounts.G2}</span>
-          <span>G3: {gradeCounts.G3}</span>
-          <span className="counter-label">Won:</span>
-          <span>
-            {wonCount} / {races.length}
-          </span>
-        </div>
+        <>
+          {/* --- NEW: Render Progress Helper --- */}
+          <ProgressHelper nextRace={nextRace} />
+
+          <div className="grade-counter checklist-page-counter">
+            <span className="counter-label">Total selected:</span>
+            <span>G1: {gradeCounts.G1}</span>
+            <span>G2: {gradeCounts.G2}</span>
+            <span>G3: {gradeCounts.G3}</span>
+            <span className="counter-label">Won:</span>
+            <span>
+              {wonCount} / {races.length}
+            </span>
+          </div>
+        </>
       )}
 
       <div className="checklist-container">
@@ -75,16 +109,25 @@ function Checklist({
             ran: false,
             won: false,
             notes: "",
+            skipped: false,
           };
           const isWarning = warningRaceIds.has(race.id);
+          const isCareer = selectedCharacter && careerRaceIds.has(race.id);
+          const isNextRace = nextRace && nextRace.id === race.id;
+
           const itemClass = `checklist-item ${
             isWarning ? "warning-race-row" : ""
-          }`;
+          } ${isNextRace ? "next-race-item" : ""}`; // Add class for next race highlight
+
           return (
             <div key={race.id} className={itemClass}>
               <div className="checklist-item-info">
                 <h3>
                   {race.name}
+                  {/* --- NEW: Career Race Indicator --- */}
+                  {isCareer && (
+                    <span className="career-race-indicator">Career</span>
+                  )}
                   {isWarning && (
                     <div className="tooltip-container">
                       <span className="warning-icon">!</span>
@@ -126,6 +169,22 @@ function Checklist({
                       }
                     />{" "}
                     Won
+                  </label>
+
+                  <label className={isCareer ? "control-disabled" : ""}>
+                    <input
+                      type="checkbox"
+                      checked={data.skipped}
+                      onChange={(e) =>
+                        onChecklistDataChange(
+                          race.id,
+                          "skipped",
+                          e.target.checked
+                        )
+                      }
+                      disabled={isCareer}
+                    />{" "}
+                    Skip
                   </label>
                 </div>
                 <textarea
