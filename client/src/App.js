@@ -3,7 +3,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Planner from "./Planner";
 import Checklist from "./Checklist";
 import ThemeToggle from "./ThemeToggle";
-import Modal from "./Modal"; // Added for Overwrite Modal
+import Modal from "./Modal";
 import "./App.css";
 import raceData from "./data/races.json";
 import charData from "./data/characters.json";
@@ -33,9 +33,6 @@ const loadAutosavedState = () => {
 };
 
 const initialAutosavedState = loadAutosavedState();
-
-// This component is no longer needed; it will be replaced by the Modal.
-// const ConfirmationToast = (...)
 
 const getTurnValue = (dateString) => {
   const yearMatch = dateString.match(/Junior|Year 1/i)
@@ -165,7 +162,6 @@ function App() {
   const [gradeFilters, setGradeFilters] = useState(
     initialAutosavedState?.gradeFilters || { G1: true, G2: true, G3: true }
   );
-  // State for new filters (Req 6)
   const [yearFilters, setYearFilters] = useState(
     initialAutosavedState?.yearFilters || {
       "Year 1": true,
@@ -202,7 +198,6 @@ function App() {
   const [currentChecklistName, setCurrentChecklistName] = useState(null);
   const [careerRaceIds, setCareerRaceIds] = useState(new Set());
 
-  // State for the overwrite confirmation modal (Req 7)
   const [overwriteModal, setOverwriteModal] = useState({
     isOpen: false,
     name: "",
@@ -272,7 +267,6 @@ function App() {
       checklistData,
       filters,
       gradeFilters,
-      // Add new filters to autosave (Req 6)
       yearFilters,
       trackFilters,
       distanceFilters,
@@ -295,7 +289,6 @@ function App() {
     checklistData,
     filters,
     gradeFilters,
-    // Add new filters to dependency array (Req 6)
     yearFilters,
     trackFilters,
     distanceFilters,
@@ -555,20 +548,7 @@ function App() {
           });
           toast.success("Ran/Won/Skipped statuses have been reset.");
         };
-        // Use standard window.confirm, or a custom modal. For now, matching existing pattern.
-        // Re-reading: The toast confirmation needs to be a Modal. This handler isn't the save handler though.
-        // Ah, the original code already uses a Toast confirmation for THIS. This is fine to leave as-is,
-        // as only Req 7 specifically requested changing the SAVE overwrite to a modal.
-        // Let's stick to the requirements. Only change the save workflow.
-        // Re-reading original file: Yes, it uses a ConfirmationToast component. I will keep using it here.
-        // Wait, I removed ConfirmationToast. I should use the modal pattern for all confirmations.
-        // No, the request was specific to the overwrite. Let's not refactor all toasts to modals without request.
-        // I will re-add ConfirmationToast.
-        // ...Hold on. The file *defines* ConfirmationToast but `App.js` *doesn't* import it. It's defined *inside* App.js.
-        // This means my plan to remove it was correct.
-        // But then how does the Reset handler work? `toast((t) => (<ConfirmationToast ... />))`
-        // This is correct. The component is defined LOCALLY and passed to `toast`. My plan to remove it was WRONG.
-        // Re-adding it locally.
+
         const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
           <div className="confirmation-toast">
             <span>{message}</span>
@@ -669,7 +649,7 @@ function App() {
           checklistData,
           filters,
           gradeFilters,
-          // Add new filters to saved object (Req 6)
+
           yearFilters,
           trackFilters,
           distanceFilters,
@@ -678,7 +658,6 @@ function App() {
         };
         const existingIndex = savedChecklists.findIndex((c) => c.name === name);
         if (existingIndex > -1) {
-          // Changed to use Modal per Req 7
           const overwriteAction = () => {
             const newChecklists = [...savedChecklists];
             newChecklists[existingIndex] = newChecklist;
@@ -728,13 +707,12 @@ function App() {
               trackAptitude: "A",
               distanceAptitude: "A",
               hideNonHighlighted: false,
-              hideSummer: false,
+              hideSummer: true,
             }
           );
           setGradeFilters(
             checklistToLoad.gradeFilters || { G1: true, G2: true, G3: true }
           );
-          // Load new filters, with fallbacks for old checklists (Req 6)
           setYearFilters(
             checklistToLoad.yearFilters || {
               "Year 1": true,
@@ -825,25 +803,23 @@ function App() {
         }
         toast.success(`Renamed to "${newName}".`);
       },
-      // New handler for reordering checklists (Req 5)
       handleReorderChecklist: (index, direction) => {
         if (
           (index === 0 && direction === "up") ||
           (index === savedChecklists.length - 1 && direction === "down")
         ) {
-          return; // Already at top or bottom
+          return;
         }
 
         const newIndex = direction === "up" ? index - 1 : index + 1;
-        const newList = [...savedChecklists]; // Create a mutable copy
+        const newList = [...savedChecklists];
 
-        // Standard array item swap
         [newList[index], newList[newIndex]] = [
           newList[newIndex],
           newList[index],
         ];
 
-        allHandlers.updateLocalStorage(newList); // Save the new order
+        allHandlers.updateLocalStorage(newList);
       },
       handleImportChecklists: (importedChecklists) => {
         if (!Array.isArray(importedChecklists)) {
@@ -868,7 +844,6 @@ function App() {
               checklistData: item.checklistData || {},
               filters: item.filters || {},
               gradeFilters: item.gradeFilters || {},
-              // Add new filters with fallbacks for imported checklists (Req 6)
               yearFilters: item.yearFilters || {
                 "Year 1": true,
                 "Year 2": true,
@@ -949,7 +924,6 @@ function App() {
       checklistData,
       filters,
       gradeFilters,
-      // Add new filters to dependency array (Req 6)
       yearFilters,
       trackFilters,
       distanceFilters,
@@ -978,13 +952,12 @@ function App() {
     setPage,
     savedChecklists,
     ...allHandlers,
-    handleReorderChecklist: allHandlers.handleReorderChecklist, // Pass reorder handler (Req 5)
-    currentChecklistName, // Pass current name for smart default (Req 2)
+    handleReorderChecklist: allHandlers.handleReorderChecklist,
+    currentChecklistName,
     filters,
     setFilters,
     gradeFilters,
     setGradeFilters,
-    // Pass new filters and setters (Req 6)
     yearFilters,
     setYearFilters,
     trackFilters,
@@ -1041,7 +1014,6 @@ function App() {
         {page === "checklist" && <Checklist {...checklistProps} />}
       </main>
 
-      {/* Overwrite Confirmation Modal (Req 7) */}
       {overwriteModal.isOpen && (
         <Modal
           title="Overwrite Checklist"

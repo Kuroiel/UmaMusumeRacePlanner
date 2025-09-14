@@ -92,7 +92,6 @@ function ChecklistManager({
             alert("Invalid file format.");
           }
         } catch (error) {
-          // FIXED: The missing curly brace has been added here.
           alert("Error reading or parsing the file.");
         }
       };
@@ -125,7 +124,6 @@ function ChecklistManager({
         />
       )}
 
-      {/* The <h2> "Checklist Manager" has been removed from here */}
       <div className="checklist-manager-content">
         <button
           className="manager-button"

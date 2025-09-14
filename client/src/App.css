@@ -221,17 +221,15 @@ h4 {
   flex-direction: column;
   gap: 20px;
 }
-/* New style for the 2x2 show/hide grid */
 .show-hide-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
-/* Updated style for the 2x2 main filter grid */
 .checkbox-filter-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px 30px; /* row-gap column-gap */
+  gap: 20px 30px;
 }
 .aptitude-filter-item-group {
   display: grid;

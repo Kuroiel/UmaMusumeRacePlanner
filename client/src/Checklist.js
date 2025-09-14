@@ -22,7 +22,6 @@ const formatChecklistDate = (dateString) => {
   return `${formattedYear} - ${halfPart} ${monthPart}`;
 };
 
-// Updated ProgressHelper for Req 9
 const ProgressHelper = ({
   nextRace,
   onUpdateNextRace,
@@ -51,7 +50,6 @@ const ProgressHelper = ({
       <div className="progress-race-date">
         🗓️ {formatChecklistDate(nextRace.date)}
       </div>
-      {/* Textarea for editing notes of the next race (Req 9) */}
       <textarea
         className="progress-notes-textarea"
         placeholder="Notes for this race..."
@@ -103,7 +101,6 @@ function Checklist({
   selectedCharacter,
   smartAddedRaceIds,
 }) {
-  // useMemo is updated to include notes in the nextRace object for Req 9
   const nextRace = useMemo(() => {
     const firstUnfinishedRace = races.find((race) => {
       const data = checklistData[race.id];
@@ -158,7 +155,7 @@ function Checklist({
             <ProgressHelper
               nextRace={nextRace}
               onUpdateNextRace={handleUpdateNextRace}
-              onChecklistDataChange={onChecklistDataChange} // Pass handler for notes (Req 9)
+              onChecklistDataChange={onChecklistDataChange}
             />
 
             <div className="grade-counter checklist-page-counter">
@@ -224,7 +221,6 @@ function Checklist({
 
                 <span className="checklist-item-meta">
                   <span className="checklist-item-date">
-                    {/* FIXED: Was date.date, now is race.date */}
                     🗓️ {formatChecklistDate(race.date)}
                   </span>
                   {" | "}
@@ -239,7 +235,6 @@ function Checklist({
                       type="checkbox"
                       checked={data.ran}
                       onChange={(e) =>
-                        // FIXED: Was e..target.checked, now is e.target.checked
                         onChecklistDataChange(race.id, "ran", e.target.checked)
                       }
                     />{" "}

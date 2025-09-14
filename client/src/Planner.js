@@ -18,7 +18,6 @@ const isSummerRace = (date) =>
 const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"];
 const APTITUDE_VALUES = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: -1 };
 
-// Helper component for collapsible panel titles
 const CollapsibleHeader = ({ title, isOpen, onToggle }) => (
   <h2 onClick={onToggle} className="collapsible-header">
     {title} <span>{isOpen ? "▼" : "►"}</span>
@@ -489,7 +488,7 @@ function Planner({
                 {panelsOpen.filters && (
                   <div className="filters-container">
                     <div className="filter-group">
-                      <h4>Aptitudes & Hiding</h4>
+                      <h4>Minimum Aptitudes</h4>
                       <div className="aptitude-filter-item-group">
                         <div className="aptitude-filter-item">
                           <label>Track Apt. &ge;</label>
@@ -521,7 +520,6 @@ function Planner({
                         </div>
                       </div>
                       <hr />
-                      {/* New 2x2 grid for show/hide checkboxes */}
                       <div className="show-hide-grid">
                         <label>
                           <input
@@ -566,7 +564,6 @@ function Planner({
                     </div>
 
                     <div className="checkbox-filter-grid">
-                      {/* Reordered to Track, Distance, Grade, Year */}
                       <div className="filter-group">
                         <h4>Track</h4>
                         {Object.keys(trackFilters).map((track) => (
@@ -714,6 +711,47 @@ function Planner({
               </div>
             )}
           </div>
+
+          <div className="panel-section">
+            <CollapsibleHeader
+              title="Known Issues/Caveats"
+              isOpen={panelsOpen.issues}
+              onToggle={() => togglePanel("issues")}
+            />
+            {panelsOpen.issues && (
+              <div className="known-issues">
+                <ul>
+                  <li>
+                    PLEASE EXPORT OFTEN. If something happens, without a file to
+                    import, there is currently NO option to restore lost
+                    checklists.
+                  </li>
+                  <li>
+                    Alternative career objectives are not yet implemented.
+                  </li>
+                  <li>
+                    Races from the JP version of the game are included which may
+                    not be present in EN yet.
+                  </li>
+                  <li>Mobile friendly view not supported at this time</li>
+                  <li>
+                    Debut and scenario specific races are hidden and not counted
+                    in the win total
+                  </li>
+                  <li>
+                    Loading a new checklist will always clear old optional
+                    races, to keep selected optional races, select a different
+                    character instead.
+                  </li>
+                  <li>
+                    Choosing races and finding a character that can run those
+                    races is not supported. Please use GameTora for that
+                    functionality.
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
           <div className="panel-section">
             <CollapsibleHeader
               title="Data Sources/Inspiration"
@@ -742,41 +780,6 @@ function Planner({
                     race scheduler
                   </a>
                 </p>
-              </div>
-            )}
-          </div>
-          <div className="panel-section">
-            <CollapsibleHeader
-              title="Known Issues/Caveats"
-              isOpen={panelsOpen.issues}
-              onToggle={() => togglePanel("issues")}
-            />
-            {panelsOpen.issues && (
-              <div className="known-issues">
-                <ul>
-                  <li>
-                    Alternative career objectives are not yet implemented.
-                  </li>
-                  <li>
-                    Races from the JP version of the game are included which may
-                    not be present in EN yet.
-                  </li>
-                  <li>Mobile friendly view not supported at this time</li>
-                  <li>
-                    Debut and scenario specific races are hidden by default and
-                    not counted in the win total
-                  </li>
-                  <li>
-                    Loading a new checklist will always clear old optional
-                    races, to keep selected optional races, select a different
-                    character instead.
-                  </li>
-                  <li>
-                    Choosing races and finding a character that can run those
-                    races is not supported. Please use GameTora for that
-                    functionality.
-                  </li>
-                </ul>
               </div>
             )}
           </div>
