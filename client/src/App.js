@@ -193,6 +193,9 @@ function App() {
   const [alwaysShowCareer, setAlwaysShowCareer] = useState(
     initialAutosavedState?.alwaysShowCareer ?? true
   );
+  const [smartAddedRaceIds, setSmartAddedRaceIds] = useState(
+    new Set(initialAutosavedState?.smartAddedRaceIds || [])
+  );
   // --- END: AUTOSAVED STATE ---
 
   // Manually managed state
@@ -272,6 +275,7 @@ function App() {
       showOptionalGrades,
       isNoCareerMode,
       alwaysShowCareer,
+      smartAddedRaceIds: Array.from(smartAddedRaceIds),
     };
     try {
       localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(stateToSave));
@@ -290,13 +294,19 @@ function App() {
     showOptionalGrades,
     isNoCareerMode,
     alwaysShowCareer,
+    smartAddedRaceIds,
   ]);
+
+  const combinedRaceIds = useMemo(
+    () => new Set([...selectedRaces, ...smartAddedRaceIds]),
+    [selectedRaces, smartAddedRaceIds]
+  );
 
   const warningRaceIds = useMemo(() => {
     const warnings = new Set();
-    if (selectedRaces.size < 3) return warnings;
+    if (combinedRaceIds.size < 3) return new Set();
     const sortedSelectedRaces = allRaces
-      .filter((race) => selectedRaces.has(race.id))
+      .filter((race) => combinedRaceIds.has(race.id))
       .sort((a, b) => a.turnValue - b.turnValue);
     for (let i = 2; i < sortedSelectedRaces.length; i++) {
       const race3 = sortedSelectedRaces[i];
@@ -310,24 +320,24 @@ function App() {
       }
     }
     return warnings;
-  }, [selectedRaces, careerRaceIds, allRaces]);
+  }, [combinedRaceIds, careerRaceIds, allRaces]);
 
   const gradeCounts = useMemo(() => {
     const counts = { G1: 0, G2: 0, G3: 0 };
-    selectedRaces.forEach((raceId) => {
+    combinedRaceIds.forEach((raceId) => {
       const race = allRaces.find((r) => r.id === raceId);
       if (race && counts[race.grade] !== undefined) {
         counts[race.grade]++;
       }
     });
     return counts;
-  }, [selectedRaces, allRaces]);
+  }, [combinedRaceIds, allRaces]);
 
   const wonCount = useMemo(() => {
-    return Array.from(selectedRaces).filter(
+    return Array.from(combinedRaceIds).filter(
       (raceId) => checklistData[raceId]?.won
     ).length;
-  }, [selectedRaces, checklistData]);
+  }, [combinedRaceIds, checklistData]);
 
   const getCareerRacesForChar = useCallback(
     (character) => {
@@ -339,6 +349,46 @@ function App() {
   const allHandlers = useMemo(
     () => ({
       handleChecklistDataChange: (raceId, field, value) => {
+        if (field === "skipped" && value === true) {
+          const raceToSkip = allRaces.find((r) => r.id === raceId);
+          const isOptional = !careerRaceIds.has(raceId);
+
+          if (isOptional && raceToSkip) {
+            // If we are skipping a smart-added race, just remove it. Don't find another.
+            if (smartAddedRaceIds.has(raceId)) {
+              setSmartAddedRaceIds((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(raceId);
+                return newSet;
+              });
+            } else {
+              // Otherwise, look for a future instance of this optional race
+              const futureInstance = allRaces
+                .filter(
+                  (r) =>
+                    r.name === raceToSkip.name &&
+                    r.turnValue > raceToSkip.turnValue
+                )
+                .sort((a, b) => a.turnValue - b.turnValue)[0]; // Get the very next one
+
+              if (futureInstance) {
+                // Add the new instance to smart-added and remove the old from selected
+                setSmartAddedRaceIds((prev) =>
+                  new Set(prev).add(futureInstance.id)
+                );
+                setSelectedRaces((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(raceId);
+                  return newSet;
+                });
+                toast(
+                  "Found a later version of this race and added it to your checklist.",
+                  { icon: "✨" }
+                );
+              }
+            }
+          }
+        }
         setChecklistData((prev) => {
           const currentData = prev[raceId] || {
             ran: false,
@@ -370,6 +420,7 @@ function App() {
       },
       handleResetChecklistStatus: () => {
         const resetAction = () => {
+          setSmartAddedRaceIds(new Set());
           setChecklistData((prev) => {
             const newData = { ...prev };
             Object.keys(newData).forEach((raceId) => {
@@ -418,11 +469,16 @@ function App() {
         );
       },
       handleSaveChecklist: (name) => {
+        const finalSelectedRaces = new Set([
+          ...selectedRaces,
+          ...smartAddedRaceIds,
+        ]);
+
         const newChecklist = {
           name,
           characterName: selectedCharacter?.name || "Unknown",
           modifiedAptitudes,
-          selectedRaceIds: Array.from(selectedRaces),
+          selectedRaceIds: Array.from(finalSelectedRaces), // Use the committed set
           checklistData,
           filters,
           gradeFilters,
@@ -454,8 +510,11 @@ function App() {
           setCurrentChecklistName(name);
           toast.success(`Checklist "${name}" saved!`);
         }
+        setSelectedRaces(finalSelectedRaces);
+        setSmartAddedRaceIds(new Set());
       },
       handleLoadChecklist: (name) => {
+        setSmartAddedRaceIds(new Set());
         const checklistToLoad = savedChecklists.find((c) => c.name === name);
         if (checklistToLoad) {
           const character = allCharacters.find(
@@ -600,6 +659,9 @@ function App() {
       allCharacters,
       currentChecklistName,
       getCareerRacesForChar,
+      allRaces,
+      careerRaceIds,
+      smartAddedRaceIds,
     ]
   );
 
@@ -634,10 +696,11 @@ function App() {
     setIsNoCareerMode,
     alwaysShowCareer,
     setAlwaysShowCareer,
+    totalSelectedCount: combinedRaceIds.size,
   };
   const checklistProps = {
     races: allRaces
-      .filter((r) => selectedRaces.has(r.id))
+      .filter((r) => combinedRaceIds.has(r.id))
       .sort((a, b) => a.turnValue - b.turnValue),
     checklistData,
     onChecklistDataChange: allHandlers.handleChecklistDataChange,
@@ -650,6 +713,7 @@ function App() {
     currentChecklistName,
     careerRaceIds,
     selectedCharacter,
+    smartAddedRaceIds,
   };
 
   return (

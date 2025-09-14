@@ -28,7 +28,7 @@ const ProgressHelper = ({ nextRace, onUpdateNextRace }) => {
   if (isComplete) {
     return (
       <div className="progress-helper progress-helper-complete">
-        🎉 Checklist Complete! 🎉
+        🎉 All Races Complete! 🎉
       </div>
     );
   }
@@ -63,7 +63,7 @@ const ProgressHelper = ({ nextRace, onUpdateNextRace }) => {
         <button
           className="progress-action-button skip"
           onClick={() => onUpdateNextRace("skipped", true)}
-          disabled={isComplete || (nextRace && nextRace.isCareer)} // Also disable skip for career races
+          disabled={isComplete || (nextRace && nextRace.isCareer)}
         >
           Mark as Skipped
         </button>
@@ -85,6 +85,7 @@ function Checklist({
   currentChecklistName,
   careerRaceIds,
   selectedCharacter,
+  smartAddedRaceIds,
 }) {
   const nextRace = useMemo(() => {
     const firstUnfinishedRace = races.find((race) => {
@@ -168,20 +169,32 @@ function Checklist({
           const isWarning = warningRaceIds.has(race.id);
           const isCareer = selectedCharacter && careerRaceIds.has(race.id);
           const isNextRace = nextRace && nextRace.id === race.id;
+          const isSmartAdded = smartAddedRaceIds.has(race.id); // NEW: Check if race is smart-added
 
           const itemClass = `checklist-item ${
             isWarning ? "warning-race-row" : ""
-          } ${isNextRace ? "next-race-item" : ""}`; // Add class for next race highlight
+          } ${isNextRace ? "next-race-item" : ""} ${
+            isSmartAdded ? "smart-added-item" : "" // NEW: Conditionally add class
+          }`;
 
           return (
             <div key={race.id} className={itemClass}>
               <div className="checklist-item-info">
                 <h3>
+                  {/* NEW: Add icon for smart-added races */}
+                  {isSmartAdded && (
+                    <span
+                      className="smart-add-indicator"
+                      title="This race was automatically added."
+                    >
+                      ✨
+                    </span>
+                  )}
                   {race.name}
-                  {/* --- NEW: Career Race Indicator --- */}
                   {isCareer && (
                     <span className="career-race-indicator">Career</span>
                   )}
+
                   {isWarning && (
                     <div className="tooltip-container">
                       <span className="warning-icon">!</span>

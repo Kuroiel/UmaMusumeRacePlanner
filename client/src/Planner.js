@@ -53,6 +53,7 @@ function Planner({
   setIsNoCareerMode,
   alwaysShowCareer,
   setAlwaysShowCareer,
+  totalSelectedCount,
 }) {
   // --- REMOVED: Local state now managed by App.js ---
   // const [isNoCareerMode, setIsNoCareerMode] = useState(false);
@@ -503,9 +504,9 @@ function Planner({
               <button
                 className="generate-button"
                 onClick={() => setPage("checklist")}
-                disabled={selectedRaces.size === 0}
+                disabled={totalSelectedCount === 0}
               >
-                View Checklist ({selectedRaces.size})
+                View Checklist ({totalSelectedCount})
               </button>
             </>
           )}
