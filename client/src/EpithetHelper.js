@@ -18,9 +18,10 @@ function EpithetHelper({ epithetStatus, onAddRaces }) {
     return null;
   }
 
+  // The <h2> "Epithet Helper" has been removed from here.
+  // The title is now handled by the collapsible header in Planner.js.
   return (
-    <div className="panel-section epithet-helper">
-      <h2>Epithet Helper</h2>
+    <div className="epithet-helper">
       <div className="epithet-list-container">
         {epithetStatus.map((epithet) => (
           <div key={epithet.name} className="epithet-item">

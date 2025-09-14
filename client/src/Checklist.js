@@ -22,8 +22,14 @@ const formatChecklistDate = (dateString) => {
   return `${formattedYear} - ${halfPart} ${monthPart}`;
 };
 
-const ProgressHelper = ({ nextRace, onUpdateNextRace }) => {
+// Updated ProgressHelper for Req 9
+const ProgressHelper = ({
+  nextRace,
+  onUpdateNextRace,
+  onChecklistDataChange,
+}) => {
   const isComplete = !nextRace;
+  const notes = isComplete ? "" : nextRace.notes;
 
   if (isComplete) {
     return (
@@ -45,6 +51,16 @@ const ProgressHelper = ({ nextRace, onUpdateNextRace }) => {
       <div className="progress-race-date">
         🗓️ {formatChecklistDate(nextRace.date)}
       </div>
+      {/* Textarea for editing notes of the next race (Req 9) */}
+      <textarea
+        className="progress-notes-textarea"
+        placeholder="Notes for this race..."
+        value={notes}
+        onChange={(e) =>
+          onChecklistDataChange(nextRace.id, "notes", e.target.value)
+        }
+        disabled={isComplete}
+      />
       <div className="progress-actions">
         <button
           className="progress-action-button ran"
@@ -87,6 +103,7 @@ function Checklist({
   selectedCharacter,
   smartAddedRaceIds,
 }) {
+  // useMemo is updated to include notes in the nextRace object for Req 9
   const nextRace = useMemo(() => {
     const firstUnfinishedRace = races.find((race) => {
       const data = checklistData[race.id];
@@ -98,6 +115,7 @@ function Checklist({
         ...firstUnfinishedRace,
         isCareer:
           selectedCharacter && careerRaceIds.has(firstUnfinishedRace.id),
+        notes: checklistData[firstUnfinishedRace.id]?.notes || "",
       };
     }
     return null;
@@ -140,6 +158,7 @@ function Checklist({
             <ProgressHelper
               nextRace={nextRace}
               onUpdateNextRace={handleUpdateNextRace}
+              onChecklistDataChange={onChecklistDataChange} // Pass handler for notes (Req 9)
             />
 
             <div className="grade-counter checklist-page-counter">
@@ -205,6 +224,7 @@ function Checklist({
 
                 <span className="checklist-item-meta">
                   <span className="checklist-item-date">
+                    {/* FIXED: Was date.date, now is race.date */}
                     🗓️ {formatChecklistDate(race.date)}
                   </span>
                   {" | "}
@@ -219,6 +239,7 @@ function Checklist({
                       type="checkbox"
                       checked={data.ran}
                       onChange={(e) =>
+                        // FIXED: Was e..target.checked, now is e.target.checked
                         onChecklistDataChange(race.id, "ran", e.target.checked)
                       }
                     />{" "}

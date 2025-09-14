@@ -7,8 +7,10 @@ function ChecklistManager({
   onLoad,
   onDelete,
   onRename,
+  onReorder,
   onImport,
   selectedCharacter,
+  currentChecklistName,
 }) {
   const fileInputRef = useRef(null);
   const [renameModalState, setRenameModalState] = useState({
@@ -21,9 +23,9 @@ function ChecklistManager({
   });
 
   const handleSaveClick = () => {
-    const defaultName = selectedCharacter
-      ? `${selectedCharacter.name} Run`
-      : `My Plan`;
+    const defaultName =
+      currentChecklistName ||
+      (selectedCharacter ? `${selectedCharacter.name} Run` : `My Plan`);
     setSaveModalState({ isOpen: true, defaultValue: defaultName });
   };
 
@@ -90,6 +92,7 @@ function ChecklistManager({
             alert("Invalid file format.");
           }
         } catch (error) {
+          // FIXED: The missing curly brace has been added here.
           alert("Error reading or parsing the file.");
         }
       };
@@ -122,8 +125,8 @@ function ChecklistManager({
         />
       )}
 
-      <div className="panel-section">
-        <h2>Checklist Manager</h2>
+      {/* The <h2> "Checklist Manager" has been removed from here */}
+      <div className="checklist-manager-content">
         <button
           className="manager-button"
           onClick={handleSaveClick}
@@ -134,10 +137,24 @@ function ChecklistManager({
 
         {savedChecklists.length > 0 && (
           <div className="saved-checklists-list">
-            {savedChecklists.map(({ name }) => (
+            {savedChecklists.map(({ name }, index) => (
               <div key={name} className="saved-checklist-item">
                 <span className="checklist-name">{name}</span>
                 <div className="checklist-actions">
+                  <button
+                    onClick={() => onReorder(index, "up")}
+                    disabled={index === 0}
+                    title="Move Up"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => onReorder(index, "down")}
+                    disabled={index === savedChecklists.length - 1}
+                    title="Move Down"
+                  >
+                    ↓
+                  </button>
                   <button onClick={() => onLoad(name)}>Load</button>
                   <button onClick={() => handleRenameClick(name)}>
                     Rename

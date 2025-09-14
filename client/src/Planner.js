@@ -18,6 +18,13 @@ const isSummerRace = (date) =>
 const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"];
 const APTITUDE_VALUES = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: -1 };
 
+// Helper component for collapsible panel titles
+const CollapsibleHeader = ({ title, isOpen, onToggle }) => (
+  <h2 onClick={onToggle} className="collapsible-header">
+    {title} <span>{isOpen ? "▼" : "►"}</span>
+  </h2>
+);
+
 function Planner({
   allRaces,
   allCharacters,
@@ -36,11 +43,19 @@ function Planner({
   handleLoadChecklist,
   handleDeleteChecklist,
   handleRenameChecklist,
+  handleReorderChecklist,
   handleImportChecklists,
+  currentChecklistName,
   filters,
   setFilters,
   gradeFilters,
   setGradeFilters,
+  yearFilters,
+  setYearFilters,
+  trackFilters,
+  setTrackFilters,
+  distanceFilters,
+  setDistanceFilters,
   showOptionalGrades,
   setShowOptionalGrades,
   careerRaceIds,
@@ -62,6 +77,20 @@ function Planner({
     isOpen: false,
     characterToSelect: null,
   });
+  const [raceSearchTerm, setRaceSearchTerm] = useState("");
+  const [panelsOpen, setPanelsOpen] = useState({
+    aptitudes: true,
+    filters: true,
+    epithets: true,
+    manager: true,
+    epithetList: false,
+    sources: false,
+    issues: false,
+  });
+
+  const togglePanel = (panelName) => {
+    setPanelsOpen((prev) => ({ ...prev, [panelName]: !prev[panelName] }));
+  };
 
   const updateCharacterState = useCallback(
     (character, finalRaceSelection, newCareerRaceIds) => {
@@ -220,6 +249,22 @@ function Planner({
       ...prev,
       [event.target.name]: event.target.checked,
     }));
+  const handleYearFilterChange = (event) =>
+    setYearFilters((prev) => ({
+      ...prev,
+      [event.target.name]: event.target.checked,
+    }));
+  const handleTrackFilterChange = (event) =>
+    setTrackFilters((prev) => ({
+      ...prev,
+      [event.target.name]: event.target.checked,
+    }));
+  const handleDistanceFilterChange = (event) =>
+    setDistanceFilters((prev) => ({
+      ...prev,
+      [event.target.name]: event.target.checked,
+    }));
+
   const handleRaceCheck = (clickedRace) => {
     setCurrentChecklistName(null);
     const newSet = new Set(selectedRaces);
@@ -246,6 +291,7 @@ function Planner({
       char.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [allCharacters, searchTerm, selectedCharacter]);
+
   const shouldHighlightRace = useCallback(
     (race) => {
       if (!modifiedAptitudes) return false;
@@ -265,6 +311,7 @@ function Planner({
     },
     [modifiedAptitudes, filters.trackAptitude, filters.distanceAptitude]
   );
+
   const careerRaceDates = useMemo(() => {
     const dates = new Set();
     allRaces.forEach((race) => {
@@ -272,44 +319,73 @@ function Planner({
     });
     return dates;
   }, [careerRaceIds, allRaces]);
+
   const displayRaces = useMemo(() => {
     const activeGradeFilters = Object.keys(gradeFilters).filter(
       (g) => gradeFilters[g]
     );
+    const activeYearFilters = Object.keys(yearFilters).filter(
+      (y) => yearFilters[y]
+    );
+    const activeTrackFilters = Object.keys(trackFilters).filter(
+      (t) => trackFilters[t]
+    );
+    const activeDistanceFilters = Object.keys(distanceFilters).filter(
+      (d) => distanceFilters[d]
+    );
+
     return allRaces.filter((race) => {
+      const displayGrade = gradeNameMap[race.grade] || race.grade;
+      if (displayGrade === "Debut" || displayGrade === "Maiden") return false;
+
       const isCareerRace = careerRaceIds.has(race.id);
       if (alwaysShowCareer && isCareerRace) {
         return true;
       }
 
+      if (
+        raceSearchTerm &&
+        !race.name.toLowerCase().includes(raceSearchTerm.toLowerCase())
+      ) {
+        return false;
+      }
+
+      const raceYear = race.date.split(" - ")[0];
+      if (!activeYearFilters.includes(raceYear)) return false;
+      if (!activeTrackFilters.includes(race.ground)) return false;
+      if (!activeDistanceFilters.includes(getDistanceCategory(race.distance)))
+        return false;
+
       if (filters.hideSummer && isSummerRace(race.date)) return false;
-      const isCorrectYear =
-        race.date.startsWith("Year 1") ||
-        race.date.startsWith("Year 2") ||
-        race.date.startsWith("Year 3");
-      if (!isCorrectYear) return false;
+
       if (
         !isNoCareerMode &&
         careerRaceDates.has(race.date) &&
         !careerRaceIds.has(race.id)
-      )
+      ) {
         return false;
-      const displayGrade = gradeNameMap[race.grade] || race.grade;
-      if (displayGrade === "Debut" || displayGrade === "Maiden") return false;
+      }
+
       if (
         !showOptionalGrades &&
         (displayGrade === "OP" || displayGrade === "Pre-OP")
-      )
+      ) {
         return false;
+      }
       const isGGrade = ["G1", "G2", "G3"].includes(displayGrade);
       if (isGGrade && !activeGradeFilters.includes(displayGrade)) return false;
+
       if (filters.hideNonHighlighted && !shouldHighlightRace(race))
         return false;
+
       return true;
     });
   }, [
     allRaces,
     gradeFilters,
+    yearFilters,
+    trackFilters,
+    distanceFilters,
     showOptionalGrades,
     filters,
     shouldHighlightRace,
@@ -317,6 +393,7 @@ function Planner({
     careerRaceIds,
     isNoCareerMode,
     alwaysShowCareer,
+    raceSearchTerm,
   ]);
 
   let lastDate = null;
@@ -327,7 +404,9 @@ function Planner({
     onLoad: handleLoadChecklist,
     onDelete: handleDeleteChecklist,
     onRename: handleRenameChecklist,
+    onReorder: handleReorderChecklist,
     onImport: handleImportChecklists,
+    currentChecklistName,
   };
 
   return (
@@ -357,7 +436,6 @@ function Planner({
       )}
       <div className="container">
         <div className="left-panel">
-          {/* ... Left Panel Content ... */}
           <div className="panel-section">
             <h2>1. Select Character</h2>
             <div className="free-play-toggle">
@@ -390,221 +468,341 @@ function Planner({
           {selectedCharacter && (
             <>
               <div className="panel-section">
-                <AptitudeEditor
-                  aptitudes={modifiedAptitudes}
-                  onAptitudeChange={handleAptitudeChange}
+                <CollapsibleHeader
+                  title="2. Edit Aptitudes"
+                  isOpen={panelsOpen.aptitudes}
+                  onToggle={() => togglePanel("aptitudes")}
                 />
+                {panelsOpen.aptitudes && (
+                  <AptitudeEditor
+                    aptitudes={modifiedAptitudes}
+                    onAptitudeChange={handleAptitudeChange}
+                  />
+                )}
               </div>
               <div className="panel-section">
-                <h2>3. Filters</h2>
-                <div className="filter-grid">
-                  <div className="filter-group">
-                    <h4>Highlighting &amp; Hiding</h4>
-                    <div className="aptitude-filter-item">
-                      <label>Track Apt. &ge;</label>
-                      <select
-                        name="trackAptitude"
-                        value={filters.trackAptitude}
-                        onChange={handleFilterChange}
-                      >
-                        {APTITUDE_RANKS.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
-                        ))}
-                      </select>
+                <CollapsibleHeader
+                  title="3. Filters"
+                  isOpen={panelsOpen.filters}
+                  onToggle={() => togglePanel("filters")}
+                />
+                {panelsOpen.filters && (
+                  <div className="filters-container">
+                    <div className="filter-group">
+                      <h4>Aptitudes & Hiding</h4>
+                      <div className="aptitude-filter-item-group">
+                        <div className="aptitude-filter-item">
+                          <label>Track Apt. &ge;</label>
+                          <select
+                            name="trackAptitude"
+                            value={filters.trackAptitude}
+                            onChange={handleFilterChange}
+                          >
+                            {APTITUDE_RANKS.map((r) => (
+                              <option key={r} value={r}>
+                                {r}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="aptitude-filter-item">
+                          <label>Dist. Apt. &ge;</label>
+                          <select
+                            name="distanceAptitude"
+                            value={filters.distanceAptitude}
+                            onChange={handleFilterChange}
+                          >
+                            {APTITUDE_RANKS.map((r) => (
+                              <option key={r} value={r}>
+                                {r}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <hr />
+                      {/* New 2x2 grid for show/hide checkboxes */}
+                      <div className="show-hide-grid">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={alwaysShowCareer}
+                            onChange={(e) =>
+                              setAlwaysShowCareer(e.target.checked)
+                            }
+                            disabled={isNoCareerMode}
+                          />{" "}
+                          Always Show Career Races
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            name="hideSummer"
+                            checked={filters.hideSummer}
+                            onChange={handleFilterChange}
+                          />{" "}
+                          Hide Summer Races
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            name="hideNonHighlighted"
+                            checked={filters.hideNonHighlighted}
+                            onChange={handleFilterChange}
+                          />{" "}
+                          Hide Unsuitable Races
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={showOptionalGrades}
+                            onChange={(e) =>
+                              setShowOptionalGrades(e.target.checked)
+                            }
+                          />{" "}
+                          Show Pre-OP/OP Races
+                        </label>
+                      </div>
                     </div>
-                    <div className="aptitude-filter-item">
-                      <label>Dist. Apt. &ge;</label>
-                      <select
-                        name="distanceAptitude"
-                        value={filters.distanceAptitude}
-                        onChange={handleFilterChange}
-                      >
-                        {APTITUDE_RANKS.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
+
+                    <div className="checkbox-filter-grid">
+                      {/* Reordered to Track, Distance, Grade, Year */}
+                      <div className="filter-group">
+                        <h4>Track</h4>
+                        {Object.keys(trackFilters).map((track) => (
+                          <label key={track}>
+                            <input
+                              type="checkbox"
+                              name={track}
+                              checked={trackFilters[track]}
+                              onChange={handleTrackFilterChange}
+                            />{" "}
+                            {track}
+                          </label>
                         ))}
-                      </select>
+                      </div>
+                      <div className="filter-group">
+                        <h4>Distance</h4>
+                        {Object.keys(distanceFilters).map((dist) => (
+                          <label key={dist}>
+                            <input
+                              type="checkbox"
+                              name={dist}
+                              checked={distanceFilters[dist]}
+                              onChange={handleDistanceFilterChange}
+                            />{" "}
+                            {dist.charAt(0).toUpperCase() + dist.slice(1)}
+                          </label>
+                        ))}
+                      </div>
+                      <div className="filter-group">
+                        <h4>Grade</h4>
+                        <label>
+                          <input
+                            type="checkbox"
+                            name="G1"
+                            checked={gradeFilters.G1}
+                            onChange={handleGradeFilterChange}
+                          />{" "}
+                          G1
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            name="G2"
+                            checked={gradeFilters.G2}
+                            onChange={handleGradeFilterChange}
+                          />{" "}
+                          G2
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            name="G3"
+                            checked={gradeFilters.G3}
+                            onChange={handleGradeFilterChange}
+                          />{" "}
+                          G3
+                        </label>
+                      </div>
+                      <div className="filter-group">
+                        <h4>Year</h4>
+                        {Object.keys(yearFilters).map((year) => (
+                          <label key={year}>
+                            <input
+                              type="checkbox"
+                              name={year}
+                              checked={yearFilters[year]}
+                              onChange={handleYearFilterChange}
+                            />{" "}
+                            {year}
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                    <hr />
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="hideNonHighlighted"
-                        checked={filters.hideNonHighlighted}
-                        onChange={handleFilterChange}
-                      />{" "}
-                      Hide Unsuitable
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="hideSummer"
-                        checked={filters.hideSummer}
-                        onChange={handleFilterChange}
-                      />{" "}
-                      Hide Summer Races
-                    </label>
                   </div>
-                  <div className="filter-group">
-                    <h4>Grade</h4>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={alwaysShowCareer}
-                        onChange={(e) => setAlwaysShowCareer(e.target.checked)}
-                        disabled={isNoCareerMode}
-                      />{" "}
-                      Always Show Career
-                    </label>
-                    <hr />
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="G1"
-                        checked={gradeFilters.G1}
-                        onChange={handleGradeFilterChange}
-                      />{" "}
-                      G1
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="G2"
-                        checked={gradeFilters.G2}
-                        onChange={handleGradeFilterChange}
-                      />{" "}
-                      G2
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="G3"
-                        checked={gradeFilters.G3}
-                        onChange={handleGradeFilterChange}
-                      />{" "}
-                      G3
-                    </label>
-                    <hr />
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={showOptionalGrades}
-                        onChange={(e) =>
-                          setShowOptionalGrades(e.target.checked)
-                        }
-                      />{" "}
-                      Show Pre-OP/OP
-                    </label>
-                  </div>
-                </div>
+                )}
               </div>
-              <EpithetHelper
-                epithetStatus={epithetStatus}
-                onAddRaces={handleAddEpithetRaces}
-              />
-              <button
-                className="generate-button"
-                onClick={() => setPage("checklist")}
-                disabled={totalSelectedCount === 0}
-              >
-                View Checklist ({totalSelectedCount})
-              </button>
+              <div className="panel-section">
+                <CollapsibleHeader
+                  title="Epithet Helper"
+                  isOpen={panelsOpen.epithets}
+                  onToggle={() => togglePanel("epithets")}
+                />
+                {panelsOpen.epithets && (
+                  <EpithetHelper
+                    epithetStatus={epithetStatus}
+                    onAddRaces={handleAddEpithetRaces}
+                  />
+                )}
+              </div>
             </>
           )}
-          <ChecklistManager {...managerProps} />
-          <div className="panel-section epithet-list">
-            <h2>Epithet Bonus Races</h2>
-            <ul>
-              <li>
-                <strong>Classic Triple Crown:</strong> Satsuki Sho, Tokyo
-                Yushun, Kikuka Sho
-              </li>
-              <li>
-                <strong>Triple Tiara:</strong> Oka Sho, Japanese Oaks, Shuka Sho
-              </li>
-              <li>
-                <strong>Spring Senior Triple Crown:</strong> Osaka Hai, Tenno
-                Sho (Spring), Takarazuka Kinen
-              </li>
-              <li>
-                <strong>Autumn Senior Triple Crown:</strong> Tenno Sho (Autumn),
-                Japan Cup, Arima Kinen
-              </li>
-              <li>
-                <strong>Tenno Sweep:</strong> Tenno Sho (Spring), Tenno Sho
-                (Autumn)
-              </li>
-              <li>
-                <strong>Dual Gran Prix:</strong> Takarazuka Kinen, Arima Kinen
-              </li>
-              <li>
-                <strong>Dual Miles:</strong> Yasuda Kinen, Mile Championship
-              </li>
-              <li>
-                <strong>Dual Sprints:</strong> Takamatsunomiya Kinen, Sprinters
-                Stakes
-              </li>
-              <li>
-                <strong>Dual Dirt:</strong> Champions Cup, February Stakes
-              </li>
-            </ul>
+          <div className="panel-section">
+            <CollapsibleHeader
+              title="Checklist Manager"
+              isOpen={panelsOpen.manager}
+              onToggle={() => togglePanel("manager")}
+            />
+            {panelsOpen.manager && <ChecklistManager {...managerProps} />}
           </div>
-          <div className="panel-section data-source">
-            <h2>Data Sources/Inspiration</h2>
-            <p>
-              Race data, Character career and aptitude data from{" "}
-              <a
-                href="https://gametora.com/umamusume"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                GameTora
-              </a>
-            </p>
-            <p>
-              Race filtering inspired by GameTora's{" "}
-              <a
-                href="https://gametora.com/umamusume/race-scheduler"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                race scheduler
-              </a>
-            </p>
+
+          <div className="panel-section">
+            <CollapsibleHeader
+              title="Epithet Bonus Races"
+              isOpen={panelsOpen.epithetList}
+              onToggle={() => togglePanel("epithetList")}
+            />
+            {panelsOpen.epithetList && (
+              <div className="epithet-list">
+                <ul>
+                  <li>
+                    <strong>Classic Triple Crown:</strong> Satsuki Sho, Tokyo
+                    Yushun, Kikuka Sho
+                  </li>
+                  <li>
+                    <strong>Triple Tiara:</strong> Oka Sho, Japanese Oaks, Shuka
+                    Sho
+                  </li>
+                  <li>
+                    <strong>Spring Senior Triple Crown:</strong> Osaka Hai,
+                    Tenno Sho (Spring), Takarazuka Kinen
+                  </li>
+                  <li>
+                    <strong>Autumn Senior Triple Crown:</strong> Tenno Sho
+                    (Autumn), Japan Cup, Arima Kinen
+                  </li>
+                  <li>
+                    <strong>Tenno Sweep:</strong> Tenno Sho (Spring), Tenno Sho
+                    (Autumn)
+                  </li>
+                  <li>
+                    <strong>Dual Gran Prix:</strong> Takarazuka Kinen, Arima
+                    Kinen
+                  </li>
+                  <li>
+                    <strong>Dual Miles:</strong> Yasuda Kinen, Mile Championship
+                  </li>
+                  <li>
+                    <strong>Dual Sprints:</strong> Takamatsunomiya Kinen,
+                    Sprinters Stakes
+                  </li>
+                  <li>
+                    <strong>Dual Dirt:</strong> Champions Cup, February Stakes
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
-          <div className="panel-section known-issues">
-            <h2>Known Issues/Caveats</h2>
-            <ul>
-              <li>Alternative career objectives are not yet implemented.</li>
-              <li>
-                Races from the JP version of the game are included which may not
-                be present in EN yet.
-              </li>
-              <li>Mobile friendly view not supported at this time</li>
-              <li>
-                Debut and scenario specific races are hidden by default and not
-                counted in the win total
-              </li>
-              <li>
-                Loading a new checklist will always clear old optional races, to
-                keep selected optional races, select a different character
-                instead.
-              </li>
-              <li>
-                Choosing races and finding a character that can run those races
-                is not supported. Please use GameTora for that functionality.
-              </li>
-            </ul>
+          <div className="panel-section">
+            <CollapsibleHeader
+              title="Data Sources/Inspiration"
+              isOpen={panelsOpen.sources}
+              onToggle={() => togglePanel("sources")}
+            />
+            {panelsOpen.sources && (
+              <div className="data-source">
+                <p>
+                  Race data, Character career and aptitude data from{" "}
+                  <a
+                    href="https://gametora.com/umamusume"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    GameTora
+                  </a>
+                </p>
+                <p>
+                  Race filtering inspired by GameTora's{" "}
+                  <a
+                    href="https://gametora.com/umamusume/race-scheduler"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    race scheduler
+                  </a>
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="panel-section">
+            <CollapsibleHeader
+              title="Known Issues/Caveats"
+              isOpen={panelsOpen.issues}
+              onToggle={() => togglePanel("issues")}
+            />
+            {panelsOpen.issues && (
+              <div className="known-issues">
+                <ul>
+                  <li>
+                    Alternative career objectives are not yet implemented.
+                  </li>
+                  <li>
+                    Races from the JP version of the game are included which may
+                    not be present in EN yet.
+                  </li>
+                  <li>Mobile friendly view not supported at this time</li>
+                  <li>
+                    Debut and scenario specific races are hidden by default and
+                    not counted in the win total
+                  </li>
+                  <li>
+                    Loading a new checklist will always clear old optional
+                    races, to keep selected optional races, select a different
+                    character instead.
+                  </li>
+                  <li>
+                    Choosing races and finding a character that can run those
+                    races is not supported. Please use GameTora for that
+                    functionality.
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
         <div className="race-list-panel">
           <div className="race-list-header">
-            <h2>Available Races ({displayRaces.length})</h2>
+            <div className="race-list-title-group">
+              <h2>Available Races ({displayRaces.length})</h2>
+              <input
+                type="text"
+                placeholder="Search race name..."
+                className="search-bar"
+                style={{ marginBottom: 0, width: "200px" }}
+                value={raceSearchTerm}
+                onChange={(e) => setRaceSearchTerm(e.target.value)}
+              />
+            </div>
+            <button
+              className="generate-button"
+              onClick={() => setPage("checklist")}
+              disabled={totalSelectedCount === 0}
+            >
+              View Checklist ({totalSelectedCount})
+            </button>
             <div className="grade-counter">
-              <span className="counter-label">Total selected:</span>
+              <span className="counter-label">Selected:</span>
               <span>G1: {gradeCounts.G1}</span>
               <span>G2: {gradeCounts.G2}</span>
               <span>G3: {gradeCounts.G3}</span>

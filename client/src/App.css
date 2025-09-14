@@ -118,8 +118,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 400px;
-  min-width: 350px;
+  max-width: 520px;
+  min-width: 420px;
 }
 .panel-section {
   background: var(--color-panel-bg);
@@ -137,6 +137,14 @@ h2 {
 h4 {
   margin-top: 0;
   margin-bottom: 8px;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* === LEFT PANEL COMPONENTS === */
@@ -167,6 +175,9 @@ h4 {
 .character-list li:hover {
   background-color: var(--color-accent-blue);
   color: var(--color-text-light);
+}
+.aptitude-editor .aptitude-group:last-child {
+  margin-bottom: 0;
 }
 .aptitude-editor .aptitude-group {
   margin-bottom: 15px;
@@ -205,10 +216,27 @@ h4 {
   cursor: pointer;
   font-weight: bold;
 }
-.filter-grid {
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+/* New style for the 2x2 show/hide grid */
+.show-hide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+/* Updated style for the 2x2 main filter grid */
+.checkbox-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px; /* row-gap column-gap */
+}
+.aptitude-filter-item-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 10px;
 }
 .filter-group {
   display: flex;
@@ -236,7 +264,8 @@ h4 {
   padding: 5px;
   border-radius: 4px;
   border: 1px solid var(--color-border-medium);
-  flex-grow: 1;
+  flex-grow: 0;
+  width: 80px;
   background-color: var(--color-background);
   color: var(--color-text-primary);
 }
@@ -244,14 +273,19 @@ h4 {
   background-color: var(--color-accent-green);
   color: var(--color-text-light);
   border: none;
-  padding: 15px;
-  font-size: 1.2em;
+  padding: 10px 20px;
+  font-size: 1em;
+  font-weight: bold;
   border-radius: 8px;
   cursor: pointer;
-  margin-top: 10px;
+  white-space: nowrap;
 }
 .generate-button:hover {
   background-color: var(--color-accent-green-hover);
+}
+.generate-button:disabled {
+  background-color: var(--color-accent-gray);
+  cursor: not-allowed;
 }
 .data-source a {
   color: var(--color-accent-blue);
@@ -374,6 +408,13 @@ h4 {
   align-items: center;
   flex-shrink: 0;
   padding-bottom: 10px;
+  gap: 20px;
+}
+.race-list-title-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-grow: 1;
 }
 .table-container {
   flex-grow: 1;
@@ -425,25 +466,25 @@ tr:hover {
   text-align: center;
 }
 .col-select {
-  width: 4%;
+  width: 3%;
 }
 .col-status {
-  width: 5%;
+  width: 4%;
 }
 .col-career {
-  width: 5%;
+  width: 4%;
 }
 .col-date {
-  width: 17%;
+  width: 14%;
 }
 .col-grade {
-  width: 7%;
+  width: 6%;
 }
 .col-name {
-  width: 25%;
+  width: 28%;
 }
 .col-track {
-  width: 7%;
+  width: 6%;
 }
 .col-dist-name {
   width: 8%;
@@ -452,7 +493,7 @@ tr:hover {
   width: 6%;
 }
 .col-exclusive {
-  width: 12%;
+  width: 10%;
 }
 
 /* === MODAL & CHECKLIST MANAGER === */
@@ -550,15 +591,23 @@ tr:hover {
   font-weight: bold;
   font-size: 0.9em;
 }
+.checklist-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 .checklist-actions button {
   font-size: 0.8em;
   padding: 3px 6px;
-  margin-left: 5px;
   cursor: pointer;
   border: 1px solid var(--color-border-heavy);
   background: var(--color-panel-bg);
   color: var(--color-text-primary);
   border-radius: 3px;
+}
+.checklist-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .checklist-actions .delete-button {
   background: var(--color-accent-red);
@@ -671,10 +720,19 @@ tr:hover {
   color: var(--color-text-secondary);
   margin-top: 4px;
 }
-.progress-race-date {
-  font-size: 1em;
-  color: var(--color-text-secondary);
-  margin-top: 4px;
+
+.progress-notes-textarea {
+  width: 90%;
+  max-width: 400px;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border-medium);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 40px;
 }
 
 .progress-actions {
