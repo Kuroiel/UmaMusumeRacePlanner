@@ -566,12 +566,22 @@ tr:hover {
 .clear-button:hover {
   background-color: var(--color-accent-orange-hover);
 }
+.checklist-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50; /* Ensures it's above list content but below the main App header */
+  background-color: var(
+    --color-background
+  ); /* Use page background for seamless look */
+  padding-top: 15px; /* Add some space above the progress helper */
+  padding-bottom: 15px; /* Add space below the counter */
+}
+
 .progress-helper {
   background-color: var(--color-interactive-bg);
   border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   padding: 15px;
-  margin-bottom: 20px;
   text-align: center;
 }
 .progress-helper-complete {
@@ -595,6 +605,54 @@ tr:hover {
   font-size: 1em;
   color: var(--color-text-secondary);
   margin-top: 4px;
+}
+.progress-race-date {
+  font-size: 1em;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* --- NEW: Progress Helper Action Buttons --- */
+.progress-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--color-border-medium);
+}
+.progress-action-button {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9em;
+  color: var(--color-text-light);
+  transition: background-color 0.2s ease;
+}
+.progress-action-button.ran {
+  background-color: var(--color-accent-blue);
+}
+.progress-action-button.ran:hover {
+  background-color: var(--color-accent-blue-hover);
+}
+.progress-action-button.won {
+  background-color: var(--color-accent-green);
+}
+.progress-action-button.won:hover {
+  background-color: var(--color-accent-green-hover);
+}
+.progress-action-button.skip {
+  background-color: var(--color-accent-gray);
+}
+.progress-action-button.skip:hover {
+  background-color: var(--color-accent-gray-hover);
+}
+.progress-action-button:disabled {
+  background-color: var(--color-border-heavy);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 .next-race-item {
   border-left: 4px solid var(--color-accent-green);
@@ -705,7 +763,6 @@ tr:hover {
 }
 .checklist-page-counter {
   justify-content: center;
-  margin-bottom: 20px;
   padding-bottom: 20px;
   border-bottom: 2px solid var(--color-interactive-bg);
 }

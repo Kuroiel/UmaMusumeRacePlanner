@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 
 const gradeNameMap = { "1 Win Class": "Pre-OP", Open: "OP" };
 const getDistanceCategory = (distance) => {
@@ -22,8 +22,10 @@ const formatChecklistDate = (dateString) => {
   return `${formattedYear} - ${halfPart} ${monthPart}`;
 };
 
-const ProgressHelper = ({ nextRace }) => {
-  if (!nextRace) {
+const ProgressHelper = ({ nextRace, onUpdateNextRace }) => {
+  const isComplete = !nextRace;
+
+  if (isComplete) {
     return (
       <div className="progress-helper progress-helper-complete">
         🎉 Checklist Complete! 🎉
@@ -34,9 +36,37 @@ const ProgressHelper = ({ nextRace }) => {
   return (
     <div className="progress-helper">
       <div className="progress-label">Next Race:</div>
-      <div className="progress-race-name">{nextRace.name}</div>
+      <div className="progress-race-name">
+        {nextRace.name}{" "}
+        {nextRace.isCareer && (
+          <span className="career-race-indicator">Career</span>
+        )}
+      </div>
       <div className="progress-race-date">
         🗓️ {formatChecklistDate(nextRace.date)}
+      </div>
+      <div className="progress-actions">
+        <button
+          className="progress-action-button ran"
+          onClick={() => onUpdateNextRace("ran", true)}
+          disabled={isComplete}
+        >
+          Mark as Ran
+        </button>
+        <button
+          className="progress-action-button won"
+          onClick={() => onUpdateNextRace("won", true)}
+          disabled={isComplete}
+        >
+          Mark as Won
+        </button>
+        <button
+          className="progress-action-button skip"
+          onClick={() => onUpdateNextRace("skipped", true)}
+          disabled={isComplete || (nextRace && nextRace.isCareer)} // Also disable skip for career races
+        >
+          Mark as Skipped
+        </button>
       </div>
     </div>
   );
@@ -57,11 +87,30 @@ function Checklist({
   selectedCharacter,
 }) {
   const nextRace = useMemo(() => {
-    return races.find((race) => {
+    const firstUnfinishedRace = races.find((race) => {
       const data = checklistData[race.id];
       return !(data?.ran || data?.won || data?.skipped);
     });
-  }, [races, checklistData]);
+
+    // Also attach career status for the helper buttons
+    if (firstUnfinishedRace) {
+      return {
+        ...firstUnfinishedRace,
+        isCareer:
+          selectedCharacter && careerRaceIds.has(firstUnfinishedRace.id),
+      };
+    }
+    return null;
+  }, [races, checklistData, careerRaceIds, selectedCharacter]);
+
+  const handleUpdateNextRace = useCallback(
+    (field, value) => {
+      if (nextRace) {
+        onChecklistDataChange(nextRace.id, field, value);
+      }
+    },
+    [nextRace, onChecklistDataChange]
+  );
 
   return (
     <div className="checklist-page">
@@ -88,17 +137,22 @@ function Checklist({
       {races.length > 0 && (
         <>
           {/* --- NEW: Render Progress Helper --- */}
-          <ProgressHelper nextRace={nextRace} />
+          <div className="checklist-sticky-header">
+            <ProgressHelper
+              nextRace={nextRace}
+              onUpdateNextRace={handleUpdateNextRace}
+            />
 
-          <div className="grade-counter checklist-page-counter">
-            <span className="counter-label">Total selected:</span>
-            <span>G1: {gradeCounts.G1}</span>
-            <span>G2: {gradeCounts.G2}</span>
-            <span>G3: {gradeCounts.G3}</span>
-            <span className="counter-label">Won:</span>
-            <span>
-              {wonCount} / {races.length}
-            </span>
+            <div className="grade-counter checklist-page-counter">
+              <span className="counter-label">Total selected:</span>
+              <span>G1: {gradeCounts.G1}</span>
+              <span>G2: {gradeCounts.G2}</span>
+              <span>G3: {gradeCounts.G3}</span>
+              <span className="counter-label">Won:</span>
+              <span>
+                {wonCount} / {races.length}
+              </span>
+            </div>
           </div>
         </>
       )}
