@@ -9,8 +9,6 @@ const APTITUDE_GROUPS = {
 
 function AptitudeEditor({ aptitudes, onAptitudeChange }) {
   if (!aptitudes) return null;
-  // The <h2> "2. Edit Aptitudes" has been removed from here.
-  // The title is now handled by the collapsible header in Planner.js.
   return (
     <div className="aptitude-editor">
       {Object.entries(APTITUDE_GROUPS).map(([groupName, groupAptitudes]) => (
