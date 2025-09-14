@@ -401,7 +401,7 @@ function App() {
           status = "impossible";
           conflictReason = `${
             race.name
-          } conflicts with career race ${careerRaceDates.get(race.date)}.`;
+          } conflicts with the career race ${careerRaceDates.get(race.date)}.`;
           break;
         }
       }
