@@ -74,6 +74,12 @@ function ChecklistManager({
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      const MAX_FILE_SIZE_MB = 5;
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        alert(`Error: File size cannot exceed ${MAX_FILE_SIZE_MB}MB.`);
+        event.target.value = null;
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (e) => {
         try {

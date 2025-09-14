@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Classic Triple Crown",
+    "races": ["Satsuki Sho", "Tokyo Yushun (Japanese Derby)", "Kikuka Sho"]
+  },
+  {
+    "name": "Triple Tiara",
+    "races": ["Oka Sho", "Japanese Oaks", "Shuka Sho"]
+  },
+  {
+    "name": "Spring Senior Triple Crown",
+    "races": ["Osaka Hai", "Tenno Sho (Spring)", "Takarazuka Kinen"]
+  },
+  {
+    "name": "Autumn Senior Triple Crown",
+    "races": ["Tenno Sho (Autumn)", "Japan Cup", "Arima Kinen"]
+  },
+  {
+    "name": "Tenno Sweep",
+    "races": ["Tenno Sho (Spring)", "Tenno Sho (Autumn)"]
+  },
+  {
+    "name": "Dual Gran Prix",
+    "races": ["Takarazuka Kinen", "Arima Kinen"]
+  },
+  {
+    "name": "Dual Miles",
+    "races": ["Yasuda Kinen", "Mile Championship"]
+  },
+  {
+    "name": "Dual Sprints",
+    "races": ["Takamatsunomiya Kinen", "Sprinters Stakes"]
+  },
+  {
+    "name": "Dual Dirt",
+    "races": ["Champions Cup", "February Stakes"]
+  }
+]

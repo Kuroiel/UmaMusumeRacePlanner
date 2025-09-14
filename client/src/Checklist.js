@@ -10,7 +10,7 @@ const getDistanceCategory = (distance) => {
 
 const formatChecklistDate = (dateString) => {
   const parts = dateString.split(" - ");
-  if (parts.length !== 3) return dateString; // Fallback for unexpected formats
+  if (parts.length !== 3) return dateString;
 
   const [yearPart, monthPart, halfPart] = parts;
 
@@ -93,7 +93,6 @@ function Checklist({
       return !(data?.ran || data?.won || data?.skipped);
     });
 
-    // Also attach career status for the helper buttons
     if (firstUnfinishedRace) {
       return {
         ...firstUnfinishedRace,
@@ -137,7 +136,6 @@ function Checklist({
 
       {races.length > 0 && (
         <>
-          {/* --- NEW: Render Progress Helper --- */}
           <div className="checklist-sticky-header">
             <ProgressHelper
               nextRace={nextRace}
@@ -169,19 +167,18 @@ function Checklist({
           const isWarning = warningRaceIds.has(race.id);
           const isCareer = selectedCharacter && careerRaceIds.has(race.id);
           const isNextRace = nextRace && nextRace.id === race.id;
-          const isSmartAdded = smartAddedRaceIds.has(race.id); // NEW: Check if race is smart-added
+          const isSmartAdded = smartAddedRaceIds.has(race.id);
 
           const itemClass = `checklist-item ${
             isWarning ? "warning-race-row" : ""
           } ${isNextRace ? "next-race-item" : ""} ${
-            isSmartAdded ? "smart-added-item" : "" // NEW: Conditionally add class
+            isSmartAdded ? "smart-added-item" : ""
           }`;
 
           return (
             <div key={race.id} className={itemClass}>
               <div className="checklist-item-info">
                 <h3>
-                  {/* NEW: Add icon for smart-added races */}
                   {isSmartAdded && (
                     <span
                       className="smart-add-indicator"

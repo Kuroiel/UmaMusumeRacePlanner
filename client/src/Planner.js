@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from "react";
 import AptitudeEditor from "./AptitudeEditor";
 import ChecklistManager from "./ChecklistManager";
 import Modal from "./Modal";
+import EpithetHelper from "./EpithetHelper";
 
 const gradeNameMap = { "1 Win Class": "Pre-OP", Open: "OP" };
 const getDistanceCategory = (distance) => {
@@ -48,17 +49,15 @@ function Planner({
   gradeCounts,
   setCurrentChecklistName,
   getCareerRacesForChar,
-  // --- NEW: Receive lifted state and setters as props ---
   isNoCareerMode,
   setIsNoCareerMode,
   alwaysShowCareer,
   setAlwaysShowCareer,
   totalSelectedCount,
+  combinedRaceIds,
+  epithetStatus,
+  handleAddEpithetRaces,
 }) {
-  // --- REMOVED: Local state now managed by App.js ---
-  // const [isNoCareerMode, setIsNoCareerMode] = useState(false);
-  // const [alwaysShowCareer, setAlwaysShowCareer] = useState(true);
-
   const [modalState, setModalState] = useState({
     isOpen: false,
     characterToSelect: null,
@@ -176,7 +175,7 @@ function Planner({
           return;
         }
       }
-      setIsNoCareerMode(isNowNoCareer); // Use prop setter
+      setIsNoCareerMode(isNowNoCareer);
       setCareerRaceIds(new Set());
       setSelectedRaces(new Set());
       setCurrentChecklistName(null);
@@ -191,7 +190,7 @@ function Planner({
       setCareerRaceIds,
       setSelectedRaces,
       setCurrentChecklistName,
-      setIsNoCareerMode, // Add setter to dependency array
+      setIsNoCareerMode,
     ]
   );
 
@@ -387,6 +386,7 @@ function Planner({
               ))}
             </ul>
           </div>
+
           {selectedCharacter && (
             <>
               <div className="panel-section">
@@ -501,6 +501,10 @@ function Planner({
                   </div>
                 </div>
               </div>
+              <EpithetHelper
+                epithetStatus={epithetStatus}
+                onAddRaces={handleAddEpithetRaces}
+              />
               <button
                 className="generate-button"
                 onClick={() => setPage("checklist")}
@@ -651,7 +655,7 @@ function Planner({
                       <td>
                         <input
                           type="checkbox"
-                          checked={selectedRaces.has(race.id)}
+                          checked={combinedRaceIds.has(race.id)}
                           onChange={() => handleRaceCheck(race)}
                           disabled={isCheckboxDisabled}
                         />

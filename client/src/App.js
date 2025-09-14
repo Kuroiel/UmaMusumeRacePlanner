@@ -6,11 +6,18 @@ import ThemeToggle from "./ThemeToggle";
 import "./App.css";
 import raceData from "./data/races.json";
 import charData from "./data/characters.json";
+import epithetData from "./data/epithets.json";
 
-// --- START: AUTOSAVE IMPLEMENTATION ---
+const APTITUDE_VALUES = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: -1 };
+const getDistanceCategory = (distance) => {
+  if (distance < 1600) return "sprint";
+  if (distance <= 1800) return "mile";
+  if (distance <= 2400) return "medium";
+  return "long";
+};
+
 const AUTOSAVE_KEY = "umamusume-autosave-session";
 
-// Helper function to load state from localStorage
 const loadAutosavedState = () => {
   try {
     const savedStateJSON = localStorage.getItem(AUTOSAVE_KEY);
@@ -19,13 +26,12 @@ const loadAutosavedState = () => {
     }
   } catch (error) {
     console.error("Failed to parse autosaved state:", error);
-    localStorage.removeItem(AUTOSAVE_KEY); // Clear corrupted data
+    localStorage.removeItem(AUTOSAVE_KEY);
   }
   return null;
 };
 
 const initialAutosavedState = loadAutosavedState();
-// --- END: AUTOSAVE IMPLEMENTATION ---
 
 const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
   <div className="confirmation-toast">
@@ -157,8 +163,6 @@ function App() {
   const [raceExclusivity, setRaceExclusivity] = useState(new Map());
   const [isAppInitialized, setIsAppInitialized] = useState(false);
 
-  // --- START: AUTOSAVED STATE ---
-  // Initialize state with loaded data or defaults
   const [searchTerm, setSearchTerm] = useState(
     initialAutosavedState?.searchTerm ?? ""
   );
@@ -186,7 +190,6 @@ function App() {
   const [showOptionalGrades, setShowOptionalGrades] = useState(
     initialAutosavedState?.showOptionalGrades ?? false
   );
-  // State lifted from Planner.js
   const [isNoCareerMode, setIsNoCareerMode] = useState(
     initialAutosavedState?.isNoCareerMode ?? false
   );
@@ -196,16 +199,11 @@ function App() {
   const [smartAddedRaceIds, setSmartAddedRaceIds] = useState(
     new Set(initialAutosavedState?.smartAddedRaceIds || [])
   );
-  // --- END: AUTOSAVED STATE ---
 
-  // Manually managed state
   const [savedChecklists, setSavedChecklists] = useState([]);
   const [currentChecklistName, setCurrentChecklistName] = useState(null);
-
-  // Derived state
   const [careerRaceIds, setCareerRaceIds] = useState(new Set());
 
-  // Effect for loading initial data (characters, races, named checklists)
   useEffect(() => {
     const racesWithTurns = raceData.map((race) => ({
       ...race,
@@ -235,10 +233,9 @@ function App() {
       console.error("Error parsing checklists from localStorage:", error);
       localStorage.removeItem("umamusume-checklists");
     }
-    setIsAppInitialized(true); // Signal that initial data load is complete
+    setIsAppInitialized(true);
   }, []);
 
-  // NEW: Effect to restore character from autosaved state once data is loaded
   useEffect(() => {
     if (
       allCharacters.length > 0 &&
@@ -256,13 +253,11 @@ function App() {
         setCareerRaceIds(newCareerRaceIds);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allCharacters, allRaces]);
 
-  // NEW: Effect for AUTOSAVING the current session
   useEffect(() => {
     if (!isAppInitialized) {
-      return; // Don't save until app has loaded initial data and restored state
+      return;
     }
     const stateToSave = {
       searchTerm,
@@ -304,7 +299,7 @@ function App() {
 
   const warningRaceIds = useMemo(() => {
     const warnings = new Set();
-    if (combinedRaceIds.size < 3) return new Set();
+    if (combinedRaceIds.size < 3) return warnings;
     const sortedSelectedRaces = allRaces
       .filter((race) => combinedRaceIds.has(race.id))
       .sort((a, b) => a.turnValue - b.turnValue);
@@ -346,15 +341,129 @@ function App() {
     [allRaces]
   );
 
+  const epithetStatus = useMemo(() => {
+    if (!selectedCharacter || !modifiedAptitudes) {
+      return [];
+    }
+
+    const careerRaceDates = new Map();
+    careerRaceIds.forEach((id) => {
+      const race = allRaces.find((r) => r.id === id);
+      if (race) careerRaceDates.set(race.date, race.name);
+    });
+
+    const isRaceSuitable = (race) => {
+      const groundAptitude =
+        race.ground === "Turf"
+          ? modifiedAptitudes.turf
+          : modifiedAptitudes.dirt;
+      const distanceAptitude =
+        modifiedAptitudes[getDistanceCategory(race.distance)];
+      const trackMatch =
+        APTITUDE_VALUES[groundAptitude] >=
+        APTITUDE_VALUES[filters.trackAptitude];
+      const distanceMatch =
+        APTITUDE_VALUES[distanceAptitude] >=
+        APTITUDE_VALUES[filters.distanceAptitude];
+      return trackMatch && distanceMatch;
+    };
+
+    return epithetData.map((epithet) => {
+      const requiredRaces = epithet.races.flatMap((name) =>
+        allRaces.filter((r) => r.name === name)
+      );
+
+      let status = "available";
+      let isRecommended = true;
+      let conflictReason = "";
+
+      const uniqueRequiredRaces = [
+        ...new Map(requiredRaces.map((r) => [r.name, r])).values(),
+      ];
+
+      const completedRaces = uniqueRequiredRaces.filter((reqRace) =>
+        allRaces.some(
+          (selRace) =>
+            combinedRaceIds.has(selRace.id) && selRace.name === reqRace.name
+        )
+      );
+
+      const missingRaces = uniqueRequiredRaces.filter(
+        (reqRace) =>
+          !completedRaces.some((compRace) => compRace.name === reqRace.name)
+      );
+
+      for (const race of missingRaces) {
+        if (
+          careerRaceDates.has(race.date) &&
+          careerRaceDates.get(race.date) !== race.name
+        ) {
+          status = "impossible";
+          conflictReason = `${
+            race.name
+          } conflicts with career race ${careerRaceDates.get(race.date)}.`;
+          break;
+        }
+      }
+
+      if (status !== "impossible") {
+        if (missingRaces.length === 0) {
+          status = "complete";
+        } else {
+          isRecommended = missingRaces.every(isRaceSuitable);
+        }
+      } else {
+        isRecommended = false;
+      }
+
+      return {
+        name: epithet.name,
+        requiredCount: uniqueRequiredRaces.length,
+        completedCount: completedRaces.length,
+        missingRaces: missingRaces,
+        status,
+        isRecommended,
+        conflictReason,
+      };
+    });
+  }, [
+    allRaces,
+    combinedRaceIds,
+    careerRaceIds,
+    modifiedAptitudes,
+    filters.trackAptitude,
+    filters.distanceAptitude,
+    selectedCharacter,
+  ]);
+
   const allHandlers = useMemo(
     () => ({
+      handleAddEpithetRaces: (racesToAdd) => {
+        const raceIdsToAdd = new Set(racesToAdd.map((r) => r.id));
+        const datesOfRacesToAdd = new Set(racesToAdd.map((r) => r.date));
+
+        const filteredSelectedRaces = new Set(
+          [...selectedRaces].filter((id) => {
+            const race = allRaces.find((r) => r.id === id);
+            return !datesOfRacesToAdd.has(race.date);
+          })
+        );
+
+        const newSelectedRaces = new Set([
+          ...filteredSelectedRaces,
+          ...raceIdsToAdd,
+        ]);
+
+        setSelectedRaces(newSelectedRaces);
+        setCurrentChecklistName(null);
+        toast.success(`Added ${racesToAdd.length} race(s) to your schedule!`);
+      },
       handleChecklistDataChange: (raceId, field, value) => {
         if (field === "skipped" && value === true) {
           const raceToSkip = allRaces.find((r) => r.id === raceId);
           const isOptional = !careerRaceIds.has(raceId);
 
           if (isOptional && raceToSkip) {
-            // If we are skipping a smart-added race, just remove it. Don't find another.
             if (smartAddedRaceIds.has(raceId)) {
               setSmartAddedRaceIds((prev) => {
                 const newSet = new Set(prev);
@@ -362,17 +471,15 @@ function App() {
                 return newSet;
               });
             } else {
-              // Otherwise, look for a future instance of this optional race
               const futureInstance = allRaces
                 .filter(
                   (r) =>
                     r.name === raceToSkip.name &&
                     r.turnValue > raceToSkip.turnValue
                 )
-                .sort((a, b) => a.turnValue - b.turnValue)[0]; // Get the very next one
+                .sort((a, b) => a.turnValue - b.turnValue)[0];
 
               if (futureInstance) {
-                // Add the new instance to smart-added and remove the old from selected
                 setSmartAddedRaceIds((prev) =>
                   new Set(prev).add(futureInstance.id)
                 );
@@ -440,7 +547,7 @@ function App() {
             <ConfirmationToast
               t={t}
               onConfirm={resetAction}
-              message="Reset all 'Ran' and 'Won' statuses? Notes will be kept."
+              message="Reset all 'Ran', 'Won', and 'Skipped' statuses? Notes will be kept."
             />
           ),
           { duration: Infinity }
@@ -478,7 +585,7 @@ function App() {
           name,
           characterName: selectedCharacter?.name || "Unknown",
           modifiedAptitudes,
-          selectedRaceIds: Array.from(finalSelectedRaces), // Use the committed set
+          selectedRaceIds: Array.from(finalSelectedRaces),
           checklistData,
           filters,
           gradeFilters,
@@ -697,6 +804,9 @@ function App() {
     alwaysShowCareer,
     setAlwaysShowCareer,
     totalSelectedCount: combinedRaceIds.size,
+    combinedRaceIds,
+    epithetStatus,
+    handleAddEpithetRaces: allHandlers.handleAddEpithetRaces,
   };
   const checklistProps = {
     races: allRaces
@@ -720,7 +830,7 @@ function App() {
     <div className="App">
       <Toaster position="top-center" reverseOrder={false} />
       <header className="App-header">
-        <h1>UmaMusume Race Scheduler</h1>
+        <h1>Umamusume Race Scheduler</h1>
         <ThemeToggle
           isDarkMode={isDarkMode}
           onToggle={() => setIsDarkMode(!isDarkMode)}

@@ -1,6 +1,5 @@
 /* === THEME VARIABLES === */
 :root {
-  /* NEW: Signal to browsers that we handle our own theming */
   color-scheme: light;
 
   /* ... Light Mode Palette ... */
@@ -27,7 +26,6 @@
   --color-warning-icon-bg: #fce1d0;
   --color-warning-icon-text: #e67e22;
   --color-tooltip-bg: #2c3e50;
-  /* NEW: Dedicated text color for tooltips for better contrast */
   --color-tooltip-text: white;
   --color-checklist-tooltip-bg: #f39c12;
   --color-checklist-tooltip-text: #2c3e50;
@@ -48,7 +46,6 @@
 }
 
 body.dark-mode {
-  /* NEW: Signal to browsers that we handle our own theming */
   color-scheme: dark;
 
   /* ... Dark Mode Palette ... */
@@ -75,7 +72,6 @@ body.dark-mode {
   --color-warning-icon-bg: #5c3f2f;
   --color-warning-icon-text: #f39c12;
   --color-tooltip-bg: #f0f0f0;
-  /* NEW: Dedicated text color for tooltips for better contrast */
   --color-tooltip-text: #121212;
   --color-checklist-tooltip-bg: #f39c12;
   --color-checklist-tooltip-text: #121212;
@@ -101,15 +97,15 @@ body {
   box-shadow: 0 2px 4px var(--color-shadow-header);
   z-index: 100;
   position: relative;
-  display: flex; /* Make header a flex container */
-  justify-content: space-between; /* Space out items */
-  align-items: center; /* Vertically align items */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .App-header h1 {
   margin: 0;
-  flex-grow: 1; /* Allow h1 to take up available space */
-  text-align: center; /* Re-center the text */
-  padding-left: 80px; /* Add padding to re-center title, adjust as needed */
+  flex-grow: 1;
+  text-align: center;
+  padding-left: 80px;
 }
 .container {
   display: flex;
@@ -290,6 +286,76 @@ h4 {
   color: var(--color-text-primary);
   font-weight: bold;
 }
+.epithet-helper .epithet-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+.epithet-item {
+  background-color: var(--color-interactive-bg);
+  border-radius: 6px;
+  padding: 12px;
+  border-left: 4px solid var(--color-border-medium);
+}
+.epithet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.epithet-header h4 {
+  margin: 0;
+  font-size: 1em;
+}
+.epithet-badge {
+  font-size: 0.8em;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 12px;
+  color: var(--color-text-light);
+}
+.epithet-badge.recommended {
+  background-color: var(--color-accent-green);
+}
+.epithet-badge.not-recommended {
+  background-color: var(--color-accent-gray);
+}
+.epithet-badge.complete {
+  background-color: var(--color-accent-blue);
+}
+.epithet-badge.impossible {
+  background-color: var(--color-accent-red);
+}
+.epithet-progress {
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+}
+.epithet-actions button {
+  width: 100%;
+  padding: 8px;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-accent-dark-blue);
+  color: var(--color-text-light);
+}
+.epithet-actions button:hover {
+  background-color: var(--color-accent-dark-blue-hover);
+}
+.epithet-reason {
+  font-size: 0.85em;
+  color: var(--color-accent-red);
+  margin-top: 8px;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 5px;
+  border-radius: 4px;
+}
 
 /* === RACE LIST & STICKY HEADER === */
 .race-list-panel {
@@ -348,7 +414,7 @@ tr:hover {
 .date-group-start td {
   border-top: 2px solid var(--color-accent-blue);
 }
-/* ... (rest of table column styles remain the same) ... */
+
 .distance-name-column {
   text-transform: capitalize;
 }
@@ -505,7 +571,7 @@ tr:hover {
   margin-top: 15px;
 }
 
-/* === CHECKLIST PAGE & BUTTON FIX === */
+/* === CHECKLIST PAGE & BUTTON  === */
 .checklist-page {
   padding: 20px;
   max-width: 1000px;
@@ -569,12 +635,10 @@ tr:hover {
 .checklist-sticky-header {
   position: sticky;
   top: 0;
-  z-index: 50; /* Ensures it's above list content but below the main App header */
-  background-color: var(
-    --color-background
-  ); /* Use page background for seamless look */
-  padding-top: 15px; /* Add some space above the progress helper */
-  padding-bottom: 15px; /* Add space below the counter */
+  z-index: 50;
+  background-color: var(--color-background);
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .progress-helper {
@@ -613,7 +677,6 @@ tr:hover {
   margin-top: 4px;
 }
 
-/* --- NEW: Progress Helper Action Buttons --- */
 .progress-actions {
   display: flex;
   justify-content: center;
@@ -657,7 +720,7 @@ tr:hover {
 }
 .next-race-item {
   border-left: 4px solid var(--color-accent-green);
-  box-shadow: 0 4px 8px var(--color-shadow); /* Add a subtle lift */
+  box-shadow: 0 4px 8px var(--color-shadow);
 }
 .career-race-indicator {
   background-color: var(--color-accent-blue);
@@ -667,7 +730,7 @@ tr:hover {
   padding: 2px 6px;
   border-radius: 8px;
   margin-left: 10px;
-  vertical-align: middle; /* Align with text */
+  vertical-align: middle;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -702,7 +765,7 @@ tr:hover {
   display: flex;
   align-items: center;
 }
-/* UPDATED: Renamed span to meta and added alignment */
+
 .checklist-item-meta {
   font-size: 0.9em;
   color: var(--color-text-secondary);
@@ -742,7 +805,7 @@ tr:hover {
   background-color: var(--color-background);
   color: var(--color-text-primary);
 }
-/* UPDATED: New "pill" style for the date */
+
 .checklist-item-date {
   background-color: var(--color-interactive-bg);
   padding: 3px 8px;
@@ -813,7 +876,6 @@ tr:hover {
   visibility: hidden;
   width: 240px;
   background-color: var(--color-tooltip-bg);
-  /* UPDATED: Use the new dedicated variable */
   color: var(--color-tooltip-text);
   text-align: center;
   border-radius: 6px;
