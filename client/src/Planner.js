@@ -857,10 +857,10 @@ function Planner({
                     Races from the JP version of the game are included which may
                     not be present in EN yet.
                   </li>
-                  <li>Mobile friendly view not supported at this time</li>
                   <li>
                     Debut and scenario specific races are hidden and not counted
-                    in the win total
+                    in the win total. Debut race is not taken into account for
+                    turn count before your first scheduled race post debut.
                   </li>
                   <li>
                     Loading a new checklist will always clear old optional
@@ -871,6 +871,12 @@ function Planner({
                     Choosing races and finding a character that can run those
                     races is not supported. Please use GameTora for that
                     functionality.
+                  </li>
+                  <li>
+                    Race notes are race specific so when running the same race
+                    for different Umas you will see the stats you recorded
+                    before. Keep in mind each Uma is different, stats that work
+                    for one Uma might not work for another.
                   </li>
                 </ul>
               </div>
