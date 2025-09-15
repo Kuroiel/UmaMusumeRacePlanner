@@ -19,11 +19,27 @@ const getDistanceCategory = (distance) => {
 
 const AUTOSAVE_KEY = "umamusume-autosave-session";
 
+const migrateYearFilters = (filters) => {
+  if (filters && filters["Year 1"] !== undefined) {
+    return {
+      "Junior Year": filters["Year 1"],
+      "Classic Year": filters["Year 2"],
+      "Senior Year": filters["Year 3"],
+    };
+  }
+  return filters;
+};
+
 const loadAutosavedState = () => {
   try {
     const savedStateJSON = localStorage.getItem(AUTOSAVE_KEY);
     if (savedStateJSON) {
-      return JSON.parse(savedStateJSON);
+      const state = JSON.parse(savedStateJSON);
+
+      if (state.yearFilters) {
+        state.yearFilters = migrateYearFilters(state.yearFilters);
+      }
+      return state;
     }
   } catch (error) {
     console.error("Failed to parse autosaved state:", error);
@@ -793,7 +809,7 @@ function App() {
             checklistToLoad.gradeFilters || { G1: true, G2: true, G3: true }
           );
           setYearFilters(
-            checklistToLoad.yearFilters || {
+            migrateYearFilters(checklistToLoad.yearFilters) || {
               "Junior Year": true,
               "Classic Year": true,
               "Senior Year": true,
@@ -923,7 +939,7 @@ function App() {
               checklistData: item.checklistData || {},
               filters: item.filters || {},
               gradeFilters: item.gradeFilters || {},
-              yearFilters: item.yearFilters || {
+              yearFilters: migrateYearFilters(item.yearFilters) || {
                 "Junior Year": true,
                 "Classic Year": true,
                 "Senior Year": true,

@@ -348,12 +348,16 @@ function Planner({
     setSelectedRaces(newSet);
   };
 
-  const handleResetAptitudes = useCallback(() => {
-    if (selectedCharacter) {
-      setModifiedAptitudes({ ...selectedCharacter.aptitudes });
-      toast.success("Aptitudes reset to default.");
-    }
-  }, [selectedCharacter, setModifiedAptitudes]);
+  const handleResetAptitudes = useCallback(
+    (e) => {
+      e.stopPropagation();
+      if (selectedCharacter) {
+        setModifiedAptitudes({ ...selectedCharacter.aptitudes });
+        toast.success("Aptitudes reset to default.");
+      }
+    },
+    [selectedCharacter, setModifiedAptitudes]
+  );
 
   const aptitudesAreModified = useMemo(() => {
     if (!selectedCharacter || !modifiedAptitudes) return false;
