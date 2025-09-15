@@ -29,6 +29,10 @@
   --color-tooltip-text: white;
   --color-checklist-tooltip-bg: #f39c12;
   --color-checklist-tooltip-text: #2c3e50;
+  --color-g1-border: #27ae60;
+  --color-g2-border: #f1c40f;
+  --color-g3-border: #e74c3c;
+  --color-career-border: #3498db;
 
   /* Accent Colors */
   --color-accent-blue: #3498db;
@@ -75,6 +79,10 @@ body.dark-mode {
   --color-tooltip-text: #121212;
   --color-checklist-tooltip-bg: #f39c12;
   --color-checklist-tooltip-text: #121212;
+  --color-g1-border: #2ecc71;
+  --color-g2-border: #f1c40f;
+  --color-g3-border: #e74c3c;
+  --color-career-border: #3498db;
 
   --color-accent-blue: #3498db;
   --color-accent-green: #2ecc71;
@@ -89,6 +97,14 @@ body {
   color: var(--color-text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.8em;
+  color: var(--color-text-secondary);
+}
+
 .App-header {
   background-color: var(--color-header-bg);
   padding: 20px;
@@ -106,6 +122,7 @@ body {
   flex-grow: 1;
   text-align: center;
   padding-left: 80px;
+  font-size: 1.5em;
 }
 .container {
   display: flex;
@@ -133,6 +150,9 @@ h2 {
   font-size: 1.2em;
   border-bottom: 2px solid var(--color-interactive-bg);
   padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 h4 {
   margin-top: 0;
@@ -142,9 +162,6 @@ h4 {
 .collapsible-header {
   cursor: pointer;
   user-select: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 /* === LEFT PANEL COMPONENTS === */
@@ -223,7 +240,7 @@ h4 {
 }
 .show-hide-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px;
 }
 .checkbox-filter-grid {
@@ -399,6 +416,7 @@ h4 {
   border-radius: 8px;
   box-shadow: 0 2px 4px var(--color-shadow);
   max-height: 90vh;
+  position: relative;
 }
 .race-list-header {
   display: flex;
@@ -407,6 +425,7 @@ h4 {
   flex-shrink: 0;
   padding-bottom: 10px;
   gap: 20px;
+  flex-wrap: wrap;
 }
 .race-list-title-group {
   display: flex;
@@ -414,9 +433,15 @@ h4 {
   gap: 15px;
   flex-grow: 1;
 }
+.race-list-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
 .table-container {
   flex-grow: 1;
   overflow-y: auto;
+  position: relative;
 }
 table {
   width: 100%;
@@ -443,12 +468,14 @@ td {
   font-size: 14px;
   white-space: nowrap;
 }
+tr {
+  transition: background-color 0.1s ease;
+}
 tr:hover {
   background-color: var(--color-highlight-hover);
 }
 .highlighted-race {
   background-color: var(--color-highlight-bg) !important;
-  font-weight: bold;
 }
 .date-group-start td {
   border-top: 2px solid var(--color-accent-blue);
@@ -578,9 +605,7 @@ tr:hover {
   gap: 10px;
 }
 .saved-checklist-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: block;
   background: var(--color-highlight-hover);
   padding: 8px;
   border-radius: 4px;
@@ -588,11 +613,15 @@ tr:hover {
 .checklist-name {
   font-weight: bold;
   font-size: 0.9em;
+  word-break: break-all;
+  display: block;
+  margin-bottom: 8px;
 }
 .checklist-actions {
   display: flex;
   align-items: center;
   gap: 5px;
+  flex-shrink: 0;
 }
 .checklist-actions button {
   font-size: 0.8em;
@@ -629,6 +658,7 @@ tr:hover {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   margin-bottom: 20px;
+  gap: 15px;
 }
 .checklist-page-header h2 {
   grid-column: 2;
@@ -660,6 +690,7 @@ tr:hover {
   justify-self: end;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 .action-button {
   background-color: var(--color-accent-gray);
@@ -687,6 +718,24 @@ tr:hover {
   padding-top: 15px;
   padding-bottom: 15px;
 }
+.checklist-options {
+  background-color: var(--color-interactive-bg);
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.checklist-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9em;
+}
 
 .progress-helper {
   background-color: var(--color-interactive-bg);
@@ -708,6 +757,19 @@ tr:hover {
   color: var(--color-text-secondary);
   margin-bottom: 4px;
 }
+.turn-counter {
+  font-size: 1.2em;
+  color: var(--color-text-secondary);
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--color-border-medium);
+  padding-bottom: 15px;
+}
+.turn-counter .turn-count {
+  font-size: 2em;
+  font-weight: bold;
+  color: var(--color-text-primary);
+  display: block;
+}
 .progress-race-name {
   font-size: 1.3em;
   font-weight: bold;
@@ -717,6 +779,10 @@ tr:hover {
   font-size: 1em;
   color: var(--color-text-secondary);
   margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px 10px;
 }
 
 .progress-notes-textarea {
@@ -740,6 +806,7 @@ tr:hover {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid var(--color-border-medium);
+  flex-wrap: wrap;
 }
 .progress-action-button {
   border: none;
@@ -774,12 +841,55 @@ tr:hover {
   cursor: not-allowed;
   opacity: 0.7;
 }
+.upcoming-races-preview {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--color-border-medium);
+  text-align: left;
+}
+.upcoming-races-preview h4 {
+  margin: 0 0 10px 0;
+  text-align: center;
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+}
+.upcoming-races-preview ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upcoming-races-preview li {
+  font-size: 0.9em;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  background-color: var(--color-background);
+  padding: 5px 8px;
+  border-radius: 4px;
+}
+.upcoming-date {
+  font-weight: bold;
+}
+.upcoming-name {
+  color: var(--color-text-primary);
+}
+.upcoming-details {
+  color: var(--color-text-secondary);
+  font-size: 0.9em;
+}
+.career-race-indicator.mini {
+  padding: 1px 4px;
+  font-size: 0.9em;
+}
 .next-race-item {
-  border-left: 4px solid var(--color-accent-green);
   box-shadow: 0 4px 8px var(--color-shadow);
 }
-.career-race-indicator {
-  background-color: var(--color-accent-blue);
+.career-race-indicator,
+.exclusive-race-indicator {
   color: var(--color-text-light);
   font-size: 0.7em;
   font-weight: bold;
@@ -790,12 +900,19 @@ tr:hover {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.career-race-indicator {
+  background-color: var(--color-accent-blue);
+}
+.exclusive-race-indicator {
+  background-color: var(--color-accent-orange);
+}
 .smart-added-item {
   border-right: 4px solid var(--color-accent-orange);
 }
 .smart-add-indicator {
-  margin-right: 10px;
+  margin: 0 5px;
   cursor: help;
+  vertical-align: middle;
 }
 .checklist-container {
   display: flex;
@@ -811,6 +928,7 @@ tr:hover {
   box-shadow: 0 2px 4px var(--color-shadow);
   padding: 15px;
   gap: 20px;
+  border-left: 4px solid transparent;
 }
 .checklist-item-info {
   flex-grow: 1;
@@ -820,6 +938,7 @@ tr:hover {
   font-size: 1.1em;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .checklist-item-meta {
@@ -828,6 +947,7 @@ tr:hover {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 .checklist-item-actions {
   display: flex;
@@ -873,9 +993,10 @@ tr:hover {
 }
 .grade-counter {
   display: flex;
-  gap: 15px;
+  gap: 10px 15px;
   font-size: 0.9em;
   align-items: center;
+  flex-wrap: wrap;
 }
 .grade-counter span {
   background-color: var(--color-interactive-bg);
@@ -900,10 +1021,35 @@ tr:hover {
   margin-left: 0;
 }
 
+/* === BACK TO TOP BUTTON === */
+.back-to-top-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  background-color: var(--color-accent-dark-blue);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--color-shadow-header);
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.back-to-top-button:hover {
+  background-color: var(--color-accent-dark-blue-hover);
+  transform: translateY(-2px);
+}
+
 /* === WARNINGS & TOOLTIPS === */
 .warning-race-row {
   background-color: var(--color-warning-bg) !important;
-  border-left: 3px solid var(--color-warning-border);
+}
+.checklist-item.warning-race-row {
+  border-left-color: var(--color-warning-border) !important;
 }
 .warning-race-row:hover {
   background-color: var(--color-warning-bg-hover) !important;
@@ -927,6 +1073,7 @@ tr:hover {
   position: relative;
   display: inline-flex;
   justify-content: center;
+  align-items: center;
 }
 .tooltip-text {
   visibility: hidden;
@@ -958,6 +1105,77 @@ tr:hover {
   background-color: var(--color-checklist-tooltip-bg);
   color: var(--color-checklist-tooltip-text);
   font-weight: bold;
+}
+
+/* === RACE COLOR CODING & LEGEND === */
+.checklist-item.g1-race-row {
+  border-left-color: var(--color-g1-border);
+}
+.checklist-item.g2-race-row {
+  border-left-color: var(--color-g2-border);
+}
+.checklist-item.g3-race-row {
+  border-left-color: var(--color-g3-border);
+}
+.checklist-item.career-race-row {
+  border-left-color: var(--color-career-border);
+}
+
+.grade-bubble {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: var(--color-text-light);
+  background-color: var(--color-interactive-bg);
+  margin-right: 5px;
+}
+.grade-bubble.g1-bubble {
+  background-color: var(--color-g1-border);
+}
+.grade-bubble.g2-bubble {
+  background-color: var(--color-g2-border);
+}
+.grade-bubble.g3-bubble {
+  background-color: var(--color-g3-border);
+}
+.grade-bubble.career-bubble {
+  background-color: var(--color-career-border);
+}
+
+.color-legend {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  width: 100%;
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid var(--color-border-light);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+}
+.legend-color-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--color-border-medium);
+}
+.legend-color-box.g1 {
+  background-color: var(--color-g1-border);
+}
+.legend-color-box.g2 {
+  background-color: var(--color-g2-border);
+}
+.legend-color-box.g3 {
+  background-color: var(--color-g3-border);
+}
+.legend-color-box.career {
+  background-color: var(--color-career-border);
 }
 
 /* === TOAST NOTIFICATION STYLES === */
@@ -998,4 +1216,112 @@ tr:hover {
 }
 .toast-button.cancel:hover {
   background-color: var(--color-accent-red-hover);
+}
+
+/* === RESPONSIVE DESIGN === */
+
+/* Tablets and smaller desktops */
+@media (max-width: 1200px) {
+  .table-container {
+    overflow-x: auto;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+  }
+  .left-panel {
+    max-width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+  .panel-section {
+    padding: 15px;
+  }
+  .App-header h1 {
+    font-size: 1.2em;
+    padding-left: 0;
+    text-align: left;
+  }
+  .race-list-panel {
+    max-height: none;
+    padding: 15px;
+  }
+  .race-list-header {
+    gap: 10px;
+  }
+  .race-list-title-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .race-list-title-group .search-bar {
+    width: 100%;
+  }
+
+  th,
+  td {
+    font-size: 12px;
+    padding: 8px 6px;
+  }
+  .checklist-page {
+    padding: 10px;
+  }
+  .checklist-page-header {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    justify-items: center;
+    gap: 10px;
+  }
+  .checklist-page-header h2 {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  .back-button {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: center;
+  }
+  .checklist-page-actions {
+    grid-row: 3;
+    grid-column: 1;
+    justify-self: center;
+    justify-content: center;
+  }
+  .checklist-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .checklist-item-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .checklist-item-controls {
+    gap: 15px;
+  }
+  .checklist-item-actions textarea {
+    width: calc(100% - 16px);
+  }
+  .grade-counter.checklist-page-counter {
+    justify-content: flex-start;
+    gap: 5px 10px;
+  }
+  .checklist-page-counter .counter-label {
+    margin-left: 0;
+  }
+  .checklist-page-counter span {
+    padding: 3px 8px;
+    font-size: 0.85em;
+  }
+  .back-to-top-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
 }

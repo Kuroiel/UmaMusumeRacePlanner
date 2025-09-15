@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import toast from "react-hot-toast";
 import AptitudeEditor from "./AptitudeEditor";
 import ChecklistManager from "./ChecklistManager";
 import Modal from "./Modal";
@@ -12,15 +13,30 @@ const getDistanceCategory = (distance) => {
   return "long";
 };
 
+const areAptitudesEqual = (a, b) => {
+  if (!a || !b) return a === b;
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
+};
+
 const isSummerRace = (date) =>
-  (date.includes("Year 2") || date.includes("Year 3")) &&
+  (date.includes("Classic Year") || date.includes("Senior Year")) &&
   (date.includes("July") || date.includes("August"));
 const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"];
 const APTITUDE_VALUES = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: -1 };
 
-const CollapsibleHeader = ({ title, isOpen, onToggle }) => (
+const CollapsibleHeader = ({ title, isOpen, onToggle, children }) => (
   <h2 onClick={onToggle} className="collapsible-header">
-    {title} <span>{isOpen ? "▼" : "►"}</span>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      {title}
+      {children}
+    </div>
+    <span>{isOpen ? "▼" : "►"}</span>
   </h2>
 );
 
@@ -61,6 +77,7 @@ function Planner({
   setCareerRaceIds,
   warningRaceIds,
   gradeCounts,
+  distanceCounts,
   setCurrentChecklistName,
   getCareerRacesForChar,
   isNoCareerMode,
@@ -77,18 +94,70 @@ function Planner({
     characterToSelect: null,
   });
   const [raceSearchTerm, setRaceSearchTerm] = useState("");
-  const [panelsOpen, setPanelsOpen] = useState({
-    aptitudes: true,
-    filters: true,
-    epithets: true,
-    manager: true,
-    epithetList: false,
-    sources: false,
-    issues: false,
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const tableContainer = document.querySelector(".table-container");
+    const handleScroll = () => {
+      if (tableContainer && tableContainer.scrollTop > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+    if (tableContainer) {
+      tableContainer.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (tableContainer) {
+        tableContainer.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    const tableContainer = document.querySelector(".table-container");
+    if (tableContainer) {
+      tableContainer.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const [panelsOpen, setPanelsOpen] = useState(() => {
+    try {
+      const savedPanels = localStorage.getItem("umamusume-panel-state");
+      return savedPanels
+        ? JSON.parse(savedPanels)
+        : {
+            aptitudes: true,
+            filters: true,
+            epithets: true,
+            manager: true,
+            epithetList: false,
+            sources: false,
+            issues: false,
+          };
+    } catch {
+      return {
+        aptitudes: true,
+        filters: true,
+        epithets: true,
+        manager: true,
+        epithetList: false,
+        sources: false,
+        issues: false,
+      };
+    }
   });
 
   const togglePanel = (panelName) => {
-    setPanelsOpen((prev) => ({ ...prev, [panelName]: !prev[panelName] }));
+    setPanelsOpen((prev) => {
+      const newState = { ...prev, [panelName]: !prev[panelName] };
+      localStorage.setItem("umamusume-panel-state", JSON.stringify(newState));
+      return newState;
+    });
   };
 
   const updateCharacterState = useCallback(
@@ -279,6 +348,18 @@ function Planner({
     setSelectedRaces(newSet);
   };
 
+  const handleResetAptitudes = useCallback(() => {
+    if (selectedCharacter) {
+      setModifiedAptitudes({ ...selectedCharacter.aptitudes });
+      toast.success("Aptitudes reset to default.");
+    }
+  }, [selectedCharacter, setModifiedAptitudes]);
+
+  const aptitudesAreModified = useMemo(() => {
+    if (!selectedCharacter || !modifiedAptitudes) return false;
+    return !areAptitudesEqual(selectedCharacter.aptitudes, modifiedAptitudes);
+  }, [selectedCharacter, modifiedAptitudes]);
+
   const filteredCharacters = useMemo(() => {
     if (
       searchTerm === "" ||
@@ -395,6 +476,38 @@ function Planner({
     raceSearchTerm,
   ]);
 
+  const getRaceRowClass = useCallback(
+    (race) => {
+      const classes = [];
+      if (shouldHighlightRace(race)) {
+        classes.push("highlighted-race");
+      }
+      if (warningRaceIds.has(race.id)) {
+        classes.push("warning-race-row");
+      }
+      return classes.join(" ");
+    },
+    [shouldHighlightRace, warningRaceIds]
+  );
+
+  const getGradeBubbleClass = useCallback(
+    (race) => {
+      const classes = ["grade-bubble"];
+      const isCareerRace = careerRaceIds.has(race.id);
+      if (isCareerRace) {
+        classes.push("career-bubble");
+      } else if (race.grade === "G1") {
+        classes.push("g1-bubble");
+      } else if (race.grade === "G2") {
+        classes.push("g2-bubble");
+      } else if (race.grade === "G3") {
+        classes.push("g3-bubble");
+      }
+      return classes.join(" ");
+    },
+    [careerRaceIds]
+  );
+
   let lastDate = null;
   const managerProps = {
     savedChecklists,
@@ -471,7 +584,18 @@ function Planner({
                   title="2. Edit Aptitudes"
                   isOpen={panelsOpen.aptitudes}
                   onToggle={() => togglePanel("aptitudes")}
-                />
+                >
+                  {aptitudesAreModified && (
+                    <button
+                      className="action-button"
+                      style={{ padding: "3px 8px", fontSize: "0.8em" }}
+                      onClick={handleResetAptitudes}
+                    >
+                      Reset to Default
+                    </button>
+                  )}
+                </CollapsibleHeader>
+
                 {panelsOpen.aptitudes && (
                   <AptitudeEditor
                     aptitudes={modifiedAptitudes}
@@ -797,18 +921,39 @@ function Planner({
                 onChange={(e) => setRaceSearchTerm(e.target.value)}
               />
             </div>
-            <button
-              className="generate-button"
-              onClick={() => setPage("checklist")}
-              disabled={totalSelectedCount === 0}
-            >
-              View Checklist ({totalSelectedCount})
-            </button>
+            <div className="race-list-actions">
+              <button
+                className="generate-button"
+                onClick={() => setPage("checklist")}
+                disabled={totalSelectedCount === 0}
+              >
+                View Checklist ({totalSelectedCount})
+              </button>
+            </div>
             <div className="grade-counter">
-              <span className="counter-label">Selected:</span>
+              <span className="counter-label">Grades:</span>
               <span>G1: {gradeCounts.G1}</span>
               <span>G2: {gradeCounts.G2}</span>
               <span>G3: {gradeCounts.G3}</span>
+              <span className="counter-label">Distances:</span>
+              <span>Sprint: {distanceCounts.sprint}</span>
+              <span>Mile: {distanceCounts.mile}</span>
+              <span>Medium: {distanceCounts.medium}</span>
+              <span>Long: {distanceCounts.long}</span>
+            </div>
+            <div className="color-legend">
+              <span className="legend-item">
+                <span className="legend-color-box career"></span>Career
+              </span>
+              <span className="legend-item">
+                <span className="legend-color-box g1"></span>G1
+              </span>
+              <span className="legend-item">
+                <span className="legend-color-box g2"></span>G2
+              </span>
+              <span className="legend-item">
+                <span className="legend-color-box g3"></span>G3
+              </span>
             </div>
           </div>
           <div className="table-container">
@@ -842,27 +987,30 @@ function Planner({
               <tbody>
                 {displayRaces.map((race) => {
                   const isCareerRace = careerRaceIds.has(race.id);
-                  const isWarning = warningRaceIds.has(race.id);
-                  const isCheckboxDisabled = !isNoCareerMode && isCareerRace;
-                  const rowClass = [];
-                  if (shouldHighlightRace(race))
-                    rowClass.push("highlighted-race");
-                  if (lastDate !== null && race.date !== lastDate)
-                    rowClass.push("date-group-start");
-                  if (isWarning) rowClass.push("warning-race-row");
+                  const rowClass = getRaceRowClass(race);
+                  const gradeBubbleClass = getGradeBubbleClass(race);
+
+                  const isDateGroupStart =
+                    lastDate !== null && race.date !== lastDate;
                   lastDate = race.date;
+
                   return (
-                    <tr key={race.id} className={rowClass.join(" ")}>
+                    <tr
+                      key={race.id}
+                      className={`${rowClass} ${
+                        isDateGroupStart ? "date-group-start" : ""
+                      }`}
+                    >
                       <td>
                         <input
                           type="checkbox"
                           checked={combinedRaceIds.has(race.id)}
                           onChange={() => handleRaceCheck(race)}
-                          disabled={isCheckboxDisabled}
+                          disabled={!isNoCareerMode && isCareerRace}
                         />
                       </td>
                       <td className="status-column">
-                        {isWarning && (
+                        {warningRaceIds.has(race.id) && (
                           <div className="tooltip-container">
                             <span className="warning-icon">!</span>
                             <span className="tooltip-text">
@@ -874,7 +1022,11 @@ function Planner({
                       </td>
                       <td>{isCareerRace ? "Yes" : "No"}</td>
                       <td>{race.date}</td>
-                      <td>{gradeNameMap[race.grade] || race.grade}</td>
+                      <td>
+                        <span className={gradeBubbleClass}>
+                          {gradeNameMap[race.grade] || race.grade}
+                        </span>
+                      </td>
                       <td>{race.name}</td>
                       <td>{race.ground}</td>
                       <td className="distance-name-column">
@@ -889,6 +1041,11 @@ function Planner({
                 })}
               </tbody>
             </table>
+            {showBackToTop && (
+              <button className="back-to-top-button" onClick={scrollToTop}>
+                ↑
+              </button>
+            )}
           </div>
         </div>
       </div>

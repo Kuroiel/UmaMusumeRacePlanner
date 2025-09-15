@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState, useEffect } from "react";
 
 const gradeNameMap = { "1 Win Class": "Pre-OP", Open: "OP" };
 const getDistanceCategory = (distance) => {
@@ -8,27 +8,73 @@ const getDistanceCategory = (distance) => {
   return "long";
 };
 
+const capitalize = (s) => {
+  if (typeof s !== "string") return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
 const formatChecklistDate = (dateString) => {
   const parts = dateString.split(" - ");
   if (parts.length !== 3) return dateString;
 
   const [yearPart, monthPart, halfPart] = parts;
 
-  let formattedYear = yearPart;
-  if (yearPart === "Year 1") formattedYear = "Junior Year";
-  else if (yearPart === "Year 2") formattedYear = "Classic Year";
-  else if (yearPart === "Year 3") formattedYear = "Senior Year";
+  return `${yearPart} - ${halfPart} ${monthPart}`;
+};
 
-  return `${formattedYear} - ${halfPart} ${monthPart}`;
+const getGradeBubbleClass = (race, careerRaceIds) => {
+  const classes = ["grade-bubble", "mini"];
+  const isCareerRace = careerRaceIds.has(race.id);
+  if (isCareerRace) {
+    classes.push("career-bubble");
+  } else if (race.grade === "G1") {
+    classes.push("g1-bubble");
+  } else if (race.grade === "G2") {
+    classes.push("g2-bubble");
+  } else if (race.grade === "G3") {
+    classes.push("g3-bubble");
+  }
+  return classes.join(" ");
 };
 
 const ProgressHelper = ({
   nextRace,
   onUpdateNextRace,
   onChecklistDataChange,
+  raceExclusivity,
+  previouslyWon,
+  nextInstancePlanned,
+  races,
+  careerRaceIds,
 }) => {
   const isComplete = !nextRace;
-  const notes = isComplete ? "" : nextRace.notes;
+
+  const { turnsUntil, upcomingRaces } = useMemo(() => {
+    if (isComplete || !races || races.length === 0) {
+      return { turnsUntil: 0, upcomingRaces: [] };
+    }
+
+    const nextRaceIndex = races.findIndex((r) => r.id === nextRace.id);
+
+    let prevTurn = 0;
+    if (nextRaceIndex > 0) {
+      prevTurn = races[nextRaceIndex - 1].turnValue;
+    }
+
+    const turnsUntil = nextRace.turnValue - prevTurn - 1;
+    const upcoming = races
+      .slice(nextRaceIndex + 1, nextRaceIndex + 4)
+      .map((race, i, arr) => {
+        const prevRaceTurn =
+          i === 0 ? nextRace.turnValue : arr[i - 1].turnValue;
+        return {
+          ...race,
+          turnsAfterPrev: race.turnValue - prevRaceTurn - 1,
+        };
+      });
+
+    return { turnsUntil, upcomingRaces: upcoming };
+  }, [isComplete, races, nextRace]);
 
   if (isComplete) {
     return (
@@ -38,17 +84,51 @@ const ProgressHelper = ({
     );
   }
 
+  const notes = nextRace.notes;
+  const isExclusive = raceExclusivity.get(nextRace.name) === 1;
+  const gradeBubbleClass = getGradeBubbleClass(nextRace, careerRaceIds);
+
   return (
     <div className="progress-helper">
+      <div className="turn-counter">
+        <span className="turn-count">{turnsUntil}</span> Turns Until Next Race
+      </div>
       <div className="progress-label">Next Race:</div>
       <div className="progress-race-name">
+        <span className={gradeBubbleClass}>
+          {gradeNameMap[nextRace.grade] || nextRace.grade}
+        </span>
         {nextRace.name}{" "}
         {nextRace.isCareer && (
           <span className="career-race-indicator">Career</span>
         )}
+        {isExclusive && !nextRace.isCareer && (
+          <span className="exclusive-race-indicator">Exclusive</span>
+        )}
+        {previouslyWon && (
+          <div className="tooltip-container">
+            <span className="smart-add-indicator">✅</span>
+            <span className="tooltip-text checklist-tooltip">
+              A previous instance of this race was already won.
+            </span>
+          </div>
+        )}
+        {nextInstancePlanned && (
+          <div className="tooltip-container">
+            <span className="smart-add-indicator">📅</span>
+            <span className="tooltip-text checklist-tooltip">
+              Next year's instance of this race is also planned.
+            </span>
+          </div>
+        )}
       </div>
       <div className="progress-race-date">
-        🗓️ {formatChecklistDate(nextRace.date)}
+        <span>🗓️ {formatChecklistDate(nextRace.date)}</span>|
+        <span>
+          {nextRace.ground} -{" "}
+          {capitalize(getDistanceCategory(nextRace.distance))} (
+          {nextRace.distance}m)
+        </span>
       </div>
       <textarea
         className="progress-notes-textarea"
@@ -82,6 +162,29 @@ const ProgressHelper = ({
           Mark as Skipped
         </button>
       </div>
+      {upcomingRaces.length > 0 && (
+        <div className="upcoming-races-preview">
+          <h4>Upcoming:</h4>
+          <ul>
+            {upcomingRaces.map((race) => (
+              <li key={race.id}>
+                <span className="upcoming-date">
+                  +{race.turnsAfterPrev} turns
+                </span>
+                <span className="upcoming-name">
+                  {race.name}
+                  {careerRaceIds.has(race.id) && (
+                    <span className="career-race-indicator mini">C</span>
+                  )}
+                </span>
+                <span className={getGradeBubbleClass(race, careerRaceIds)}>
+                  {gradeNameMap[race.grade] || race.grade}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
@@ -95,12 +198,46 @@ function Checklist({
   onClearNotes,
   warningRaceIds,
   gradeCounts,
+  distanceCounts,
   wonCount,
   currentChecklistName,
   careerRaceIds,
   selectedCharacter,
   smartAddedRaceIds,
+  raceExclusivity,
+  combinedRaceIds,
+  filters,
+  setFilters,
 }) {
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const handleFilterChange = (event) => {
+    const { name, checked } = event.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
   const nextRace = useMemo(() => {
     const firstUnfinishedRace = races.find((race) => {
       const data = checklistData[race.id];
@@ -126,6 +263,65 @@ function Checklist({
     },
     [nextRace, onChecklistDataChange]
   );
+
+  const wonRaceNames = useMemo(() => {
+    const names = new Set();
+    races.forEach((race) => {
+      if (checklistData[race.id]?.won) {
+        names.add(race.name);
+      }
+    });
+    return names;
+  }, [races, checklistData]);
+
+  const getChecklistItemClass = useCallback(
+    (race) => {
+      const classes = ["checklist-item"];
+      const isCareer = selectedCharacter && careerRaceIds.has(race.id);
+      const isNext = nextRace && nextRace.id === race.id;
+      const isSmartAdded = smartAddedRaceIds.has(race.id);
+      const isWarning = warningRaceIds.has(race.id);
+
+      if (isCareer) {
+        classes.push("career-race-row");
+      } else if (race.grade === "G1") {
+        classes.push("g1-race-row");
+      } else if (race.grade === "G2") {
+        classes.push("g2-race-row");
+      } else if (race.grade === "G3") {
+        classes.push("g3-race-row");
+      }
+
+      if (isWarning) classes.push("warning-race-row");
+      if (isNext) classes.push("next-race-item");
+      if (isSmartAdded) classes.push("smart-added-item");
+
+      return classes.join(" ");
+    },
+    [
+      careerRaceIds,
+      nextRace,
+      selectedCharacter,
+      smartAddedRaceIds,
+      warningRaceIds,
+    ]
+  );
+
+  const nextRaceInfo = useMemo(() => {
+    if (!nextRace) return { previouslyWon: false, nextInstancePlanned: false };
+    const isExclusive = raceExclusivity.get(nextRace.name) === 1;
+    const previouslyWon =
+      !nextRace.isCareer && !isExclusive && wonRaceNames.has(nextRace.name);
+    const nextInstancePlanned =
+      !isExclusive &&
+      races.some(
+        (r) =>
+          r.name === nextRace.name &&
+          r.turnValue > nextRace.turnValue &&
+          combinedRaceIds.has(r.id)
+      );
+    return { previouslyWon, nextInstancePlanned };
+  }, [nextRace, raceExclusivity, wonRaceNames, races, combinedRaceIds]);
 
   return (
     <div className="checklist-page">
@@ -156,16 +352,52 @@ function Checklist({
               nextRace={nextRace}
               onUpdateNextRace={handleUpdateNextRace}
               onChecklistDataChange={onChecklistDataChange}
+              raceExclusivity={raceExclusivity}
+              previouslyWon={nextRaceInfo.previouslyWon}
+              nextInstancePlanned={nextRaceInfo.nextInstancePlanned}
+              races={races}
+              careerRaceIds={careerRaceIds}
             />
 
             <div className="grade-counter checklist-page-counter">
-              <span className="counter-label">Total selected:</span>
+              <span className="counter-label">Selected:</span>
               <span>G1: {gradeCounts.G1}</span>
               <span>G2: {gradeCounts.G2}</span>
               <span>G3: {gradeCounts.G3}</span>
+              <span className="counter-label">Distances:</span>
+              <span>Sprint: {distanceCounts.sprint}</span>
+              <span>Mile: {distanceCounts.mile}</span>
+              <span>Medium: {distanceCounts.medium}</span>
+              <span>Long: {distanceCounts.long}</span>
               <span className="counter-label">Won:</span>
               <span>
                 {wonCount} / {races.length}
+              </span>
+            </div>
+          </div>
+          <div className="checklist-options">
+            <label>
+              <input
+                type="checkbox"
+                name="preventWarningAdd"
+                checked={filters.preventWarningAdd}
+                onChange={handleFilterChange}
+              />
+              Prevent Smart Adding of races that would cause 3+ consecutive
+              races
+            </label>
+            <div className="color-legend">
+              <span className="legend-item">
+                <span className="legend-color-box career"></span>Career
+              </span>
+              <span className="legend-item">
+                <span className="legend-color-box g1"></span>G1
+              </span>
+              <span className="legend-item">
+                <span className="legend-color-box g2"></span>G2
+              </span>
+              <span className="legend-item">
+                <span className="legend-color-box g3"></span>G3
               </span>
             </div>
           </div>
@@ -180,16 +412,23 @@ function Checklist({
             notes: "",
             skipped: false,
           };
-          const isWarning = warningRaceIds.has(race.id);
           const isCareer = selectedCharacter && careerRaceIds.has(race.id);
-          const isNextRace = nextRace && nextRace.id === race.id;
           const isSmartAdded = smartAddedRaceIds.has(race.id);
+          const isExclusive = raceExclusivity.get(race.name) === 1;
 
-          const itemClass = `checklist-item ${
-            isWarning ? "warning-race-row" : ""
-          } ${isNextRace ? "next-race-item" : ""} ${
-            isSmartAdded ? "smart-added-item" : ""
-          }`;
+          const previouslyWon =
+            !isCareer && !isExclusive && wonRaceNames.has(race.name);
+
+          const nextInstancePlanned =
+            !isExclusive &&
+            races.some(
+              (r) =>
+                r.name === race.name &&
+                r.turnValue > race.turnValue &&
+                combinedRaceIds.has(r.id)
+            );
+
+          const itemClass = getChecklistItemClass(race);
 
           return (
             <div key={race.id} className={itemClass}>
@@ -207,8 +446,26 @@ function Checklist({
                   {isCareer && (
                     <span className="career-race-indicator">Career</span>
                   )}
-
-                  {isWarning && (
+                  {isExclusive && !isCareer && (
+                    <span className="exclusive-race-indicator">Exclusive</span>
+                  )}
+                  {previouslyWon && (
+                    <div className="tooltip-container">
+                      <span className="smart-add-indicator">✅</span>
+                      <span className="tooltip-text checklist-tooltip">
+                        A previous instance of this race was already won.
+                      </span>
+                    </div>
+                  )}
+                  {nextInstancePlanned && (
+                    <div className="tooltip-container">
+                      <span className="smart-add-indicator">📅</span>
+                      <span className="tooltip-text checklist-tooltip">
+                        Next year's instance of this race is also planned.
+                      </span>
+                    </div>
+                  )}
+                  {warningRaceIds.has(race.id) && (
                     <div className="tooltip-container">
                       <span className="warning-icon">!</span>
                       <span className="tooltip-text checklist-tooltip">
@@ -224,8 +481,10 @@ function Checklist({
                     🗓️ {formatChecklistDate(race.date)}
                   </span>
                   {" | "}
-                  {gradeNameMap[race.grade] || race.grade} | {race.ground}{" "}
-                  {getDistanceCategory(race.distance)} ({race.distance}m)
+                  {gradeNameMap[race.grade] || race.grade} | {race.ground}
+                  {" | "}
+                  {capitalize(getDistanceCategory(race.distance))} (
+                  {race.distance}m)
                 </span>
               </div>
               <div className="checklist-item-actions">
@@ -279,6 +538,11 @@ function Checklist({
           );
         })}
       </div>
+      {showBackToTop && (
+        <button className="back-to-top-button" onClick={scrollToTop}>
+          ↑
+        </button>
+      )}
     </div>
   );
 }

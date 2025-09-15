@@ -62,7 +62,7 @@ function ChecklistManager({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "umamusume-checklists.json";
+    a.download = "umamusume-race-planner.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

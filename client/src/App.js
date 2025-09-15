@@ -35,11 +35,11 @@ const loadAutosavedState = () => {
 const initialAutosavedState = loadAutosavedState();
 
 const getTurnValue = (dateString) => {
-  const yearMatch = dateString.match(/Junior|Year 1/i)
+  const yearMatch = dateString.match(/Junior/i)
     ? 1
-    : dateString.match(/Classic|Year 2/i)
+    : dateString.match(/Classic/i)
     ? 2
-    : dateString.match(/Senior|Year 3/i)
+    : dateString.match(/Senior/i)
     ? 3
     : 0;
   const monthMap = {
@@ -67,11 +67,11 @@ const getTurnValue = (dateString) => {
 };
 
 const normalizeDateForMatching = (dateString) => {
-  const yearMatch = dateString.match(/Junior|Year 1/i)
+  const yearMatch = dateString.match(/Junior/i)
     ? "Y1"
-    : dateString.match(/Classic|Year 2/i)
+    : dateString.match(/Classic/i)
     ? "Y2"
-    : dateString.match(/Senior|Year 3/i)
+    : dateString.match(/Senior/i)
     ? "Y3"
     : null;
   const monthMatch = dateString.match(
@@ -96,7 +96,13 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
         if (!raceNameMatch) return;
         const raceName = raceNameMatch[1].trim();
         if (raceName.toLowerCase().includes("make debut")) return;
-        const normalizedDate = normalizeDateForMatching(objective.details);
+
+        let details = objective.details;
+        details = details.replace(/Year 1/i, "Junior");
+        details = details.replace(/Year 2/i, "Classic");
+        details = details.replace(/Year 3/i, "Senior");
+        const normalizedDate = normalizeDateForMatching(details);
+
         if (!normalizedDate) return;
         const foundRace = allRaces.find((race) => {
           const raceDate = normalizeDateForMatching(race.date);
@@ -108,6 +114,26 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
     }
   });
   return ids;
+};
+
+const calculateWarningIds = (raceIdSet, allRaces, careerRaceIds) => {
+  const warnings = new Set();
+  if (raceIdSet.size < 3) return warnings;
+  const sortedSelectedRaces = allRaces
+    .filter((race) => raceIdSet.has(race.id))
+    .sort((a, b) => a.turnValue - b.turnValue);
+  for (let i = 2; i < sortedSelectedRaces.length; i++) {
+    const race3 = sortedSelectedRaces[i];
+    const race2 = sortedSelectedRaces[i - 1];
+    const race1 = sortedSelectedRaces[i - 2];
+    const isConsecutive =
+      race3.turnValue === race2.turnValue + 1 &&
+      race2.turnValue === race1.turnValue + 1;
+    if (isConsecutive && !careerRaceIds.has(race3.id)) {
+      warnings.add(race3.id);
+    }
+  }
+  return warnings;
 };
 
 function App() {
@@ -157,6 +183,7 @@ function App() {
       distanceAptitude: "A",
       hideNonHighlighted: false,
       hideSummer: false,
+      preventWarningAdd: true,
     }
   );
   const [gradeFilters, setGradeFilters] = useState(
@@ -164,9 +191,9 @@ function App() {
   );
   const [yearFilters, setYearFilters] = useState(
     initialAutosavedState?.yearFilters || {
-      "Year 1": true,
-      "Year 2": true,
-      "Year 3": true,
+      "Junior Year": true,
+      "Classic Year": true,
+      "Senior Year": true,
     }
   );
   const [trackFilters, setTrackFilters] = useState(
@@ -205,10 +232,19 @@ function App() {
   });
 
   useEffect(() => {
-    const racesWithTurns = raceData.map((race) => ({
-      ...race,
-      turnValue: getTurnValue(race.date),
-    }));
+    const standardizedRaces = raceData.map((race) => {
+      let date = race.date;
+      date = date.replace(/Year 1/i, "Junior Year");
+      date = date.replace(/Year 2/i, "Classic Year");
+      date = date.replace(/Year 3/i, "Senior Year");
+      return {
+        ...race,
+        date,
+        turnValue: getTurnValue(date),
+      };
+    });
+    setAllRaces(standardizedRaces);
+
     const transformedCharData = charData.map((char) => {
       const newAptitudes = { ...char.aptitudes };
       if (newAptitudes.short !== undefined) {
@@ -217,7 +253,6 @@ function App() {
       }
       return { ...char, aptitudes: newAptitudes };
     });
-    setAllRaces(racesWithTurns);
     setAllCharacters(
       transformedCharData.sort((a, b) => a.name.localeCompare(b.name))
     );
@@ -303,25 +338,10 @@ function App() {
     [selectedRaces, smartAddedRaceIds]
   );
 
-  const warningRaceIds = useMemo(() => {
-    const warnings = new Set();
-    if (combinedRaceIds.size < 3) return warnings;
-    const sortedSelectedRaces = allRaces
-      .filter((race) => combinedRaceIds.has(race.id))
-      .sort((a, b) => a.turnValue - b.turnValue);
-    for (let i = 2; i < sortedSelectedRaces.length; i++) {
-      const race3 = sortedSelectedRaces[i];
-      const race2 = sortedSelectedRaces[i - 1];
-      const race1 = sortedSelectedRaces[i - 2];
-      const isConsecutive =
-        race3.turnValue === race2.turnValue + 1 &&
-        race2.turnValue === race1.turnValue + 1;
-      if (isConsecutive && !careerRaceIds.has(race3.id)) {
-        warnings.add(race3.id);
-      }
-    }
-    return warnings;
-  }, [combinedRaceIds, careerRaceIds, allRaces]);
+  const warningRaceIds = useMemo(
+    () => calculateWarningIds(combinedRaceIds, allRaces, careerRaceIds),
+    [combinedRaceIds, allRaces, careerRaceIds]
+  );
 
   const gradeCounts = useMemo(() => {
     const counts = { G1: 0, G2: 0, G3: 0 };
@@ -329,6 +349,20 @@ function App() {
       const race = allRaces.find((r) => r.id === raceId);
       if (race && counts[race.grade] !== undefined) {
         counts[race.grade]++;
+      }
+    });
+    return counts;
+  }, [combinedRaceIds, allRaces]);
+
+  const distanceCounts = useMemo(() => {
+    const counts = { sprint: 0, mile: 0, medium: 0, long: 0 };
+    combinedRaceIds.forEach((raceId) => {
+      const race = allRaces.find((r) => r.id === raceId);
+      if (race) {
+        const category = getDistanceCategory(race.distance);
+        if (counts[category] !== undefined) {
+          counts[category]++;
+        }
       }
     });
     return counts;
@@ -384,7 +418,11 @@ function App() {
       let conflictReason = "";
 
       const uniqueRequiredRaces = [
-        ...new Map(requiredRaces.map((r) => [r.name, r])).values(),
+        ...new Map(
+          requiredRaces
+            .sort((a, b) => b.turnValue - a.turnValue)
+            .map((r) => [r.name, r])
+        ).values(),
       ];
 
       const completedRaces = uniqueRequiredRaces.filter((reqRace) =>
@@ -465,11 +503,21 @@ function App() {
         toast.success(`Added ${racesToAdd.length} race(s) to your schedule!`);
       },
       handleChecklistDataChange: (raceId, field, value) => {
-        if (field === "skipped" && value === true) {
-          const raceToSkip = allRaces.find((r) => r.id === raceId);
-          const isOptional = !careerRaceIds.has(raceId);
+        const currentData = checklistData[raceId] || {
+          ran: false,
+          won: false,
+          notes: "",
+          skipped: false,
+        };
+        const newData = { ...currentData, [field]: value };
 
-          if (isOptional && raceToSkip) {
+        const shouldTriggerSmartAdd =
+          (field === "skipped" && value === true) ||
+          (field === "ran" && value === true && !newData.won);
+
+        if (shouldTriggerSmartAdd) {
+          const raceToSkip = allRaces.find((r) => r.id === raceId);
+          if (!careerRaceIds.has(raceId) && raceToSkip) {
             if (smartAddedRaceIds.has(raceId)) {
               setSmartAddedRaceIds((prev) => {
                 const newSet = new Set(prev);
@@ -486,30 +534,60 @@ function App() {
                 .sort((a, b) => a.turnValue - b.turnValue)[0];
 
               if (futureInstance) {
-                setSmartAddedRaceIds((prev) =>
-                  new Set(prev).add(futureInstance.id)
-                );
-                setSelectedRaces((prev) => {
-                  const newSet = new Set(prev);
-                  newSet.delete(raceId);
-                  return newSet;
-                });
-                toast(
-                  "Found a later version of this race and added it to your checklist.",
-                  { icon: "✨" }
-                );
+                if (
+                  careerRaceIds.has(futureInstance.id) ||
+                  selectedRaces.has(futureInstance.id) ||
+                  smartAddedRaceIds.has(futureInstance.id)
+                ) {
+                } else if (filters.preventWarningAdd) {
+                  const potentialIds = new Set([
+                    ...combinedRaceIds,
+                    futureInstance.id,
+                  ]);
+                  potentialIds.delete(raceId);
+                  const potentialWarnings = calculateWarningIds(
+                    potentialIds,
+                    allRaces,
+                    careerRaceIds
+                  );
+                  if (potentialWarnings.has(futureInstance.id)) {
+                    toast.error(
+                      `Did not add next race as it would cause a 3-race warning. You can disable this in the filters.`,
+                      { duration: 5000 }
+                    );
+                  } else {
+                    setSmartAddedRaceIds((prev) =>
+                      new Set(prev).add(futureInstance.id)
+                    );
+                    setSelectedRaces((prev) => {
+                      const newSet = new Set(prev);
+                      newSet.delete(raceId);
+                      return newSet;
+                    });
+                    toast(
+                      "Found a later version of this race and added it to your checklist.",
+                      { icon: "✨" }
+                    );
+                  }
+                } else {
+                  setSmartAddedRaceIds((prev) =>
+                    new Set(prev).add(futureInstance.id)
+                  );
+                  setSelectedRaces((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.delete(raceId);
+                    return newSet;
+                  });
+                  toast(
+                    "Found a later version of this race and added it to your checklist.",
+                    { icon: "✨" }
+                  );
+                }
               }
             }
           }
         }
         setChecklistData((prev) => {
-          const currentData = prev[raceId] || {
-            ran: false,
-            won: false,
-            notes: "",
-            skipped: false,
-          };
-          const newData = { ...currentData, [field]: value };
           if (field === "won" && value === true) {
             newData.ran = true;
             newData.skipped = false;
@@ -708,6 +786,7 @@ function App() {
               distanceAptitude: "A",
               hideNonHighlighted: false,
               hideSummer: true,
+              preventWarningAdd: true,
             }
           );
           setGradeFilters(
@@ -715,9 +794,9 @@ function App() {
           );
           setYearFilters(
             checklistToLoad.yearFilters || {
-              "Year 1": true,
-              "Year 2": true,
-              "Year 3": true,
+              "Junior Year": true,
+              "Classic Year": true,
+              "Senior Year": true,
             }
           );
           setTrackFilters(
@@ -845,9 +924,9 @@ function App() {
               filters: item.filters || {},
               gradeFilters: item.gradeFilters || {},
               yearFilters: item.yearFilters || {
-                "Year 1": true,
-                "Year 2": true,
-                "Year 3": true,
+                "Junior Year": true,
+                "Classic Year": true,
+                "Senior Year": true,
               },
               trackFilters: item.trackFilters || { Turf: true, Dirt: true },
               distanceFilters: item.distanceFilters || {
@@ -934,7 +1013,16 @@ function App() {
       allRaces,
       careerRaceIds,
       smartAddedRaceIds,
+      combinedRaceIds,
     ]
+  );
+
+  const checklistRaces = useMemo(
+    () =>
+      allRaces
+        .filter((r) => combinedRaceIds.has(r.id))
+        .sort((a, b) => a.turnValue - b.turnValue),
+    [allRaces, combinedRaceIds]
   );
 
   const plannerProps = {
@@ -970,6 +1058,7 @@ function App() {
     setCareerRaceIds,
     warningRaceIds,
     gradeCounts,
+    distanceCounts,
     setCurrentChecklistName,
     getCareerRacesForChar,
     isNoCareerMode,
@@ -982,9 +1071,7 @@ function App() {
     handleAddEpithetRaces: allHandlers.handleAddEpithetRaces,
   };
   const checklistProps = {
-    races: allRaces
-      .filter((r) => combinedRaceIds.has(r.id))
-      .sort((a, b) => a.turnValue - b.turnValue),
+    races: checklistRaces,
     checklistData,
     onChecklistDataChange: allHandlers.handleChecklistDataChange,
     setPage,
@@ -992,18 +1079,23 @@ function App() {
     onClearNotes: allHandlers.handleClearChecklistNotes,
     warningRaceIds,
     gradeCounts,
+    distanceCounts,
     wonCount,
     currentChecklistName,
     careerRaceIds,
     selectedCharacter,
     smartAddedRaceIds,
+    raceExclusivity,
+    combinedRaceIds,
+    filters,
+    setFilters,
   };
 
   return (
     <div className="App">
       <Toaster position="top-center" reverseOrder={false} />
       <header className="App-header">
-        <h1>Umamusume Race Scheduler</h1>
+        <h1>UmaMusume Race Planner</h1>
         <ThemeToggle
           isDarkMode={isDarkMode}
           onToggle={() => setIsDarkMode(!isDarkMode)}
@@ -1032,6 +1124,11 @@ function App() {
           </p>
         </Modal>
       )}
+      <footer>
+        <p>
+          This is a fan-made project and is not affiliated with Cygames, Inc.
+        </p>
+      </footer>
     </div>
   );
 }
