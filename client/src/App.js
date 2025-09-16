@@ -124,7 +124,13 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
           const raceDate = normalizeDateForMatching(race.date);
           return race.name.trim() === raceName && raceDate === normalizedDate;
         });
-        if (foundRace) ids.add(foundRace.id);
+        if (foundRace) {
+          ids.add(foundRace.id);
+        } else {
+          console.warn(
+            `Career objective race "${raceName}" on date "${details}" not found in master race list for character ${character.name}.`
+          );
+        }
       };
       processObjective(obj);
     }
@@ -150,6 +156,50 @@ const calculateWarningIds = (raceIdSet, allRaces, careerRaceIds) => {
     }
   }
   return warnings;
+};
+
+const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
+        onConfirm();
+        toast.dismiss(t.id);
+      } else if (e.key === "Escape") {
+        if (onCancel) onCancel();
+        toast.dismiss(t.id);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [t, onConfirm, onCancel]);
+
+  return (
+    <div className="confirmation-toast">
+      <span>{message}</span>
+      <div className="toast-buttons">
+        <button
+          className="toast-button cancel"
+          onClick={() => {
+            if (onCancel) onCancel();
+            toast.dismiss(t.id);
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          className="toast-button confirm"
+          onClick={() => {
+            onConfirm();
+            toast.dismiss(t.id);
+          }}
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  );
 };
 
 function App() {
@@ -526,65 +576,70 @@ function App() {
           skipped: false,
         };
         const newData = { ...currentData, [field]: value };
+        const raceToUpdate = allRaces.find((r) => r.id === raceId);
+        if (!raceToUpdate) return;
 
-        const shouldTriggerSmartAdd =
+        const wasTrigger =
+          (field === "skipped" && currentData.skipped === false) ||
+          (field === "ran" &&
+            currentData.ran === false &&
+            currentData.won === false);
+        const isTrigger =
           (field === "skipped" && value === true) ||
           (field === "ran" && value === true && !newData.won);
+        const isUndo = wasTrigger && !isTrigger;
 
-        if (shouldTriggerSmartAdd) {
-          const raceToSkip = allRaces.find((r) => r.id === raceId);
-          if (!careerRaceIds.has(raceId) && raceToSkip) {
-            if (smartAddedRaceIds.has(raceId)) {
-              setSmartAddedRaceIds((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(raceId);
-                return newSet;
+        if (
+          !careerRaceIds.has(raceId) &&
+          (isTrigger || isUndo) &&
+          raceExclusivity.get(raceToUpdate.name) > 1
+        ) {
+          const futureInstance = allRaces
+            .filter(
+              (r) =>
+                r.name === raceToUpdate.name &&
+                r.turnValue > raceToUpdate.turnValue
+            )
+            .sort((a, b) => a.turnValue - b.turnValue)[0];
+
+          if (futureInstance) {
+            if (isTrigger) {
+              const allScheduledDates = new Map();
+              allRaces.forEach((r) => {
+                if (combinedRaceIds.has(r.id) && r.id !== raceId) {
+                  allScheduledDates.set(r.date, {
+                    name: r.name,
+                    isCareer: careerRaceIds.has(r.id),
+                  });
+                }
               });
-            } else {
-              const futureInstance = allRaces
-                .filter(
-                  (r) =>
-                    r.name === raceToSkip.name &&
-                    r.turnValue > raceToSkip.turnValue
-                )
-                .sort((a, b) => a.turnValue - b.turnValue)[0];
 
-              if (futureInstance) {
-                if (
-                  careerRaceIds.has(futureInstance.id) ||
-                  selectedRaces.has(futureInstance.id) ||
-                  smartAddedRaceIds.has(futureInstance.id)
-                ) {
-                } else if (filters.preventWarningAdd) {
-                  const potentialIds = new Set([
-                    ...combinedRaceIds,
-                    futureInstance.id,
-                  ]);
-                  potentialIds.delete(raceId);
-                  const potentialWarnings = calculateWarningIds(
-                    potentialIds,
-                    allRaces,
-                    careerRaceIds
+              if (allScheduledDates.has(futureInstance.date)) {
+                const conflict = allScheduledDates.get(futureInstance.date);
+                toast.error(
+                  `Cannot add next instance of race: Conflicts with ${
+                    conflict.isCareer
+                      ? "the career race:"
+                      : "the selected race:"
+                  } ${conflict.name}.`,
+                  { duration: 4000 }
+                );
+              } else if (filters.preventWarningAdd) {
+                const potentialIds = new Set([
+                  ...combinedRaceIds,
+                  futureInstance.id,
+                ]);
+                potentialIds.delete(raceId);
+                const potentialWarnings = calculateWarningIds(
+                  potentialIds,
+                  allRaces,
+                  careerRaceIds
+                );
+                if (potentialWarnings.has(futureInstance.id)) {
+                  toast.error(
+                    `Did not add next race as it would cause a 3-race warning. You can disable this in the filters.`,
+                    { duration: 5000 }
                   );
-                  if (potentialWarnings.has(futureInstance.id)) {
-                    toast.error(
-                      `Did not add next race as it would cause a 3-race warning. You can disable this in the filters.`,
-                      { duration: 5000 }
-                    );
-                  } else {
-                    setSmartAddedRaceIds((prev) =>
-                      new Set(prev).add(futureInstance.id)
-                    );
-                    setSelectedRaces((prev) => {
-                      const newSet = new Set(prev);
-                      newSet.delete(raceId);
-                      return newSet;
-                    });
-                    toast(
-                      "Found a later version of this race and added it to your checklist.",
-                      { icon: "✨" }
-                    );
-                  }
                 } else {
                   setSmartAddedRaceIds((prev) =>
                     new Set(prev).add(futureInstance.id)
@@ -599,10 +654,33 @@ function App() {
                     { icon: "✨" }
                   );
                 }
+              } else {
+                setSmartAddedRaceIds((prev) =>
+                  new Set(prev).add(futureInstance.id)
+                );
+                setSelectedRaces((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(raceId);
+                  return newSet;
+                });
+                toast(
+                  "Found a later version of this race and added it to your checklist.",
+                  { icon: "✨" }
+                );
               }
+            } else if (isUndo && smartAddedRaceIds.has(futureInstance.id)) {
+              setSmartAddedRaceIds((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(futureInstance.id);
+                return newSet;
+              });
+              toast.success(
+                `Removed automatically added instance of "${futureInstance.name}".`
+              );
             }
           }
         }
+
         setChecklistData((prev) => {
           if (field === "won" && value === true) {
             newData.ran = true;
@@ -643,32 +721,6 @@ function App() {
           toast.success("Ran/Won/Skipped statuses have been reset.");
         };
 
-        const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
-          <div className="confirmation-toast">
-            <span>{message}</span>
-            <div className="toast-buttons">
-              <button
-                className="toast-button cancel"
-                onClick={() => {
-                  if (onCancel) onCancel();
-                  toast.dismiss(t.id);
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className="toast-button confirm"
-                onClick={() => {
-                  onConfirm();
-                  toast.dismiss(t.id);
-                }}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        );
-
         toast(
           (t) => (
             <ConfirmationToast
@@ -691,32 +743,6 @@ function App() {
           });
           toast.success("All notes have been cleared.");
         };
-
-        const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
-          <div className="confirmation-toast">
-            <span>{message}</span>
-            <div className="toast-buttons">
-              <button
-                className="toast-button cancel"
-                onClick={() => {
-                  if (onCancel) onCancel();
-                  toast.dismiss(t.id);
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className="toast-button confirm"
-                onClick={() => {
-                  onConfirm();
-                  toast.dismiss(t.id);
-                }}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        );
 
         toast(
           (t) => (
@@ -842,32 +868,6 @@ function App() {
           toast.success(`Deleted "${name}".`);
         };
 
-        const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
-          <div className="confirmation-toast">
-            <span>{message}</span>
-            <div className="toast-buttons">
-              <button
-                className="toast-button cancel"
-                onClick={() => {
-                  if (onCancel) onCancel();
-                  toast.dismiss(t.id);
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className="toast-button confirm"
-                onClick={() => {
-                  onConfirm();
-                  toast.dismiss(t.id);
-                }}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        );
-
         toast(
           (t) => (
             <ConfirmationToast
@@ -970,32 +970,6 @@ function App() {
             toast.success(`Imported ${validatedChecklists.length} checklists!`);
           };
 
-          const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => (
-            <div className="confirmation-toast">
-              <span>{message}</span>
-              <div className="toast-buttons">
-                <button
-                  className="toast-button cancel"
-                  onClick={() => {
-                    if (onCancel) onCancel();
-                    toast.dismiss(t.id);
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="toast-button confirm"
-                  onClick={() => {
-                    onConfirm();
-                    toast.dismiss(t.id);
-                  }}
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          );
-
           toast(
             (t) => (
               <ConfirmationToast
@@ -1030,6 +1004,7 @@ function App() {
       careerRaceIds,
       smartAddedRaceIds,
       combinedRaceIds,
+      raceExclusivity,
     ]
   );
 

@@ -245,13 +245,25 @@ function Planner({
         }
       });
       const newFilters = { ...filters };
-      if (APTITUDE_VALUES[minTrackApt] < APTITUDE_VALUES[filters.trackAptitude])
+      let filtersChanged = false;
+      if (
+        APTITUDE_VALUES[minTrackApt] < APTITUDE_VALUES[filters.trackAptitude]
+      ) {
         newFilters.trackAptitude = minTrackApt;
+        filtersChanged = true;
+      }
       if (
         APTITUDE_VALUES[minDistApt] < APTITUDE_VALUES[filters.distanceAptitude]
-      )
+      ) {
         newFilters.distanceAptitude = minDistApt;
+        filtersChanged = true;
+      }
       setFilters(newFilters);
+      if (filtersChanged) {
+        toast.info("Aptitude filters were adjusted to show all kept races.", {
+          duration: 4000,
+        });
+      }
     }
     updateCharacterState(
       characterToSelect,

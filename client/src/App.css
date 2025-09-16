@@ -760,9 +760,6 @@ tr:hover {
 .turn-counter {
   font-size: 1.2em;
   color: var(--color-text-secondary);
-  margin-bottom: 15px;
-  border-bottom: 1px solid var(--color-border-medium);
-  padding-bottom: 15px;
 }
 .turn-counter .turn-count {
   font-size: 2em;
@@ -841,8 +838,25 @@ tr:hover {
   cursor: not-allowed;
   opacity: 0.7;
 }
-.upcoming-races-preview {
+.progress-details-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--color-border-medium);
+  cursor: pointer;
+  user-select: none;
+}
+.progress-details-toggle h4 {
+  margin: 0;
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+}
+.progress-details-content {
+  padding-top: 15px;
+}
+.upcoming-races-preview {
   padding-top: 15px;
   border-top: 1px solid var(--color-border-medium);
   text-align: left;

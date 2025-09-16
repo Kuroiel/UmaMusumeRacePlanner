@@ -47,6 +47,7 @@ const ProgressHelper = ({
   races,
   careerRaceIds,
 }) => {
+  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
   const isComplete = !nextRace;
 
   const { turnsUntil, upcomingRaces } = useMemo(() => {
@@ -90,9 +91,6 @@ const ProgressHelper = ({
 
   return (
     <div className="progress-helper">
-      <div className="turn-counter">
-        <span className="turn-count">{turnsUntil}</span> Turns Until Next Race
-      </div>
       <div className="progress-label">Next Race:</div>
       <div className="progress-race-name">
         <span className={gradeBubbleClass}>
@@ -162,27 +160,44 @@ const ProgressHelper = ({
           Mark as Skipped
         </button>
       </div>
-      {upcomingRaces.length > 0 && (
-        <div className="upcoming-races-preview">
-          <h4>Upcoming:</h4>
-          <ul>
-            {upcomingRaces.map((race) => (
-              <li key={race.id}>
-                <span className="upcoming-date">
-                  +{race.turnsAfterPrev} turns
-                </span>
-                <span className="upcoming-name">
-                  {race.name}
-                  {careerRaceIds.has(race.id) && (
-                    <span className="career-race-indicator mini">C</span>
-                  )}
-                </span>
-                <span className={getGradeBubbleClass(race, careerRaceIds)}>
-                  {gradeNameMap[race.grade] || race.grade}
-                </span>
-              </li>
-            ))}
-          </ul>
+
+      <div
+        className="progress-details-toggle"
+        onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+      >
+        <h4>Schedule Details</h4>
+        <span>{isDetailsOpen ? "▼" : "►"}</span>
+      </div>
+
+      {isDetailsOpen && (
+        <div className="progress-details-content">
+          <div className="turn-counter">
+            <span className="turn-count">{turnsUntil}</span> Turns Until Next
+            Race
+          </div>
+          {upcomingRaces.length > 0 && (
+            <div className="upcoming-races-preview">
+              <h4>Upcoming:</h4>
+              <ul>
+                {upcomingRaces.map((race) => (
+                  <li key={race.id}>
+                    <span className="upcoming-date">
+                      +{race.turnsAfterPrev} turns
+                    </span>
+                    <span className="upcoming-name">
+                      {race.name}
+                      {careerRaceIds.has(race.id) && (
+                        <span className="career-race-indicator mini">C</span>
+                      )}
+                    </span>
+                    <span className={getGradeBubbleClass(race, careerRaceIds)}>
+                      {gradeNameMap[race.grade] || race.grade}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>
