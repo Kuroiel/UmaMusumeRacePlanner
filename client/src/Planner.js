@@ -894,6 +894,11 @@ function Planner({
                     before. Keep in mind each Uma is different, stats that work
                     for one Uma might not work for another.
                   </li>
+                  <li>
+                    If you skip a race early for any reason, ie: low stats, the
+                    turn counter will not be accurate as it calculates turns
+                    based on the most recent race.
+                  </li>
                 </ul>
               </div>
             )}

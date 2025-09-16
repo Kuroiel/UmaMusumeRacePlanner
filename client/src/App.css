@@ -853,9 +853,7 @@ tr:hover {
   font-size: 0.9em;
   color: var(--color-text-secondary);
 }
-.progress-details-content {
-  padding-top: 15px;
-}
+
 .upcoming-races-preview {
   padding-top: 15px;
   border-top: 1px solid var(--color-border-medium);
