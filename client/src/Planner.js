@@ -899,6 +899,10 @@ function Planner({
                     turn counter will not be accurate as it calculates turns
                     based on the most recent race.
                   </li>
+                  <li>
+                    Right now you can only export all checklists, the ability to
+                    export and import individual checklists is in progress.
+                  </li>
                 </ul>
               </div>
             )}
