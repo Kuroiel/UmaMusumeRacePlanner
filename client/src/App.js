@@ -296,6 +296,10 @@ function App() {
     name: "",
     onConfirm: () => {},
   });
+  const [importConflictModal, setImportConflictModal] = useState({
+    isOpen: false,
+    checklistToImport: null,
+  });
 
   useEffect(() => {
     const standardizedRaces = raceData.map((race) => {
@@ -916,6 +920,80 @@ function App() {
 
         allHandlers.updateLocalStorage(newList);
       },
+      handleExportSingleChecklist: (name) => {
+        const checklist = savedChecklists.find((c) => c.name === name);
+        if (!checklist) {
+          toast.error("Could not find checklist to export.");
+          return;
+        }
+        const jsonString = JSON.stringify(checklist, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${name}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success(`Exported "${name}"!`);
+      },
+      handleImportSingleChecklist: (importedChecklist) => {
+        if (
+          typeof importedChecklist !== "object" ||
+          importedChecklist === null ||
+          typeof importedChecklist.name !== "string" ||
+          !Array.isArray(importedChecklist.selectedRaceIds)
+        ) {
+          toast.error(
+            "Import failed: File data is not a valid checklist object."
+          );
+          return;
+        }
+
+        const sanitizedChecklist = {
+          name: String(importedChecklist.name).slice(0, 100),
+          characterName: String(importedChecklist.characterName || "Unknown"),
+          modifiedAptitudes: importedChecklist.modifiedAptitudes || null,
+          selectedRaceIds: importedChecklist.selectedRaceIds,
+          checklistData: importedChecklist.checklistData || {},
+          filters: importedChecklist.filters || {},
+          gradeFilters: importedChecklist.gradeFilters || {},
+          yearFilters: migrateYearFilters(importedChecklist.yearFilters) || {
+            "Junior Year": true,
+            "Classic Year": true,
+            "Senior Year": true,
+          },
+          trackFilters: importedChecklist.trackFilters || {
+            Turf: true,
+            Dirt: true,
+          },
+          distanceFilters: importedChecklist.distanceFilters || {
+            sprint: true,
+            mile: true,
+            medium: true,
+            long: true,
+          },
+          showOptionalGrades: !!importedChecklist.showOptionalGrades,
+          savedAt: importedChecklist.savedAt || new Date().toISOString(),
+        };
+
+        const existingIndex = savedChecklists.findIndex(
+          (c) => c.name === sanitizedChecklist.name
+        );
+        if (existingIndex > -1) {
+          setImportConflictModal({
+            isOpen: true,
+            checklistToImport: sanitizedChecklist,
+          });
+        } else {
+          allHandlers.updateLocalStorage([
+            ...savedChecklists,
+            sanitizedChecklist,
+          ]);
+          toast.success(`Imported checklist "${sanitizedChecklist.name}"!`);
+        }
+      },
       handleImportChecklists: (importedChecklists) => {
         if (!Array.isArray(importedChecklists)) {
           toast.error(
@@ -1082,6 +1160,18 @@ function App() {
     setFilters,
   };
 
+  const handleConfirmImportOverwrite = () => {
+    const { checklistToImport } = importConflictModal;
+    if (!checklistToImport) return;
+
+    const newChecklists = savedChecklists.map((c) =>
+      c.name === checklistToImport.name ? checklistToImport : c
+    );
+    allHandlers.updateLocalStorage(newChecklists);
+    toast.success(`Checklist "${checklistToImport.name}" was overwritten!`);
+    setImportConflictModal({ isOpen: false, checklistToImport: null });
+  };
+
   return (
     <div className="App">
       <Toaster position="top-center" reverseOrder={false} />
@@ -1112,6 +1202,23 @@ function App() {
           <p>
             A checklist named "<strong>{overwriteModal.name}</strong>" already
             exists. Do you want to overwrite it?
+          </p>
+        </Modal>
+      )}
+
+      {importConflictModal.isOpen && (
+        <Modal
+          title="Import Conflict"
+          onConfirm={handleConfirmImportOverwrite}
+          onCancel={() =>
+            setImportConflictModal({ isOpen: false, checklistToImport: null })
+          }
+          confirmText="Overwrite"
+        >
+          <p>
+            A checklist named "
+            <strong>{importConflictModal.checklistToImport?.name}</strong>"
+            already exists. Do you want to overwrite it with the imported file?
           </p>
         </Modal>
       )}

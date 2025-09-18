@@ -59,6 +59,8 @@ function Planner({
   handleDeleteChecklist,
   handleRenameChecklist,
   handleReorderChecklist,
+  handleExportSingleChecklist,
+  handleImportSingleChecklist,
   handleImportChecklists,
   currentChecklistName,
   filters,
@@ -533,6 +535,8 @@ function Planner({
     onDelete: handleDeleteChecklist,
     onRename: handleRenameChecklist,
     onReorder: handleReorderChecklist,
+    onExportSingle: handleExportSingleChecklist,
+    onImportSingle: handleImportSingleChecklist,
     onImport: handleImportChecklists,
     currentChecklistName,
   };

@@ -8,11 +8,14 @@ function ChecklistManager({
   onDelete,
   onRename,
   onReorder,
+  onExportSingle,
+  onImportSingle,
   onImport,
   selectedCharacter,
   currentChecklistName,
 }) {
   const fileInputRef = useRef(null);
+  const singleFileInputRef = useRef(null);
   const [renameModalState, setRenameModalState] = useState({
     isOpen: false,
     oldName: "",
@@ -56,24 +59,28 @@ function ChecklistManager({
     setRenameModalState({ isOpen: false, oldName: "" });
   };
 
-  const handleExportClick = () => {
+  const handleExportAllClick = () => {
     const jsonString = JSON.stringify(savedChecklists, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "umamusume-race-planner.json";
+    a.download = "umamusume-race-planner-all.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  const handleImportClick = () => {
+  const handleImportAllClick = () => {
     fileInputRef.current.click();
   };
 
-  const handleFileChange = (event) => {
+  const handleImportSingleClick = () => {
+    singleFileInputRef.current.click();
+  };
+
+  const handleFileChange = (event, isSingleImport) => {
     const file = event.target.files[0];
     if (file) {
       const MAX_FILE_SIZE_MB = 5;
@@ -86,10 +93,14 @@ function ChecklistManager({
       reader.onload = (e) => {
         try {
           const importedData = JSON.parse(e.target.result);
-          if (Array.isArray(importedData)) {
-            onImport(importedData);
+          if (isSingleImport) {
+            onImportSingle(importedData);
           } else {
-            alert("Invalid file format.");
+            if (Array.isArray(importedData)) {
+              onImport(importedData);
+            } else {
+              alert("Invalid file format for importing all checklists.");
+            }
           }
         } catch (error) {
           alert("Error reading or parsing the file.");
@@ -157,6 +168,7 @@ function ChecklistManager({
                   <button onClick={() => handleRenameClick(name)}>
                     Rename
                   </button>
+                  <button onClick={() => onExportSingle(name)}>Export</button>
                   <button
                     className="delete-button"
                     onClick={() => onDelete(name)}
@@ -171,12 +183,12 @@ function ChecklistManager({
         <div className="io-buttons">
           <button
             className="manager-button"
-            onClick={handleExportClick}
+            onClick={handleExportAllClick}
             disabled={savedChecklists.length === 0}
           >
             Export All
           </button>
-          <button className="manager-button" onClick={handleImportClick}>
+          <button className="manager-button" onClick={handleImportAllClick}>
             Import All
           </button>
           <input
@@ -184,7 +196,23 @@ function ChecklistManager({
             accept=".json"
             ref={fileInputRef}
             style={{ display: "none" }}
-            onChange={handleFileChange}
+            onChange={(e) => handleFileChange(e, false)}
+          />
+        </div>
+        <div className="io-buttons" style={{ marginTop: "5px" }}>
+          <button
+            className="manager-button"
+            style={{ width: "100%" }}
+            onClick={handleImportSingleClick}
+          >
+            Import Single
+          </button>
+          <input
+            type="file"
+            accept=".json"
+            ref={singleFileInputRef}
+            style={{ display: "none" }}
+            onChange={(e) => handleFileChange(e, true)}
           />
         </div>
       </div>
