@@ -47,7 +47,7 @@ const ProgressHelper = ({
   races,
   careerRaceIds,
 }) => {
-  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const isComplete = !nextRace;
 
   const { turnsUntil, upcomingRaces } = useMemo(() => {
@@ -91,74 +91,77 @@ const ProgressHelper = ({
 
   return (
     <div className="progress-helper">
-      <div className="progress-label">Next Race:</div>
-      <div className="progress-race-name">
-        <span className={gradeBubbleClass}>
-          {gradeNameMap[nextRace.grade] || nextRace.grade}
-        </span>
-        {nextRace.name}{" "}
-        {nextRace.isCareer && (
-          <span className="career-race-indicator">Career</span>
-        )}
-        {isExclusive && !nextRace.isCareer && (
-          <span className="exclusive-race-indicator">Exclusive</span>
-        )}
-        {previouslyWon && (
-          <div className="tooltip-container">
-            <span className="smart-add-indicator">✅</span>
-            <span className="tooltip-text checklist-tooltip">
-              A previous instance of this race was already won.
-            </span>
-          </div>
-        )}
-        {nextInstancePlanned && (
-          <div className="tooltip-container">
-            <span className="smart-add-indicator">📅</span>
-            <span className="tooltip-text checklist-tooltip">
-              Next year's instance of this race is also planned.
-            </span>
-          </div>
-        )}
-      </div>
-      <div className="progress-race-date">
-        <span>🗓️ {formatChecklistDate(nextRace.date)}</span>|
-        <span>
-          {nextRace.ground} -{" "}
+      <div className="progress-race-info">
+        <div className="progress-label">Next Race:</div>
+        <div className="progress-race-name">
+          <span className={gradeBubbleClass}>
+            {gradeNameMap[nextRace.grade] || nextRace.grade}
+          </span>
+          {nextRace.name}{" "}
+          {nextRace.isCareer && (
+            <span className="career-race-indicator">Career</span>
+          )}
+          {isExclusive && !nextRace.isCareer && (
+            <span className="exclusive-race-indicator">Exclusive</span>
+          )}
+          {previouslyWon && (
+            <div className="tooltip-container">
+              <span className="smart-add-indicator">✅</span>
+              <span className="tooltip-text checklist-tooltip">
+                A previous instance of this race was already won.
+              </span>
+            </div>
+          )}
+          {nextInstancePlanned && (
+            <div className="tooltip-container">
+              <span className="smart-add-indicator">📅</span>
+              <span className="tooltip-text checklist-tooltip">
+                Next year's instance of this race is also planned.
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="progress-race-meta">
+          <span>🗓️ {formatChecklistDate(nextRace.date)}</span>
+          {" | "}
+          {nextRace.ground}
+          {" | "}
           {capitalize(getDistanceCategory(nextRace.distance))} (
-          {nextRace.distance}m)
-        </span>
-      </div>
-      <textarea
-        className="progress-notes-textarea"
-        placeholder="Notes for this race..."
-        value={notes}
-        onChange={(e) =>
-          onChecklistDataChange(nextRace.id, "notes", e.target.value)
-        }
-        disabled={isComplete}
-      />
-      <div className="progress-actions">
-        <button
-          className="progress-action-button ran"
-          onClick={() => onUpdateNextRace("ran", true)}
+          {nextRace.distance}
+          m)
+        </div>
+        <textarea
+          className="progress-notes-textarea"
+          placeholder="Notes for this race..."
+          value={notes}
+          onChange={(e) =>
+            onChecklistDataChange(nextRace.id, "notes", e.target.value)
+          }
           disabled={isComplete}
-        >
-          Mark as Ran
-        </button>
-        <button
-          className="progress-action-button won"
-          onClick={() => onUpdateNextRace("won", true)}
-          disabled={isComplete}
-        >
-          Mark as Won
-        </button>
-        <button
-          className="progress-action-button skip"
-          onClick={() => onUpdateNextRace("skipped", true)}
-          disabled={isComplete || (nextRace && nextRace.isCareer)}
-        >
-          Mark as Skipped
-        </button>
+        />
+        <div className="progress-actions">
+          <button
+            className="progress-action-button ran"
+            onClick={() => onUpdateNextRace("ran", true)}
+            disabled={isComplete}
+          >
+            Mark as Ran
+          </button>
+          <button
+            className="progress-action-button won"
+            onClick={() => onUpdateNextRace("won", true)}
+            disabled={isComplete}
+          >
+            Mark as Won
+          </button>
+          <button
+            className="progress-action-button skip"
+            onClick={() => onUpdateNextRace("skipped", true)}
+            disabled={isComplete || (nextRace && nextRace.isCareer)}
+          >
+            Mark as Skipped
+          </button>
+        </div>
       </div>
 
       <div
@@ -223,6 +226,10 @@ function Checklist({
   combinedRaceIds,
   filters,
   setFilters,
+  totalBaseFans,
+  estimatedTotalFans,
+  fanBonus,
+  setFanBonus,
 }) {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -363,16 +370,18 @@ function Checklist({
       {races.length > 0 && (
         <>
           <div className="checklist-sticky-header">
-            <ProgressHelper
-              nextRace={nextRace}
-              onUpdateNextRace={handleUpdateNextRace}
-              onChecklistDataChange={onChecklistDataChange}
-              raceExclusivity={raceExclusivity}
-              previouslyWon={nextRaceInfo.previouslyWon}
-              nextInstancePlanned={nextRaceInfo.nextInstancePlanned}
-              races={races}
-              careerRaceIds={careerRaceIds}
-            />
+            <div className="next-race-panel">
+              <ProgressHelper
+                nextRace={nextRace}
+                onUpdateNextRace={handleUpdateNextRace}
+                onChecklistDataChange={onChecklistDataChange}
+                raceExclusivity={raceExclusivity}
+                previouslyWon={nextRaceInfo.previouslyWon}
+                nextInstancePlanned={nextRaceInfo.nextInstancePlanned}
+                races={races}
+                careerRaceIds={careerRaceIds}
+              />
+            </div>
 
             <div className="grade-counter checklist-page-counter">
               <span className="counter-label">Selected:</span>
@@ -387,6 +396,44 @@ function Checklist({
               <span className="counter-label">Won:</span>
               <span>
                 {wonCount} / {races.length}
+              </span>
+            </div>
+            <div
+              className="grade-counter checklist-page-counter"
+              style={{
+                borderTop: "1px solid var(--color-border-light)",
+                paddingTop: "15px",
+              }}
+            >
+              <span className="counter-label">Fan Info:</span>
+              <div className="fan-input-group">
+                <label htmlFor="fanBonus">Fan Bonus %:</label>
+                <input
+                  id="fanBonus"
+                  type="number"
+                  value={fanBonus}
+                  onChange={(e) => setFanBonus(e.target.value)}
+                  className="fan-bonus-input"
+                />
+              </div>
+              <span>
+                Base: <strong>{totalBaseFans.toLocaleString()}</strong>
+              </span>
+              <span>
+                Est. Total:{" "}
+                <strong>{estimatedTotalFans.toLocaleString()}</strong>
+                <div className="tooltip-container">
+                  <span
+                    className="warning-icon"
+                    style={{ marginLeft: "5px", fontSize: "0.8em" }}
+                  >
+                    ?
+                  </span>
+                  <span className="tooltip-text">
+                    An estimate based on gaining 1st place in all selected races
+                    with the specified fan bonus.
+                  </span>
+                </div>
               </span>
             </div>
           </div>

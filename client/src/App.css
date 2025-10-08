@@ -164,6 +164,12 @@ h4 {
   user-select: none;
 }
 
+.collapsible-header span {
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+}
+
 /* === LEFT PANEL COMPONENTS === */
 .search-bar {
   width: calc(100% - 22px);
@@ -316,6 +322,7 @@ h4 {
 .known-issues li {
   font-size: 0.9em;
   color: var(--color-text-secondary);
+  margin-bottom: 5px;
 }
 .epithet-list ul {
   padding-left: 20px;
@@ -406,6 +413,31 @@ h4 {
   border-radius: 4px;
 }
 
+/* === FAN COUNTER INPUT GROUP === */
+.fan-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.fan-input-group label {
+  font-weight: bold;
+}
+.fan-bonus-input {
+  width: 60px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border-medium);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 1em;
+}
+.fan-input-group span {
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
 /* === RACE LIST & STICKY HEADER === */
 .race-list-panel {
   display: flex;
@@ -437,6 +469,21 @@ h4 {
   display: flex;
   gap: 10px;
   align-items: center;
+}
+.race-list-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: var(--color-interactive-bg);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.show-only-selected-toggle {
+  font-weight: bold;
+  cursor: pointer;
 }
 .table-container {
   flex-grow: 1;
@@ -490,11 +537,12 @@ tr:hover {
 .col-exclusive {
   text-align: center;
 }
+/* Adjusted column widths for new Fan column */
 .col-select {
   width: 3%;
 }
 .col-status {
-  width: 4%;
+  width: 3%;
 }
 .col-career {
   width: 4%;
@@ -509,16 +557,20 @@ tr:hover {
   width: 28%;
 }
 .col-track {
-  width: 6%;
+  width: 5%;
 }
 .col-dist-name {
-  width: 8%;
+  width: 7%;
 }
 .col-dist-m {
+  width: 5%;
+}
+.col-fans {
   width: 6%;
+  text-align: right;
 }
 .col-exclusive {
-  width: 10%;
+  width: 8%;
 }
 
 /* === MODAL & CHECKLIST MANAGER === */
@@ -636,6 +688,17 @@ tr:hover {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.checklist-actions .load-button {
+  background-color: var(--color-accent-blue);
+  border-color: var(--color-accent-blue);
+  color: var(--color-text-light);
+  font-weight: bold;
+}
+.checklist-actions .load-button:hover {
+  background-color: var(--color-accent-blue-hover);
+}
+
 .checklist-actions .delete-button {
   background: var(--color-accent-red);
   color: var(--color-text-light);
@@ -650,7 +713,7 @@ tr:hover {
 /* === CHECKLIST PAGE & BUTTON  === */
 .checklist-page {
   padding: 20px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: auto;
 }
 .checklist-page-header {
@@ -737,45 +800,48 @@ tr:hover {
   font-size: 0.9em;
 }
 
-.progress-helper {
+/* --- CHECKLIST PROGRESS HELPER --- */
+.next-race-panel {
   background-color: var(--color-interactive-bg);
   border: 1px solid var(--color-border-medium);
   border-radius: 8px;
-  padding: 15px;
   margin-bottom: 5px;
+}
+
+.progress-helper {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+
+  align-items: stretch;
   text-align: center;
 }
+
 .progress-helper-complete {
-  background-color: var(--color-highlight-bg);
-  border-color: var(--color-accent-green);
-  font-weight: bold;
-  font-size: 1.2em;
+  width: 100%;
 }
+
+.progress-race-info {
+  width: 100%;
+}
+
 .progress-label {
   font-size: 0.9em;
   font-weight: bold;
   color: var(--color-text-secondary);
   margin-bottom: 4px;
 }
-.turn-counter {
-  font-size: 1.2em;
-  color: var(--color-text-secondary);
-}
-.turn-counter .turn-count {
-  font-size: 2em;
-  font-weight: bold;
-  color: var(--color-text-primary);
-  display: block;
-}
+
 .progress-race-name {
   font-size: 1.3em;
   font-weight: bold;
   color: var(--color-text-primary);
 }
-.progress-race-date {
+
+.progress-race-meta {
   font-size: 1em;
   color: var(--color-text-secondary);
-  margin-top: 4px;
+  margin-top: 8px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -794,6 +860,9 @@ tr:hover {
   font-family: inherit;
   resize: vertical;
   min-height: 40px;
+
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .progress-actions {
@@ -838,15 +907,17 @@ tr:hover {
   cursor: not-allowed;
   opacity: 0.7;
 }
+
 .progress-details-toggle {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
+  margin-top: 20px;
   padding-top: 15px;
   border-top: 1px solid var(--color-border-medium);
   cursor: pointer;
   user-select: none;
+  width: 100%;
 }
 .progress-details-toggle h4 {
   margin: 0;
@@ -854,10 +925,25 @@ tr:hover {
   color: var(--color-text-secondary);
 }
 
+.progress-details-content {
+  padding-top: 15px;
+  width: 100%;
+}
+.turn-counter {
+  font-size: 1.2em;
+  color: var(--color-text-secondary);
+}
+.turn-counter .turn-count {
+  font-size: 2em;
+  font-weight: bold;
+  color: var(--color-text-primary);
+  display: block;
+}
+
 .upcoming-races-preview {
+  text-align: left;
   padding-top: 15px;
   border-top: 1px solid var(--color-border-medium);
-  text-align: left;
 }
 .upcoming-races-preview h4 {
   margin: 0 0 10px 0;
@@ -893,6 +979,7 @@ tr:hover {
   color: var(--color-text-secondary);
   font-size: 0.9em;
 }
+
 .career-race-indicator.mini {
   padding: 1px 4px;
   font-size: 0.9em;
@@ -911,6 +998,8 @@ tr:hover {
   vertical-align: middle;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
 }
 .career-race-indicator {
   background-color: var(--color-accent-blue);
@@ -926,10 +1015,12 @@ tr:hover {
   cursor: help;
   vertical-align: middle;
 }
+
 .checklist-container {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  flex-grow: 1;
 }
 .checklist-item {
   display: flex;
@@ -1033,6 +1124,23 @@ tr:hover {
   margin-left: 0;
 }
 
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-item .label {
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--color-text-secondary);
+  margin-bottom: 2px;
+}
+
+.detail-item .value {
+  font-size: 1em;
+  color: var(--color-text-primary);
+}
+
 /* === BACK TO TOP BUTTON === */
 .back-to-top-button {
   position: fixed;
@@ -1077,7 +1185,6 @@ tr:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 8px;
   cursor: help;
   border: 1px solid var(--color-warning-icon-text);
 }
@@ -1230,12 +1337,180 @@ tr:hover {
   background-color: var(--color-accent-red-hover);
 }
 
+/* === CALENDAR VIEW === */
+.calendar-page {
+  padding: 20px;
+  max-width: 1600px;
+  margin: auto;
+}
+.calendar-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 15px;
+}
+.calendar-header h2 {
+  grid-column: 2;
+  text-align: center;
+  margin-bottom: 0;
+  border: none;
+}
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.calendar-year .year-title {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  text-align: center;
+  background-color: var(--color-interactive-bg);
+  padding: 8px;
+  border-radius: 6px;
+}
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+.calendar-month {
+  background-color: var(--color-panel-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.month-header {
+  font-weight: bold;
+  text-align: center;
+  padding: 6px;
+  background-color: var(--color-interactive-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+.turns-container {
+  display: flex;
+}
+.calendar-turn {
+  flex: 1;
+  padding: 5px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+.calendar-turn:first-child {
+  border-right: 1px solid var(--color-border-light);
+}
+.turn-label {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--color-text-secondary);
+  opacity: 0.5;
+}
+.calendar-race-entry {
+  font-size: 0.8em;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: var(--color-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: help;
+  display: flex;
+  gap: 4px;
+}
+.calendar-race-entry.optional {
+  background-color: var(--color-accent-gray);
+}
+.calendar-race-entry.career {
+  background-color: var(--color-accent-blue);
+}
+.calendar-race-entry .race-grade {
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.calendar-race-entry .race-name {
+  opacity: 0.9;
+}
+
+/* === COMPACT MODE === */
+.App.compact-mode .panel-section {
+  padding: 10px 15px;
+}
+.App.compact-mode h2 {
+  font-size: 1.1em;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+.App.compact-mode .character-list li {
+  padding: 6px 10px;
+}
+.App.compact-mode table th,
+.App.compact-mode table td {
+  padding: 4px 6px;
+  font-size: 12px;
+}
+.App.compact-mode .checklist-page {
+  padding: 10px;
+}
+.App.compact-mode .checklist-item {
+  padding: 8px 12px;
+  gap: 12px;
+}
+.App.compact-mode .checklist-item-info h3 {
+  font-size: 1em;
+  margin-bottom: 3px;
+}
+.App.compact-mode .checklist-item-meta {
+  font-size: 0.8em;
+  gap: 6px;
+}
+.App.compact-mode .checklist-item-actions {
+  gap: 8px;
+}
+.App.compact-mode .checklist-item-controls {
+  gap: 12px;
+}
+.App.compact-mode .checklist-item-actions textarea {
+  padding: 5px;
+  width: 200px;
+  font-size: 0.9em;
+}
+.App.compact-mode .next-race-panel {
+  margin-bottom: 0;
+}
+.App.compact-mode .progress-helper {
+  padding: 10px;
+}
+.App.compact-mode .progress-race-name {
+  font-size: 1.1em;
+}
+.App.compact-mode .turn-counter {
+  font-size: 1em;
+}
+.App.compact-mode .turn-counter .turn-count {
+  font-size: 1.6em;
+}
+
 /* === RESPONSIVE DESIGN === */
 
 /* Tablets and smaller desktops */
 @media (max-width: 1200px) {
   .table-container {
     overflow-x: auto;
+  }
+  .months-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .months-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -1272,6 +1547,10 @@ tr:hover {
   }
   .race-list-title-group .search-bar {
     width: 100%;
+  }
+  .race-list-controls {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   th,
@@ -1335,5 +1614,40 @@ tr:hover {
     width: 40px;
     height: 40px;
     font-size: 20px;
+  }
+  .next-race-panel {
+    flex-direction: column;
+  }
+  .race-details-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--color-border-medium);
+  }
+  .race-details-panel.collapsed {
+    width: 100%;
+    cursor: default;
+  }
+  .race-details-header {
+    padding: 10px 15px;
+    justify-content: space-between;
+  }
+  .race-details-header h3 {
+    flex-direction: row;
+  }
+
+  .months-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .calendar-header {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 10px;
+  }
+  .calendar-header h2 {
+    grid-row: 1;
+  }
+  .calendar-header .back-button {
+    grid-row: 2;
+    justify-self: center;
   }
 }

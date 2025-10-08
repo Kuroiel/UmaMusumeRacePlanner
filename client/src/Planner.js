@@ -90,6 +90,14 @@ function Planner({
   combinedRaceIds,
   epithetStatus,
   handleAddEpithetRaces,
+  showOnlySelected,
+  setShowOnlySelected,
+  totalBaseFans,
+  estimatedTotalFans,
+  fanBonus,
+  setFanBonus,
+  isCompactMode,
+  setIsCompactMode,
 }) {
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -130,17 +138,19 @@ function Planner({
   const [panelsOpen, setPanelsOpen] = useState(() => {
     try {
       const savedPanels = localStorage.getItem("umamusume-panel-state");
-      return savedPanels
-        ? JSON.parse(savedPanels)
-        : {
-            aptitudes: true,
-            filters: true,
-            epithets: true,
-            manager: true,
-            epithetList: false,
-            sources: false,
-            issues: false,
-          };
+      const parsed = savedPanels ? JSON.parse(savedPanels) : {};
+
+      delete parsed.fanCounter;
+      return {
+        aptitudes: true,
+        filters: true,
+        epithets: true,
+        manager: true,
+        epithetList: false,
+        sources: false,
+        issues: false,
+        ...parsed,
+      };
     } catch {
       return {
         aptitudes: true,
@@ -436,6 +446,10 @@ function Planner({
       const displayGrade = gradeNameMap[race.grade] || race.grade;
       if (displayGrade === "Debut" || displayGrade === "Maiden") return false;
 
+      if (showOnlySelected && !combinedRaceIds.has(race.id)) {
+        return false;
+      }
+
       const isCareerRace = careerRaceIds.has(race.id);
       if (alwaysShowCareer && isCareerRace) {
         return true;
@@ -492,6 +506,8 @@ function Planner({
     isNoCareerMode,
     alwaysShowCareer,
     raceSearchTerm,
+    showOnlySelected,
+    combinedRaceIds,
   ]);
 
   const getRaceRowClass = useCallback(
@@ -541,6 +557,17 @@ function Planner({
     currentChecklistName,
   };
 
+  const renderFanCell = (fans) => {
+    if (typeof fans === "number" && fans > 100) {
+      return fans.toLocaleString();
+    }
+
+    if (typeof fans === "string") {
+      return fans;
+    }
+    return "";
+  };
+
   return (
     <>
       {modalState.isOpen && (
@@ -587,6 +614,7 @@ function Planner({
               className="search-bar"
               value={searchTerm}
               onChange={handleSearchChange}
+              onFocus={(e) => e.target.select()}
             />
             <ul className="character-list">
               {filteredCharacters.map((char) => (
@@ -818,6 +846,10 @@ function Planner({
               <div className="epithet-list">
                 <ul>
                   <li>
+                    Note: Winning the Year 2 version of a race (e.g., Japan Cup)
+                    also counts towards any epithet that requires it.
+                  </li>
+                  <li>
                     <strong>Classic Triple Crown:</strong> Satsuki Sho, Tokyo
                     Yushun, Kikuka Sho
                   </li>
@@ -874,6 +906,15 @@ function Planner({
                     Alternative career objectives are not yet implemented.
                   </li>
                   <li>
+                    Fan counts are a work-in-progress and have not been added
+                    for all races yet.
+                  </li>
+                  <li>
+                    If you change characters while having an active checklist,
+                    it is recommended to reset the Ran/Won statuses to ensure
+                    accuracy for the new character's career.
+                  </li>
+                  <li>
                     Races from the JP version of the game are included which may
                     not be present in EN yet.
                   </li>
@@ -902,10 +943,6 @@ function Planner({
                     If you skip a race early for any reason, ie: low stats, the
                     turn counter will not be accurate as it calculates turns
                     based on the most recent race.
-                  </li>
-                  <li>
-                    Right now you can only export all checklists, the ability to
-                    export and import individual checklists is in progress.
                   </li>
                 </ul>
               </div>
@@ -954,6 +991,7 @@ function Planner({
                 style={{ marginBottom: 0, width: "200px" }}
                 value={raceSearchTerm}
                 onChange={(e) => setRaceSearchTerm(e.target.value)}
+                onFocus={(e) => e.target.select()}
               />
             </div>
             <div className="race-list-actions">
@@ -963,6 +1001,13 @@ function Planner({
                 disabled={totalSelectedCount === 0}
               >
                 View Checklist ({totalSelectedCount})
+              </button>
+              <button
+                className="action-button"
+                onClick={() => setPage("calendar")}
+                disabled={totalSelectedCount === 0}
+              >
+                View Calendar
               </button>
             </div>
             <div className="grade-counter">
@@ -991,6 +1036,53 @@ function Planner({
               </span>
             </div>
           </div>
+          <div className="race-list-controls">
+            <div className="fan-input-group">
+              <label htmlFor="fanBonus">Fan Bonus %:</label>
+              <input
+                id="fanBonus"
+                type="number"
+                value={fanBonus}
+                onChange={(e) => setFanBonus(e.target.value)}
+                className="fan-bonus-input"
+              />
+              <span>
+                Base:&nbsp;<strong>{totalBaseFans.toLocaleString()}</strong>
+              </span>
+              <span>
+                Est. Total:&nbsp;{"  "}
+                <strong> {estimatedTotalFans.toLocaleString()}</strong>
+                <div className="tooltip-container">
+                  <span
+                    className="warning-icon"
+                    style={{ marginLeft: "5px", fontSize: "0.8em" }}
+                  >
+                    ?
+                  </span>
+                  <span className="tooltip-text">
+                    An estimate based on gaining 1st place in all selected races
+                    with the specified fan bonus.
+                  </span>
+                </div>
+              </span>
+            </div>
+            <label className="show-only-selected-toggle">
+              <input
+                type="checkbox"
+                checked={showOnlySelected}
+                onChange={(e) => setShowOnlySelected(e.target.checked)}
+              />{" "}
+              Show Only Selected Races
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={isCompactMode}
+                onChange={(e) => setIsCompactMode(e.target.checked)}
+              />{" "}
+              Compact Mode
+            </label>
+          </div>
           <div className="table-container">
             <table>
               <colgroup>
@@ -1003,6 +1095,7 @@ function Planner({
                 <col className="col-track" />
                 <col className="col-dist-name" />
                 <col className="col-dist-m" />
+                <col className="col-fans" />
                 <col className="col-exclusive" />
               </colgroup>
               <thead>
@@ -1016,6 +1109,7 @@ function Planner({
                   <th>Track</th>
                   <th>Distance</th>
                   <th>(m)</th>
+                  <th className="col-fans">Fans</th>
                   <th>Year Exclusive</th>
                 </tr>
               </thead>
@@ -1068,6 +1162,9 @@ function Planner({
                         {getDistanceCategory(race.distance)}
                       </td>
                       <td>{race.distance}</td>
+                      <td className="col-fans">
+                        {renderFanCell(race.fans_gained)}
+                      </td>
                       <td>
                         {raceExclusivity.get(race.name) === 1 ? "Yes" : "No"}
                       </td>

@@ -2,12 +2,14 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Planner from "./Planner";
 import Checklist from "./Checklist";
+import CalendarView from "./CalendarView";
 import ThemeToggle from "./ThemeToggle";
 import Modal from "./Modal";
 import "./App.css";
-import raceData from "./data/races.json";
+import raceData from "./data/races_detailed.json";
 import charData from "./data/characters.json";
 import epithetData from "./data/epithets.json";
+import fanOverrides from "./data/fan_overrides.json";
 
 const APTITUDE_VALUES = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: -1 };
 const getDistanceCategory = (distance) => {
@@ -301,8 +303,16 @@ function App() {
     checklistToImport: null,
   });
 
+  const [fanBonus, setFanBonus] = useState(
+    initialAutosavedState?.fanBonus ?? 0
+  );
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [isCompactMode, setIsCompactMode] = useState(
+    initialAutosavedState?.isCompactMode ?? false
+  );
+
   useEffect(() => {
-    const standardizedRaces = raceData.map((race) => {
+    let processedRaces = raceData.map((race) => {
       let date = race.date;
       date = date.replace(/Year 1/i, "Junior Year");
       date = date.replace(/Year 2/i, "Classic Year");
@@ -313,7 +323,16 @@ function App() {
         turnValue: getTurnValue(date),
       };
     });
-    setAllRaces(standardizedRaces);
+
+    processedRaces = processedRaces.map((race) => {
+      const originalFans = race.fans_gained;
+      if (fanOverrides[String(originalFans)] !== undefined) {
+        return { ...race, fans_gained: fanOverrides[String(originalFans)] };
+      }
+      return race;
+    });
+
+    setAllRaces(processedRaces);
 
     const transformedCharData = charData.map((char) => {
       const newAptitudes = { ...char.aptitudes };
@@ -379,6 +398,8 @@ function App() {
       isNoCareerMode,
       alwaysShowCareer,
       smartAddedRaceIds: Array.from(smartAddedRaceIds),
+      fanBonus,
+      isCompactMode,
     };
     try {
       localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(stateToSave));
@@ -401,6 +422,8 @@ function App() {
     isNoCareerMode,
     alwaysShowCareer,
     smartAddedRaceIds,
+    fanBonus,
+    isCompactMode,
   ]);
 
   const combinedRaceIds = useMemo(
@@ -413,36 +436,45 @@ function App() {
     [combinedRaceIds, allRaces, careerRaceIds]
   );
 
-  const gradeCounts = useMemo(() => {
-    const counts = { G1: 0, G2: 0, G3: 0 };
-    combinedRaceIds.forEach((raceId) => {
-      const race = allRaces.find((r) => r.id === raceId);
-      if (race && counts[race.grade] !== undefined) {
-        counts[race.grade]++;
-      }
-    });
-    return counts;
-  }, [combinedRaceIds, allRaces]);
+  const { gradeCounts, distanceCounts, wonCount, totalBaseFans } =
+    useMemo(() => {
+      const counts = { G1: 0, G2: 0, G3: 0 };
+      const distCounts = { sprint: 0, mile: 0, medium: 0, long: 0 };
+      let localWonCount = 0;
+      let fans = 0;
 
-  const distanceCounts = useMemo(() => {
-    const counts = { sprint: 0, mile: 0, medium: 0, long: 0 };
-    combinedRaceIds.forEach((raceId) => {
-      const race = allRaces.find((r) => r.id === raceId);
-      if (race) {
-        const category = getDistanceCategory(race.distance);
-        if (counts[category] !== undefined) {
-          counts[category]++;
+      combinedRaceIds.forEach((raceId) => {
+        const race = allRaces.find((r) => r.id === raceId);
+        if (race) {
+          if (counts[race.grade] !== undefined) {
+            counts[race.grade]++;
+          }
+          const category = getDistanceCategory(race.distance);
+          if (distCounts[category] !== undefined) {
+            distCounts[category]++;
+          }
+
+          if (typeof race.fans_gained === "number" && race.fans_gained > 100) {
+            fans += race.fans_gained;
+          }
         }
-      }
-    });
-    return counts;
-  }, [combinedRaceIds, allRaces]);
+        if (checklistData[raceId]?.won) {
+          localWonCount++;
+        }
+      });
 
-  const wonCount = useMemo(() => {
-    return Array.from(combinedRaceIds).filter(
-      (raceId) => checklistData[raceId]?.won
-    ).length;
-  }, [combinedRaceIds, checklistData]);
+      return {
+        gradeCounts: counts,
+        distanceCounts: distCounts,
+        wonCount: localWonCount,
+        totalBaseFans: fans,
+      };
+    }, [combinedRaceIds, allRaces, checklistData]);
+
+  const estimatedTotalFans = useMemo(() => {
+    const bonus = 1 + (Number(fanBonus) || 0) / 100;
+    return Math.round(totalBaseFans * bonus);
+  }, [totalBaseFans, fanBonus]);
 
   const getCareerRacesForChar = useCallback(
     (character) => {
@@ -550,76 +582,150 @@ function App() {
     selectedCharacter,
   ]);
 
-  const allHandlers = useMemo(
-    () => ({
-      handleAddEpithetRaces: (racesToAdd) => {
-        const raceIdsToAdd = new Set(racesToAdd.map((r) => r.id));
-        const datesOfRacesToAdd = new Set(racesToAdd.map((r) => r.date));
+  const handleAddEpithetRaces = useCallback(
+    (racesToAdd) => {
+      const racesToAddByName = new Map();
+      racesToAdd.forEach((race) => {
+        if (!racesToAddByName.has(race.name)) {
+          racesToAddByName.set(race.name, []);
+        }
+        racesToAddByName.get(race.name).push(race);
+      });
 
-        const filteredSelectedRaces = new Set(
-          [...selectedRaces].filter((id) => {
-            const race = allRaces.find((r) => r.id === id);
-            return !datesOfRacesToAdd.has(race.date);
-          })
+      const currentRaceDates = new Map();
+      allRaces.forEach((r) => {
+        if (combinedRaceIds.has(r.id)) {
+          currentRaceDates.set(r.date, r.name);
+        }
+      });
+
+      const finalRacesToAdd = new Set();
+      const racesThatCauseWarnings = new Set();
+
+      racesToAddByName.forEach((instances, name) => {
+        const sortedInstances = instances.sort(
+          (a, b) => a.turnValue - b.turnValue
         );
+        let added = false;
+        for (const instance of sortedInstances) {
+          if (currentRaceDates.has(instance.date)) continue;
 
-        const newSelectedRaces = new Set([
-          ...filteredSelectedRaces,
-          ...raceIdsToAdd,
-        ]);
+          const potentialIds = new Set([
+            ...combinedRaceIds,
+            ...finalRacesToAdd,
+            instance.id,
+          ]);
+          const potentialWarnings = calculateWarningIds(
+            potentialIds,
+            allRaces,
+            careerRaceIds
+          );
 
-        setSelectedRaces(newSelectedRaces);
-        setCurrentChecklistName(null);
-        toast.success(`Added ${racesToAdd.length} race(s) to your schedule!`);
-      },
-      handleChecklistDataChange: (raceId, field, value) => {
-        const currentData = checklistData[raceId] || {
-          ran: false,
-          won: false,
-          notes: "",
-          skipped: false,
-        };
-        const newData = { ...currentData, [field]: value };
-        const raceToUpdate = allRaces.find((r) => r.id === raceId);
-        if (!raceToUpdate) return;
+          if (!potentialWarnings.has(instance.id)) {
+            finalRacesToAdd.add(instance.id);
+            added = true;
+            break;
+          }
+        }
 
-        const wasTrigger =
-          (field === "skipped" && currentData.skipped === false) ||
-          (field === "ran" &&
-            currentData.ran === false &&
-            currentData.won === false);
-        const isTrigger =
-          (field === "skipped" && value === true) ||
-          (field === "ran" && value === true && !newData.won);
-        const isUndo = wasTrigger && !isTrigger;
+        if (!added) {
+          racesThatCauseWarnings.add(name);
+          const fallbackInstance = sortedInstances.find(
+            (r) => !currentRaceDates.has(r.date)
+          );
+          if (fallbackInstance) {
+            finalRacesToAdd.add(fallbackInstance.id);
+          }
+        }
+      });
 
-        if (
-          !careerRaceIds.has(raceId) &&
-          (isTrigger || isUndo) &&
-          raceExclusivity.get(raceToUpdate.name) > 1
-        ) {
-          const futureInstance = allRaces
-            .filter(
-              (r) =>
-                r.name === raceToUpdate.name &&
-                r.turnValue > raceToUpdate.turnValue
-            )
-            .sort((a, b) => a.turnValue - b.turnValue)[0];
+      if (racesThatCauseWarnings.size > 0) {
+        const raceNames = Array.from(racesThatCauseWarnings).join(", ");
+        toast.error(
+          `Could not add the following race(s) without causing a 3-race warning: ${raceNames}. The earliest available instance was added instead.`,
+          { duration: 6000 }
+        );
+      }
 
-          if (futureInstance) {
-            if (isTrigger) {
-              const allScheduledDates = new Map();
-              allRaces.forEach((r) => {
-                if (combinedRaceIds.has(r.id) && r.id !== raceId) {
-                  allScheduledDates.set(r.date, {
-                    name: r.name,
-                    isCareer: careerRaceIds.has(r.id),
-                  });
-                }
-              });
+      const datesOfRacesToAdd = new Set();
+      allRaces.forEach((r) => {
+        if (finalRacesToAdd.has(r.id)) {
+          datesOfRacesToAdd.add(r.date);
+        }
+      });
 
-              if (allScheduledDates.has(futureInstance.date)) {
-                const conflict = allScheduledDates.get(futureInstance.date);
+      const filteredSelectedRaces = new Set(
+        [...selectedRaces].filter((id) => {
+          const race = allRaces.find((r) => r.id === id);
+          return !datesOfRacesToAdd.has(race.date);
+        })
+      );
+
+      const newSelectedRaces = new Set([
+        ...filteredSelectedRaces,
+        ...finalRacesToAdd,
+      ]);
+
+      setSelectedRaces(newSelectedRaces);
+      setCurrentChecklistName(null);
+      toast.success(`Added ${finalRacesToAdd.size} race(s) to your schedule!`);
+    },
+    [allRaces, combinedRaceIds, careerRaceIds, selectedRaces]
+  );
+
+  const handleChecklistDataChange = useCallback(
+    (raceId, field, value) => {
+      const currentData = checklistData[raceId] || {
+        ran: false,
+        won: false,
+        notes: "",
+        skipped: false,
+      };
+      const newData = { ...currentData, [field]: value };
+      const raceToUpdate = allRaces.find((r) => r.id === raceId);
+      if (!raceToUpdate) return;
+
+      const wasTrigger =
+        (field === "skipped" && currentData.skipped === false) ||
+        (field === "ran" &&
+          currentData.ran === false &&
+          currentData.won === false);
+      const isTrigger =
+        (field === "skipped" && value === true) ||
+        (field === "ran" && value === true && !newData.won);
+      const isUndo = wasTrigger && !isTrigger;
+
+      let didSmartChange = false;
+
+      if (
+        !careerRaceIds.has(raceId) &&
+        (isTrigger || isUndo) &&
+        raceExclusivity.get(raceToUpdate.name) > 1
+      ) {
+        const futureInstance = allRaces
+          .filter(
+            (r) =>
+              r.name === raceToUpdate.name &&
+              r.turnValue > raceToUpdate.turnValue
+          )
+          .sort((a, b) => a.turnValue - b.turnValue)[0];
+
+        if (futureInstance) {
+          if (isTrigger) {
+            const allScheduledDates = new Map();
+            allRaces.forEach((r) => {
+              if (combinedRaceIds.has(r.id) && r.id !== raceId) {
+                allScheduledDates.set(r.date, {
+                  name: r.name,
+                  isCareer: careerRaceIds.has(r.id),
+                  id: r.id,
+                });
+              }
+            });
+
+            if (allScheduledDates.has(futureInstance.date)) {
+              const conflict = allScheduledDates.get(futureInstance.date);
+              if (conflict.name !== futureInstance.name) {
                 toast.error(
                   `Cannot add next instance of race: Conflicts with ${
                     conflict.isCareer
@@ -628,36 +734,23 @@ function App() {
                   } ${conflict.name}.`,
                   { duration: 4000 }
                 );
-              } else if (filters.preventWarningAdd) {
-                const potentialIds = new Set([
-                  ...combinedRaceIds,
-                  futureInstance.id,
-                ]);
-                potentialIds.delete(raceId);
-                const potentialWarnings = calculateWarningIds(
-                  potentialIds,
-                  allRaces,
-                  careerRaceIds
+              }
+            } else if (filters.preventWarningAdd) {
+              const potentialIds = new Set([
+                ...combinedRaceIds,
+                futureInstance.id,
+              ]);
+              potentialIds.delete(raceId);
+              const potentialWarnings = calculateWarningIds(
+                potentialIds,
+                allRaces,
+                careerRaceIds
+              );
+              if (potentialWarnings.has(futureInstance.id)) {
+                toast.error(
+                  `Did not add next race as it would cause a 3-race warning. You can disable this in the filters.`,
+                  { duration: 5000 }
                 );
-                if (potentialWarnings.has(futureInstance.id)) {
-                  toast.error(
-                    `Did not add next race as it would cause a 3-race warning. You can disable this in the filters.`,
-                    { duration: 5000 }
-                  );
-                } else {
-                  setSmartAddedRaceIds((prev) =>
-                    new Set(prev).add(futureInstance.id)
-                  );
-                  setSelectedRaces((prev) => {
-                    const newSet = new Set(prev);
-                    newSet.delete(raceId);
-                    return newSet;
-                  });
-                  toast(
-                    "Found a later version of this race and added it to your checklist.",
-                    { icon: "✨" }
-                  );
-                }
               } else {
                 setSmartAddedRaceIds((prev) =>
                   new Set(prev).add(futureInstance.id)
@@ -671,398 +764,172 @@ function App() {
                   "Found a later version of this race and added it to your checklist.",
                   { icon: "✨" }
                 );
+                didSmartChange = true;
               }
-            } else if (isUndo && smartAddedRaceIds.has(futureInstance.id)) {
-              setSmartAddedRaceIds((prev) => {
+            } else {
+              setSmartAddedRaceIds((prev) =>
+                new Set(prev).add(futureInstance.id)
+              );
+              setSelectedRaces((prev) => {
                 const newSet = new Set(prev);
-                newSet.delete(futureInstance.id);
+                newSet.delete(raceId);
                 return newSet;
               });
-              toast.success(
-                `Removed automatically added instance of "${futureInstance.name}".`
+              toast(
+                "Found a later version of this race and added it to your checklist.",
+                { icon: "✨" }
               );
+              didSmartChange = true;
             }
+          } else if (isUndo && smartAddedRaceIds.has(futureInstance.id)) {
+            setSmartAddedRaceIds((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(futureInstance.id);
+              return newSet;
+            });
+            toast.success(
+              `Removed automatically added instance of "${futureInstance.name}".`
+            );
+            didSmartChange = true;
           }
         }
+      }
 
-        setChecklistData((prev) => {
-          if (field === "won" && value === true) {
-            newData.ran = true;
-            newData.skipped = false;
-          } else if (field === "ran" && value === true) {
-            newData.skipped = false;
-          } else if (field === "ran" && value === false) {
-            newData.won = false;
-          } else if (field === "skipped" && value === true) {
-            newData.ran = false;
-            newData.won = false;
-          }
-          return { ...prev, [raceId]: newData };
+      if (!didSmartChange) {
+        setCurrentChecklistName(null);
+      }
+
+      setChecklistData((prev) => {
+        if (field === "won" && value === true) {
+          newData.ran = true;
+          newData.skipped = false;
+        } else if (field === "ran" && value === true) {
+          newData.skipped = false;
+        } else if (field === "ran" && value === false) {
+          newData.won = false;
+        } else if (field === "skipped" && value === true) {
+          newData.ran = false;
+          newData.won = false;
+        }
+        return { ...prev, [raceId]: newData };
+      });
+    },
+    [
+      allRaces,
+      careerRaceIds,
+      raceExclusivity,
+      smartAddedRaceIds,
+      filters.preventWarningAdd,
+      combinedRaceIds,
+      checklistData,
+    ]
+  );
+
+  const updateLocalStorage = useCallback((newChecklists) => {
+    setSavedChecklists(newChecklists);
+    localStorage.setItem("umamusume-checklists", JSON.stringify(newChecklists));
+  }, []);
+
+  const handleResetChecklistStatus = useCallback(() => {
+    const resetAction = () => {
+      setSmartAddedRaceIds(new Set());
+      setChecklistData((prev) => {
+        const newData = { ...prev };
+        Object.keys(newData).forEach((raceId) => {
+          newData[raceId] = {
+            ...newData[raceId],
+            ran: false,
+            won: false,
+            skipped: false,
+          };
         });
-      },
-      updateLocalStorage: (newChecklists) => {
-        setSavedChecklists(newChecklists);
-        localStorage.setItem(
-          "umamusume-checklists",
-          JSON.stringify(newChecklists)
-        );
-      },
-      handleResetChecklistStatus: () => {
-        const resetAction = () => {
-          setSmartAddedRaceIds(new Set());
-          setChecklistData((prev) => {
-            const newData = { ...prev };
-            Object.keys(newData).forEach((raceId) => {
-              newData[raceId] = {
-                ...newData[raceId],
-                ran: false,
-                won: false,
-                skipped: false,
-              };
-            });
-            return newData;
-          });
-          toast.success("Ran/Won/Skipped statuses have been reset.");
-        };
+        return newData;
+      });
+      toast.success("Ran/Won/Skipped statuses have been reset.");
+    };
 
-        toast(
-          (t) => (
-            <ConfirmationToast
-              t={t}
-              onConfirm={resetAction}
-              message="Reset all 'Ran', 'Won', and 'Skipped' statuses? Notes will be kept."
-            />
-          ),
-          { duration: Infinity }
-        );
-      },
-      handleClearChecklistNotes: () => {
-        const clearAction = () => {
-          setChecklistData((prev) => {
-            const newData = { ...prev };
-            Object.keys(newData).forEach((raceId) => {
-              newData[raceId] = { ...newData[raceId], notes: "" };
-            });
-            return newData;
-          });
-          toast.success("All notes have been cleared.");
-        };
+    toast(
+      (t) => (
+        <ConfirmationToast
+          t={t}
+          onConfirm={resetAction}
+          message="Reset all 'Ran', 'Won', and 'Skipped' statuses? Notes will be kept."
+        />
+      ),
+      { duration: Infinity }
+    );
+  }, []);
 
-        toast(
-          (t) => (
-            <ConfirmationToast
-              t={t}
-              onConfirm={clearAction}
-              message="Clear all notes? Ran/Won statuses will be kept."
-            />
-          ),
-          { duration: Infinity }
-        );
-      },
-      handleSaveChecklist: (name) => {
-        const finalSelectedRaces = new Set([
-          ...selectedRaces,
-          ...smartAddedRaceIds,
-        ]);
+  const handleClearChecklistNotes = useCallback(() => {
+    const clearAction = () => {
+      setChecklistData((prev) => {
+        const newData = { ...prev };
+        Object.keys(newData).forEach((raceId) => {
+          newData[raceId] = { ...newData[raceId], notes: "" };
+        });
+        return newData;
+      });
+      toast.success("All notes have been cleared.");
+    };
 
-        const newChecklist = {
-          name,
-          characterName: selectedCharacter?.name || "Unknown",
-          modifiedAptitudes,
-          selectedRaceIds: Array.from(finalSelectedRaces),
-          checklistData,
-          filters,
-          gradeFilters,
+    toast(
+      (t) => (
+        <ConfirmationToast
+          t={t}
+          onConfirm={clearAction}
+          message="Clear all notes? Ran/Won statuses will be kept."
+        />
+      ),
+      { duration: Infinity }
+    );
+  }, []);
 
-          yearFilters,
-          trackFilters,
-          distanceFilters,
-          showOptionalGrades,
-          savedAt: new Date().toISOString(),
-        };
-        const existingIndex = savedChecklists.findIndex((c) => c.name === name);
-        if (existingIndex > -1) {
-          const overwriteAction = () => {
-            const newChecklists = [...savedChecklists];
-            newChecklists[existingIndex] = newChecklist;
-            allHandlers.updateLocalStorage(newChecklists);
-            setCurrentChecklistName(name);
-            toast.success(`Checklist "${name}" overwritten!`);
-          };
+  const handleSaveChecklist = useCallback(
+    (name) => {
+      const finalSelectedRaces = new Set([
+        ...selectedRaces,
+        ...smartAddedRaceIds,
+      ]);
 
-          setOverwriteModal({
-            isOpen: true,
-            name: name,
-            onConfirm: overwriteAction,
-          });
-        } else {
-          const newChecklists = [...savedChecklists, newChecklist];
-          allHandlers.updateLocalStorage(newChecklists);
+      const newChecklist = {
+        name,
+        characterName: selectedCharacter?.name || "Unknown",
+        modifiedAptitudes,
+        selectedRaceIds: Array.from(finalSelectedRaces),
+        checklistData,
+        filters,
+        gradeFilters,
+        yearFilters,
+        trackFilters,
+        distanceFilters,
+        showOptionalGrades,
+        fanBonus,
+        savedAt: new Date().toISOString(),
+      };
+      const existingIndex = savedChecklists.findIndex((c) => c.name === name);
+      if (existingIndex > -1) {
+        const overwriteAction = () => {
+          const newChecklists = [...savedChecklists];
+          newChecklists[existingIndex] = newChecklist;
+          updateLocalStorage(newChecklists);
           setCurrentChecklistName(name);
-          toast.success(`Checklist "${name}" saved!`);
-        }
-        setSelectedRaces(finalSelectedRaces);
-        setSmartAddedRaceIds(new Set());
-      },
-      handleLoadChecklist: (name) => {
-        setSmartAddedRaceIds(new Set());
-        const checklistToLoad = savedChecklists.find((c) => c.name === name);
-        if (checklistToLoad) {
-          const character = allCharacters.find(
-            (c) => c.name === checklistToLoad.characterName
-          );
-
-          if (character) {
-            const newCareerRaceIds = getCareerRacesForChar(character);
-            setCareerRaceIds(newCareerRaceIds);
-            setSelectedCharacter(character);
-            setSearchTerm(character.name);
-          } else {
-            setCareerRaceIds(new Set());
-            setSelectedCharacter(null);
-            setSearchTerm("");
-          }
-
-          setModifiedAptitudes(checklistToLoad.modifiedAptitudes);
-          setSelectedRaces(new Set(checklistToLoad.selectedRaceIds));
-          setChecklistData(checklistToLoad.checklistData || {});
-          setFilters(
-            checklistToLoad.filters || {
-              trackAptitude: "A",
-              distanceAptitude: "A",
-              hideNonHighlighted: false,
-              hideSummer: true,
-              preventWarningAdd: true,
-            }
-          );
-          setGradeFilters(
-            checklistToLoad.gradeFilters || { G1: true, G2: true, G3: true }
-          );
-          setYearFilters(
-            migrateYearFilters(checklistToLoad.yearFilters) || {
-              "Junior Year": true,
-              "Classic Year": true,
-              "Senior Year": true,
-            }
-          );
-          setTrackFilters(
-            checklistToLoad.trackFilters || { Turf: true, Dirt: true }
-          );
-          setDistanceFilters(
-            checklistToLoad.distanceFilters || {
-              sprint: true,
-              mile: true,
-              medium: true,
-              long: true,
-            }
-          );
-          setShowOptionalGrades(checklistToLoad.showOptionalGrades || false);
-          setCurrentChecklistName(name);
-          toast.success(`Checklist "${name}" loaded!`);
-        }
-      },
-      handleDeleteChecklist: (name) => {
-        const deleteAction = () => {
-          allHandlers.updateLocalStorage(
-            savedChecklists.filter((c) => c.name !== name)
-          );
-          if (currentChecklistName === name) {
-            setCurrentChecklistName(null);
-          }
-          toast.success(`Deleted "${name}".`);
+          toast.success(`Checklist "${name}" overwritten!`);
         };
 
-        toast(
-          (t) => (
-            <ConfirmationToast
-              t={t}
-              onConfirm={deleteAction}
-              message={`Delete checklist "${name}"? This cannot be undone.`}
-            />
-          ),
-          { duration: Infinity }
-        );
-      },
-      handleRenameChecklist: (oldName, newName) => {
-        if (!newName || newName.trim() === "") {
-          toast.error("New name cannot be empty.");
-          return;
-        }
-        if (savedChecklists.some((c) => c.name === newName)) {
-          toast.error("A checklist with that name already exists.");
-          return;
-        }
-        allHandlers.updateLocalStorage(
-          savedChecklists.map((c) =>
-            c.name === oldName ? { ...c, name: newName } : c
-          )
-        );
-        if (currentChecklistName === oldName) {
-          setCurrentChecklistName(newName);
-        }
-        toast.success(`Renamed to "${newName}".`);
-      },
-      handleReorderChecklist: (index, direction) => {
-        if (
-          (index === 0 && direction === "up") ||
-          (index === savedChecklists.length - 1 && direction === "down")
-        ) {
-          return;
-        }
-
-        const newIndex = direction === "up" ? index - 1 : index + 1;
-        const newList = [...savedChecklists];
-
-        [newList[index], newList[newIndex]] = [
-          newList[newIndex],
-          newList[index],
-        ];
-
-        allHandlers.updateLocalStorage(newList);
-      },
-      handleExportSingleChecklist: (name) => {
-        const checklist = savedChecklists.find((c) => c.name === name);
-        if (!checklist) {
-          toast.error("Could not find checklist to export.");
-          return;
-        }
-        const jsonString = JSON.stringify(checklist, null, 2);
-        const blob = new Blob([jsonString], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${name}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success(`Exported "${name}"!`);
-      },
-      handleImportSingleChecklist: (importedChecklist) => {
-        if (
-          typeof importedChecklist !== "object" ||
-          importedChecklist === null ||
-          typeof importedChecklist.name !== "string" ||
-          !Array.isArray(importedChecklist.selectedRaceIds)
-        ) {
-          toast.error(
-            "Import failed: File data is not a valid checklist object."
-          );
-          return;
-        }
-
-        const sanitizedChecklist = {
-          name: String(importedChecklist.name).slice(0, 100),
-          characterName: String(importedChecklist.characterName || "Unknown"),
-          modifiedAptitudes: importedChecklist.modifiedAptitudes || null,
-          selectedRaceIds: importedChecklist.selectedRaceIds,
-          checklistData: importedChecklist.checklistData || {},
-          filters: importedChecklist.filters || {},
-          gradeFilters: importedChecklist.gradeFilters || {},
-          yearFilters: migrateYearFilters(importedChecklist.yearFilters) || {
-            "Junior Year": true,
-            "Classic Year": true,
-            "Senior Year": true,
-          },
-          trackFilters: importedChecklist.trackFilters || {
-            Turf: true,
-            Dirt: true,
-          },
-          distanceFilters: importedChecklist.distanceFilters || {
-            sprint: true,
-            mile: true,
-            medium: true,
-            long: true,
-          },
-          showOptionalGrades: !!importedChecklist.showOptionalGrades,
-          savedAt: importedChecklist.savedAt || new Date().toISOString(),
-        };
-
-        const existingIndex = savedChecklists.findIndex(
-          (c) => c.name === sanitizedChecklist.name
-        );
-        if (existingIndex > -1) {
-          setImportConflictModal({
-            isOpen: true,
-            checklistToImport: sanitizedChecklist,
-          });
-        } else {
-          allHandlers.updateLocalStorage([
-            ...savedChecklists,
-            sanitizedChecklist,
-          ]);
-          toast.success(`Imported checklist "${sanitizedChecklist.name}"!`);
-        }
-      },
-      handleImportChecklists: (importedChecklists) => {
-        if (!Array.isArray(importedChecklists)) {
-          toast.error(
-            "Import failed: File data is not a valid checklist array."
-          );
-          return;
-        }
-        const validatedChecklists = [];
-        for (const item of importedChecklists) {
-          if (
-            typeof item === "object" &&
-            item !== null &&
-            typeof item.name === "string" &&
-            Array.isArray(item.selectedRaceIds)
-          ) {
-            const sanitizedItem = {
-              name: String(item.name).slice(0, 100),
-              characterName: String(item.characterName || "Unknown"),
-              modifiedAptitudes: item.modifiedAptitudes || null,
-              selectedRaceIds: item.selectedRaceIds,
-              checklistData: item.checklistData || {},
-              filters: item.filters || {},
-              gradeFilters: item.gradeFilters || {},
-              yearFilters: migrateYearFilters(item.yearFilters) || {
-                "Junior Year": true,
-                "Classic Year": true,
-                "Senior Year": true,
-              },
-              trackFilters: item.trackFilters || { Turf: true, Dirt: true },
-              distanceFilters: item.distanceFilters || {
-                sprint: true,
-                mile: true,
-                medium: true,
-                long: true,
-              },
-              showOptionalGrades: !!item.showOptionalGrades,
-              savedAt: item.savedAt || new Date().toISOString(),
-            };
-            validatedChecklists.push(sanitizedItem);
-          }
-        }
-        if (validatedChecklists.length !== importedChecklists.length) {
-          toast(
-            "Warning: Some checklists in the file appeared to be malformed and were skipped.",
-            { icon: "⚠️" }
-          );
-        }
-        if (validatedChecklists.length > 0) {
-          const importAction = () => {
-            allHandlers.updateLocalStorage(validatedChecklists);
-            setCurrentChecklistName(null);
-            toast.success(`Imported ${validatedChecklists.length} checklists!`);
-          };
-
-          toast(
-            (t) => (
-              <ConfirmationToast
-                t={t}
-                onConfirm={importAction}
-                message={`This will overwrite all current checklists with ${validatedChecklists.length} imported one(s). Are you sure?`}
-              />
-            ),
-            { duration: Infinity }
-          );
-        } else {
-          toast.error("Import failed: No valid checklists found in the file.");
-        }
-      },
-    }),
+        setOverwriteModal({
+          isOpen: true,
+          name: name,
+          onConfirm: overwriteAction,
+        });
+      } else {
+        const newChecklists = [...savedChecklists, newChecklist];
+        updateLocalStorage(newChecklists);
+        setCurrentChecklistName(name);
+        toast.success(`Checklist "${name}" saved!`);
+      }
+      setSelectedRaces(finalSelectedRaces);
+      setSmartAddedRaceIds(new Set());
+    },
     [
       savedChecklists,
       selectedCharacter,
@@ -1075,15 +942,299 @@ function App() {
       trackFilters,
       distanceFilters,
       showOptionalGrades,
-      allCharacters,
-      currentChecklistName,
-      getCareerRacesForChar,
-      allRaces,
-      careerRaceIds,
       smartAddedRaceIds,
-      combinedRaceIds,
-      raceExclusivity,
+      fanBonus,
+      updateLocalStorage,
     ]
+  );
+
+  const handleLoadChecklist = useCallback(
+    (name) => {
+      setSmartAddedRaceIds(new Set());
+      const checklistToLoad = savedChecklists.find((c) => c.name === name);
+      if (checklistToLoad) {
+        const character = allCharacters.find(
+          (c) => c.name === checklistToLoad.characterName
+        );
+
+        if (character) {
+          const newCareerRaceIds = getCareerRacesForChar(character);
+          setCareerRaceIds(newCareerRaceIds);
+          setSelectedCharacter(character);
+          setSearchTerm(character.name);
+        } else {
+          setCareerRaceIds(new Set());
+          setSelectedCharacter(null);
+          setSearchTerm("");
+        }
+
+        setModifiedAptitudes(checklistToLoad.modifiedAptitudes);
+        setSelectedRaces(new Set(checklistToLoad.selectedRaceIds));
+        setChecklistData(checklistToLoad.checklistData || {});
+        setFilters(
+          checklistToLoad.filters || {
+            trackAptitude: "A",
+            distanceAptitude: "A",
+            hideNonHighlighted: false,
+            hideSummer: true,
+            preventWarningAdd: true,
+          }
+        );
+        setGradeFilters(
+          checklistToLoad.gradeFilters || { G1: true, G2: true, G3: true }
+        );
+        setYearFilters(
+          migrateYearFilters(checklistToLoad.yearFilters) || {
+            "Junior Year": true,
+            "Classic Year": true,
+            "Senior Year": true,
+          }
+        );
+        setTrackFilters(
+          checklistToLoad.trackFilters || { Turf: true, Dirt: true }
+        );
+        setDistanceFilters(
+          checklistToLoad.distanceFilters || {
+            sprint: true,
+            mile: true,
+            medium: true,
+            long: true,
+          }
+        );
+        setShowOptionalGrades(checklistToLoad.showOptionalGrades || false);
+        setFanBonus(checklistToLoad.fanBonus || 0);
+        setCurrentChecklistName(name);
+        toast.success(`Checklist "${name}" loaded!`);
+      }
+    },
+    [savedChecklists, allCharacters, getCareerRacesForChar]
+  );
+
+  const handleDeleteChecklist = useCallback(
+    (name) => {
+      const deleteAction = () => {
+        updateLocalStorage(savedChecklists.filter((c) => c.name !== name));
+
+        if (currentChecklistName === name) {
+          setSelectedRaces(new Set());
+          setSmartAddedRaceIds(new Set());
+          setChecklistData({});
+          setSelectedCharacter(null);
+          setModifiedAptitudes(null);
+          setSearchTerm("");
+          setCareerRaceIds(new Set());
+          setCurrentChecklistName(null);
+          toast.success(`Deleted "${name}" and cleared the planner.`);
+        } else {
+          toast.success(`Deleted "${name}".`);
+        }
+      };
+
+      toast(
+        (t) => (
+          <ConfirmationToast
+            t={t}
+            onConfirm={deleteAction}
+            message={`Delete checklist "${name}"? This cannot be undone.`}
+          />
+        ),
+        { duration: Infinity }
+      );
+    },
+    [savedChecklists, currentChecklistName, updateLocalStorage]
+  );
+
+  const handleRenameChecklist = useCallback(
+    (oldName, newName) => {
+      if (!newName || newName.trim() === "") {
+        toast.error("New name cannot be empty.");
+        return;
+      }
+      if (savedChecklists.some((c) => c.name === newName)) {
+        toast.error("A checklist with that name already exists.");
+        return;
+      }
+      updateLocalStorage(
+        savedChecklists.map((c) =>
+          c.name === oldName ? { ...c, name: newName } : c
+        )
+      );
+      if (currentChecklistName === oldName) {
+        setCurrentChecklistName(newName);
+      }
+      toast.success(`Renamed to "${newName}".`);
+    },
+    [savedChecklists, currentChecklistName, updateLocalStorage]
+  );
+
+  const handleReorderChecklist = useCallback(
+    (index, direction) => {
+      if (
+        (index === 0 && direction === "up") ||
+        (index === savedChecklists.length - 1 && direction === "down")
+      ) {
+        return;
+      }
+
+      const newIndex = direction === "up" ? index - 1 : index + 1;
+      const newList = [...savedChecklists];
+
+      [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
+
+      updateLocalStorage(newList);
+    },
+    [savedChecklists, updateLocalStorage]
+  );
+
+  const handleExportSingleChecklist = useCallback(
+    (name) => {
+      const checklist = savedChecklists.find((c) => c.name === name);
+      if (!checklist) {
+        toast.error("Could not find checklist to export.");
+        return;
+      }
+      const jsonString = JSON.stringify(checklist, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(`Exported "${name}"!`);
+    },
+    [savedChecklists]
+  );
+
+  const handleImportSingleChecklist = useCallback(
+    (importedChecklist) => {
+      if (
+        typeof importedChecklist !== "object" ||
+        importedChecklist === null ||
+        typeof importedChecklist.name !== "string" ||
+        !Array.isArray(importedChecklist.selectedRaceIds)
+      ) {
+        toast.error(
+          "Import failed: File data is not a valid checklist object."
+        );
+        return;
+      }
+
+      const sanitizedChecklist = {
+        name: String(importedChecklist.name).slice(0, 100),
+        characterName: String(importedChecklist.characterName || "Unknown"),
+        modifiedAptitudes: importedChecklist.modifiedAptitudes || null,
+        selectedRaceIds: importedChecklist.selectedRaceIds,
+        checklistData: importedChecklist.checklistData || {},
+        filters: importedChecklist.filters || {},
+        gradeFilters: importedChecklist.gradeFilters || {},
+        yearFilters: migrateYearFilters(importedChecklist.yearFilters) || {
+          "Junior Year": true,
+          "Classic Year": true,
+          "Senior Year": true,
+        },
+        trackFilters: importedChecklist.trackFilters || {
+          Turf: true,
+          Dirt: true,
+        },
+        distanceFilters: importedChecklist.distanceFilters || {
+          sprint: true,
+          mile: true,
+          medium: true,
+          long: true,
+        },
+        showOptionalGrades: !!importedChecklist.showOptionalGrades,
+        fanBonus: importedChecklist.fanBonus || 0,
+        savedAt: importedChecklist.savedAt || new Date().toISOString(),
+      };
+
+      const existingIndex = savedChecklists.findIndex(
+        (c) => c.name === sanitizedChecklist.name
+      );
+      if (existingIndex > -1) {
+        setImportConflictModal({
+          isOpen: true,
+          checklistToImport: sanitizedChecklist,
+        });
+      } else {
+        updateLocalStorage([...savedChecklists, sanitizedChecklist]);
+        toast.success(`Imported checklist "${sanitizedChecklist.name}"!`);
+      }
+    },
+    [savedChecklists, updateLocalStorage]
+  );
+
+  const handleImportChecklists = useCallback(
+    (importedChecklists) => {
+      if (!Array.isArray(importedChecklists)) {
+        toast.error("Import failed: File data is not a valid checklist array.");
+        return;
+      }
+      const validatedChecklists = [];
+      for (const item of importedChecklists) {
+        if (
+          typeof item === "object" &&
+          item !== null &&
+          typeof item.name === "string" &&
+          Array.isArray(item.selectedRaceIds)
+        ) {
+          const sanitizedItem = {
+            name: String(item.name).slice(0, 100),
+            characterName: String(item.characterName || "Unknown"),
+            modifiedAptitudes: item.modifiedAptitudes || null,
+            selectedRaceIds: item.selectedRaceIds,
+            checklistData: item.checklistData || {},
+            filters: item.filters || {},
+            gradeFilters: item.gradeFilters || {},
+            yearFilters: migrateYearFilters(item.yearFilters) || {
+              "Junior Year": true,
+              "Classic Year": true,
+              "Senior Year": true,
+            },
+            trackFilters: item.trackFilters || { Turf: true, Dirt: true },
+            distanceFilters: item.distanceFilters || {
+              sprint: true,
+              mile: true,
+              medium: true,
+              long: true,
+            },
+            showOptionalGrades: !!item.showOptionalGrades,
+            fanBonus: item.fanBonus || 0,
+            savedAt: item.savedAt || new Date().toISOString(),
+          };
+          validatedChecklists.push(sanitizedItem);
+        }
+      }
+      if (validatedChecklists.length !== importedChecklists.length) {
+        toast(
+          "Warning: Some checklists in the file appeared to be malformed and were skipped.",
+          { icon: "⚠️" }
+        );
+      }
+      if (validatedChecklists.length > 0) {
+        const importAction = () => {
+          updateLocalStorage(validatedChecklists);
+          setCurrentChecklistName(null);
+          toast.success(`Imported ${validatedChecklists.length} checklists!`);
+        };
+
+        toast(
+          (t) => (
+            <ConfirmationToast
+              t={t}
+              onConfirm={importAction}
+              message={`This will overwrite all current checklists with ${validatedChecklists.length} imported one(s). Are you sure?`}
+            />
+          ),
+          { duration: Infinity }
+        );
+      } else {
+        toast.error("Import failed: No valid checklists found in the file.");
+      }
+    },
+    [updateLocalStorage]
   );
 
   const checklistRaces = useMemo(
@@ -1108,8 +1259,14 @@ function App() {
     setSelectedRaces,
     setPage,
     savedChecklists,
-    ...allHandlers,
-    handleReorderChecklist: allHandlers.handleReorderChecklist,
+    handleSaveChecklist,
+    handleLoadChecklist,
+    handleDeleteChecklist,
+    handleRenameChecklist,
+    handleReorderChecklist,
+    handleExportSingleChecklist,
+    handleImportSingleChecklist,
+    handleImportChecklists,
     currentChecklistName,
     filters,
     setFilters,
@@ -1137,15 +1294,24 @@ function App() {
     totalSelectedCount: combinedRaceIds.size,
     combinedRaceIds,
     epithetStatus,
-    handleAddEpithetRaces: allHandlers.handleAddEpithetRaces,
+    handleAddEpithetRaces,
+    showOnlySelected,
+    setShowOnlySelected,
+    totalBaseFans,
+    estimatedTotalFans,
+    fanBonus,
+    setFanBonus,
+    isCompactMode,
+    setIsCompactMode,
   };
+
   const checklistProps = {
     races: checklistRaces,
     checklistData,
-    onChecklistDataChange: allHandlers.handleChecklistDataChange,
+    onChecklistDataChange: handleChecklistDataChange,
     setPage,
-    onResetStatus: allHandlers.handleResetChecklistStatus,
-    onClearNotes: allHandlers.handleClearChecklistNotes,
+    onResetStatus: handleResetChecklistStatus,
+    onClearNotes: handleClearChecklistNotes,
     warningRaceIds,
     gradeCounts,
     distanceCounts,
@@ -1158,6 +1324,18 @@ function App() {
     combinedRaceIds,
     filters,
     setFilters,
+    totalBaseFans,
+    estimatedTotalFans,
+    fanBonus,
+    setFanBonus,
+    isCompactMode,
+    setIsCompactMode,
+  };
+
+  const calendarProps = {
+    races: checklistRaces,
+    careerRaceIds,
+    setPage,
   };
 
   const handleConfirmImportOverwrite = () => {
@@ -1167,13 +1345,13 @@ function App() {
     const newChecklists = savedChecklists.map((c) =>
       c.name === checklistToImport.name ? checklistToImport : c
     );
-    allHandlers.updateLocalStorage(newChecklists);
+    updateLocalStorage(newChecklists);
     toast.success(`Checklist "${checklistToImport.name}" was overwritten!`);
     setImportConflictModal({ isOpen: false, checklistToImport: null });
   };
 
   return (
-    <div className="App">
+    <div className={`App ${isCompactMode ? "compact-mode" : ""}`}>
       <Toaster position="top-center" reverseOrder={false} />
       <header className="App-header">
         <h1>UmaMusume Race Planner</h1>
@@ -1185,6 +1363,7 @@ function App() {
       <main>
         {page === "planner" && <Planner {...plannerProps} />}
         {page === "checklist" && <Checklist {...checklistProps} />}
+        {page === "calendar" && <CalendarView {...calendarProps} />}
       </main>
 
       {overwriteModal.isOpen && (

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import PromptModal from "./PromptModal";
+import toast from "react-hot-toast";
 
 function ChecklistManager({
   savedChecklists = [],
@@ -85,7 +86,7 @@ function ChecklistManager({
     if (file) {
       const MAX_FILE_SIZE_MB = 5;
       if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-        alert(`Error: File size cannot exceed ${MAX_FILE_SIZE_MB}MB.`);
+        toast.error(`File size cannot exceed ${MAX_FILE_SIZE_MB}MB.`);
         event.target.value = null;
         return;
       }
@@ -99,11 +100,11 @@ function ChecklistManager({
             if (Array.isArray(importedData)) {
               onImport(importedData);
             } else {
-              alert("Invalid file format for importing all checklists.");
+              toast.error("Invalid file format for importing all checklists.");
             }
           }
         } catch (error) {
-          alert("Error reading or parsing the file.");
+          toast.error("Error reading or parsing the file.");
         }
       };
       reader.readAsText(file);
@@ -164,7 +165,9 @@ function ChecklistManager({
                   >
                     ↓
                   </button>
-                  <button onClick={() => onLoad(name)}>Load</button>
+                  <button className="load-button" onClick={() => onLoad(name)}>
+                    Load
+                  </button>
                   <button onClick={() => handleRenameClick(name)}>
                     Rename
                   </button>
