@@ -59,6 +59,7 @@ function Planner({
   handleDeleteChecklist,
   handleRenameChecklist,
   handleReorderChecklist,
+  handleSortChecklists,
   handleExportSingleChecklist,
   handleImportSingleChecklist,
   handleImportChecklists,
@@ -551,6 +552,7 @@ function Planner({
     onDelete: handleDeleteChecklist,
     onRename: handleRenameChecklist,
     onReorder: handleReorderChecklist,
+    onSort: handleSortChecklists,
     onExportSingle: handleExportSingleChecklist,
     onImportSingle: handleImportSingleChecklist,
     onImport: handleImportChecklists,
@@ -906,13 +908,15 @@ function Planner({
                     Alternative career objectives are not yet implemented.
                   </li>
                   <li>
-                    Fan counts are a work-in-progress and have not been added
-                    for all races yet.
+                    The three JBC races (Sprint, Classic, Ladies' Classic) have
+                    variable tracks, distances, and directions. The planner does
+                    not account for this variation, so please verify the
+                    specifics in-game for your run.
                   </li>
                   <li>
                     If you change characters while having an active checklist,
-                    it is recommended to reset the Ran/Won statuses to ensure
-                    accuracy for the new character's career.
+                    it is recommended to reset the Ran/Won/Skipped statuses to
+                    ensure accuracy for the new character's career.
                   </li>
                   <li>
                     Races from the JP version of the game are included which may

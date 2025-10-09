@@ -1,12 +1,7 @@
 import React, { useMemo, useCallback, useState, useEffect } from "react";
+import { getDistanceCategory } from "./App";
 
 const gradeNameMap = { "1 Win Class": "Pre-OP", Open: "OP" };
-const getDistanceCategory = (distance) => {
-  if (distance < 1600) return "sprint";
-  if (distance <= 1800) return "mile";
-  if (distance <= 2400) return "medium";
-  return "long";
-};
 
 const capitalize = (s) => {
   if (typeof s !== "string") return "";
@@ -37,6 +32,13 @@ const getGradeBubbleClass = (race, careerRaceIds) => {
   return classes.join(" ");
 };
 
+const RaceDetailItem = ({ label, value }) => (
+  <div className="detail-item">
+    <span className="label">{label}</span>
+    <span className="value">{value}</span>
+  </div>
+);
+
 const ProgressHelper = ({
   nextRace,
   onUpdateNextRace,
@@ -48,34 +50,78 @@ const ProgressHelper = ({
   careerRaceIds,
 }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const isComplete = !nextRace;
 
-  const { turnsUntil, upcomingRaces } = useMemo(() => {
-    if (isComplete || !races || races.length === 0) {
-      return { turnsUntil: 0, upcomingRaces: [] };
-    }
-
-    const nextRaceIndex = races.findIndex((r) => r.id === nextRace.id);
-
-    let prevTurn = 0;
-    if (nextRaceIndex > 0) {
-      prevTurn = races[nextRaceIndex - 1].turnValue;
-    }
-
-    const turnsUntil = nextRace.turnValue - prevTurn - 1;
-    const upcoming = races
-      .slice(nextRaceIndex + 1, nextRaceIndex + 4)
-      .map((race, i, arr) => {
-        const prevRaceTurn =
-          i === 0 ? nextRace.turnValue : arr[i - 1].turnValue;
+  const { turnsUntil, upcomingRaces, season, direction, distanceStandard } =
+    useMemo(() => {
+      if (isComplete || !races || races.length === 0) {
         return {
-          ...race,
-          turnsAfterPrev: race.turnValue - prevRaceTurn - 1,
+          turnsUntil: 0,
+          upcomingRaces: [],
+          season: "N/A",
+          direction: "N/A",
+          distanceStandard: "N/A",
         };
-      });
+      }
 
-    return { turnsUntil, upcomingRaces: upcoming };
-  }, [isComplete, races, nextRace]);
+      const nextRaceIndex = races.findIndex((r) => r.id === nextRace.id);
+
+      let prevTurn = 0;
+      if (nextRaceIndex > 0) {
+        prevTurn = races[nextRaceIndex - 1].turnValue;
+      }
+
+      const turns = nextRace.turnValue - prevTurn - 1;
+      const upcoming = races
+        .slice(nextRaceIndex + 1, nextRaceIndex + 4)
+        .map((race, i, arr) => {
+          const prevRaceTurn =
+            i === 0 ? nextRace.turnValue : arr[i - 1].turnValue;
+          return {
+            ...race,
+            turnsAfterPrev: race.turnValue - prevRaceTurn - 1,
+          };
+        });
+
+      const [, month, half] = nextRace.date.split(" - ");
+      let raceSeason = "N/A";
+      if (
+        ["March", "April", "May", "June"].includes(month) ||
+        (month === "February" && half === "Late") // This is an approximation for in-game logic
+      ) {
+        raceSeason = "Spring";
+      } else if (
+        ["July", "August"].includes(month) ||
+        (month === "September" && half === "Early")
+      ) {
+        raceSeason = "Summer";
+      } else if (
+        ["October", "November"].includes(month) ||
+        (month === "September" && half === "Late")
+      ) {
+        raceSeason = "Autumn";
+      } else if (
+        ["December", "January"].includes(month) ||
+        (month === "February" && half === "Early")
+      ) {
+        raceSeason = "Winter";
+      }
+
+      const raceDirection =
+        nextRace.direction === "CCW" ? "Left-Handed" : "Right-Handed";
+
+      const raceDistanceStandard =
+        nextRace.distance % 400 === 0 ? "Standard" : "Non-Standard";
+
+      return {
+        turnsUntil: turns,
+        upcomingRaces: upcoming,
+        season: raceSeason,
+        direction: raceDirection,
+        distanceStandard: raceDistanceStandard,
+      };
+    }, [isComplete, races, nextRace]);
 
   if (isComplete) {
     return (
@@ -123,12 +169,9 @@ const ProgressHelper = ({
         </div>
         <div className="progress-race-meta">
           <span>🗓️ {formatChecklistDate(nextRace.date)}</span>
-          {" | "}
-          {nextRace.ground}
-          {" | "}
-          {capitalize(getDistanceCategory(nextRace.distance))} (
-          {nextRace.distance}
-          m)
+        </div>
+        <div className="turn-counter">
+          <span className="turn-count">{turnsUntil}</span>Turns Until Next Race
         </div>
         <textarea
           className="progress-notes-textarea"
@@ -168,19 +211,52 @@ const ProgressHelper = ({
         className="progress-details-toggle"
         onClick={() => setIsDetailsOpen(!isDetailsOpen)}
       >
-        <h4>Schedule Details</h4>
+        <h4>Next Race Details</h4>
         <span>{isDetailsOpen ? "▼" : "►"}</span>
       </div>
 
       {isDetailsOpen && (
+        <div
+          className="progress-details-content"
+          style={{
+            display: "flex",
+            justifyContent: "space-around",
+            flexWrap: "wrap",
+            gap: "10px 15px",
+          }}
+        >
+          <RaceDetailItem label="Track" value={nextRace.ground} />
+          <RaceDetailItem
+            label="Distance"
+            value={capitalize(getDistanceCategory(nextRace.distance))}
+          />
+          <RaceDetailItem label="Length" value={`${nextRace.distance}m`} />
+          <RaceDetailItem label="Length(Type)" value={distanceStandard} />
+          <RaceDetailItem label="Direction" value={direction} />
+          <RaceDetailItem label="Season" value={season} />
+          <RaceDetailItem
+            label="Fans (1st)"
+            value={
+              typeof nextRace.fans_gained === "number"
+                ? nextRace.fans_gained.toLocaleString()
+                : "N/A"
+            }
+          />
+        </div>
+      )}
+
+      <div
+        className="progress-details-toggle"
+        onClick={() => setIsScheduleOpen(!isScheduleOpen)}
+      >
+        <h4>Upcoming Schedule</h4>
+        <span>{isScheduleOpen ? "▼" : "►"}</span>
+      </div>
+
+      {isScheduleOpen && (
         <div className="progress-details-content">
-          <div className="turn-counter">
-            <span className="turn-count">{turnsUntil}</span> Turns Until Next
-            Race
-          </div>
-          {upcomingRaces.length > 0 && (
+          {upcomingRaces.length > 0 ? (
             <div className="upcoming-races-preview">
-              <h4>Upcoming:</h4>
               <ul>
                 {upcomingRaces.map((race) => (
                   <li key={race.id}>
@@ -200,6 +276,15 @@ const ProgressHelper = ({
                 ))}
               </ul>
             </div>
+          ) : (
+            <p
+              style={{
+                fontSize: "0.9em",
+                color: "var(--color-text-secondary)",
+              }}
+            >
+              No other races scheduled after this one.
+            </p>
           )}
         </div>
       )}
@@ -358,6 +443,13 @@ function Checklist({
           )}
         </div>
         <div className="checklist-page-actions">
+          <button
+            className="action-button"
+            onClick={() => setPage("calendar")}
+            disabled={races.length === 0}
+          >
+            View Calendar
+          </button>
           <button className="action-button" onClick={onResetStatus}>
             Reset All Status
           </button>
@@ -431,7 +523,8 @@ function Checklist({
                   </span>
                   <span className="tooltip-text">
                     An estimate based on gaining 1st place in all selected races
-                    with the specified fan bonus.
+                    with the specified fan bonus. Does not include Debut,
+                    Maiden, or scenario-specific races.
                   </span>
                 </div>
               </span>

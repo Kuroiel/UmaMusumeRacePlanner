@@ -14,6 +14,7 @@ function ChecklistManager({
   onImport,
   selectedCharacter,
   currentChecklistName,
+  onSort,
 }) {
   const fileInputRef = useRef(null);
   const singleFileInputRef = useRef(null);
@@ -218,6 +219,19 @@ function ChecklistManager({
             onChange={(e) => handleFileChange(e, true)}
           />
         </div>
+        {savedChecklists.length > 1 && (
+          <div className="io-buttons" style={{ marginTop: "5px" }}>
+            <button className="manager-button" onClick={() => onSort("name")}>
+              Sort by Name (A-Z)
+            </button>
+            <button
+              className="manager-button"
+              onClick={() => onSort("character")}
+            >
+              Sort by Character
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

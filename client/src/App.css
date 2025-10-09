@@ -166,8 +166,9 @@ h4 {
 
 .collapsible-header span {
   display: inline-block;
-  width: 1.2em;
+  width: 1.6em; /* Increased width to prevent squishing */
   text-align: center;
+  font-size: 0.9em; /* Adjusted size for better proportion */
 }
 
 /* === LEFT PANEL COMPONENTS === */
@@ -554,16 +555,16 @@ tr:hover {
   width: 6%;
 }
 .col-name {
-  width: 28%;
+  width: 25%;
 }
 .col-track {
-  width: 5%;
+  width: 6%;
 }
 .col-dist-name {
-  width: 7%;
+  width: 8%;
 }
 .col-dist-m {
-  width: 5%;
+  width: 6%;
 }
 .col-fans {
   width: 6%;
@@ -841,7 +842,7 @@ tr:hover {
 .progress-race-meta {
   font-size: 1em;
   color: var(--color-text-secondary);
-  margin-top: 8px;
+  margin-top: 4px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -930,20 +931,21 @@ tr:hover {
   width: 100%;
 }
 .turn-counter {
-  font-size: 1.2em;
+  margin-top: 8px;
+  font-size: 1.1em;
   color: var(--color-text-secondary);
 }
 .turn-counter .turn-count {
-  font-size: 2em;
+  font-size: 1.2em;
   font-weight: bold;
   color: var(--color-text-primary);
-  display: block;
+  margin-right: 6px;
+  display: inline-block;
 }
 
 .upcoming-races-preview {
   text-align: left;
   padding-top: 15px;
-  border-top: 1px solid var(--color-border-medium);
 }
 .upcoming-races-preview h4 {
   margin: 0 0 10px 0;
@@ -1130,7 +1132,7 @@ tr:hover {
 }
 
 .detail-item .label {
-  font-size: 0.8em;
+  font-size: 1em;
   font-weight: bold;
   color: var(--color-text-secondary);
   margin-bottom: 2px;
@@ -1392,7 +1394,7 @@ tr:hover {
 }
 .calendar-turn {
   flex: 1;
-  padding: 5px;
+  padding: 20px 5px 5px 5px;
   min-height: 80px;
   display: flex;
   flex-direction: column;
@@ -1435,6 +1437,9 @@ tr:hover {
 }
 .calendar-race-entry .race-name {
   opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* === COMPACT MODE === */

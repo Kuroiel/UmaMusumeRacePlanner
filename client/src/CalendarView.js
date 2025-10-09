@@ -24,7 +24,7 @@ const getShortGrade = (grade) => {
   return grade;
 };
 
-function CalendarView({ races, careerRaceIds, setPage }) {
+function CalendarView({ races, careerRaceIds, setPage, previousPage }) {
   const calendarData = React.useMemo(() => {
     const turns = Array.from({ length: 72 }, (_, i) => ({
       turnValue: i + 1,
@@ -43,7 +43,10 @@ function CalendarView({ races, careerRaceIds, setPage }) {
   return (
     <div className="calendar-page">
       <div className="calendar-header">
-        <button className="back-button" onClick={() => setPage("planner")}>
+        <button
+          className="back-button"
+          onClick={() => setPage(previousPage || "planner")}
+        >
           &larr; Back to Planner
         </button>
         <h2>3-Year Race Calendar</h2>
