@@ -443,18 +443,18 @@ function Checklist({
           )}
         </div>
         <div className="checklist-page-actions">
+          <button className="action-button" onClick={onResetStatus}>
+            Reset All Status
+          </button>
+          <button className="action-button clear-button" onClick={onClearNotes}>
+            Clear All Notes
+          </button>
           <button
             className="action-button"
             onClick={() => setPage("calendar")}
             disabled={races.length === 0}
           >
             View Calendar
-          </button>
-          <button className="action-button" onClick={onResetStatus}>
-            Reset All Status
-          </button>
-          <button className="action-button clear-button" onClick={onClearNotes}>
-            Clear All Notes
           </button>
         </div>
       </div>
