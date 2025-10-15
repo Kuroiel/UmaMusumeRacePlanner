@@ -225,6 +225,23 @@ const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => {
   );
 };
 
+const UndoToast = ({ t, onUndo, message }) => (
+  <div className="confirmation-toast">
+    <span>{message}</span>
+    <div className="toast-buttons">
+      <button
+        className="toast-button cancel"
+        onClick={() => {
+          onUndo();
+          toast.dismiss(t.id);
+        }}
+      >
+        Undo
+      </button>
+    </div>
+  </div>
+);
+
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -258,6 +275,46 @@ function App() {
   const [allCharacters, setAllCharacters] = useState([]);
   const [raceExclusivity, setRaceExclusivity] = useState(new Map());
   const [isAppInitialized, setIsAppInitialized] = useState(false);
+  const [lastAction, setLastAction] = useState(null);
+
+  useEffect(() => {
+    if (lastAction && lastAction.undo) {
+      const toastId = toast(
+        (t) => (
+          <UndoToast
+            t={t}
+            message={lastAction.message}
+            onUndo={() => {
+              lastAction.undo();
+              setLastAction(null);
+            }}
+          />
+        ),
+        {
+          duration: 7000,
+          onClose: () => setLastAction(null),
+        }
+      );
+
+      return () => toast.dismiss(toastId);
+    }
+  }, [lastAction]);
+
+  const performActionWithUndo = useCallback(
+    (actionFn, message, beforeState) => {
+      actionFn();
+      setLastAction({
+        message,
+        undo: () => {
+          setSelectedRaces(beforeState.selectedRaces);
+          setSmartAddedRaceIds(beforeState.smartAddedRaceIds);
+          setChecklistData(beforeState.checklistData);
+          toast.success("Action undone!");
+        },
+      });
+    },
+    []
+  );
 
   const [searchTerm, setSearchTerm] = useState(
     initialAutosavedState?.searchTerm ?? ""
@@ -274,10 +331,10 @@ function App() {
   );
   const [filters, setFilters] = useState(
     initialAutosavedState?.filters || {
-      trackAptitude: "A",
+      trackAptitude: "B",
       distanceAptitude: "A",
-      hideNonHighlighted: false,
-      hideSummer: false,
+      hideNonHighlighted: true,
+      hideSummer: true,
       preventWarningAdd: true,
     }
   );
@@ -350,7 +407,7 @@ function App() {
         { duration: Infinity }
       );
       console.error("raceData or charData is empty or failed to load.");
-      setIsAppInitialized(false); // Prevent app from trying to render
+      setIsAppInitialized(false);
       return;
     }
     let processedRaces = raceData.map((race) => {
@@ -632,6 +689,12 @@ function App() {
 
   const handleAddEpithetRaces = useCallback(
     (racesToAdd) => {
+      const beforeState = {
+        selectedRaces: new Set(selectedRaces),
+        smartAddedRaceIds: new Set(smartAddedRaceIds),
+        checklistData: { ...checklistData },
+      };
+
       const racesToAddByName = new Map();
       racesToAdd.forEach((race) => {
         if (!racesToAddByName.has(race.name)) {
@@ -649,6 +712,7 @@ function App() {
 
       const finalRacesToAdd = new Set();
       const racesThatCauseWarnings = new Set();
+      const racesSkippedDueToWarningFilter = new Set();
 
       racesToAddByName.forEach((instances, name) => {
         const sortedInstances = instances.sort(
@@ -658,6 +722,11 @@ function App() {
         for (const instance of sortedInstances) {
           if (currentRaceDates.has(instance.date)) continue;
 
+          const currentWarnings = calculateWarningIds(
+            combinedRaceIds,
+            allRaces,
+            careerRaceIds
+          );
           const potentialIds = new Set([
             ...combinedRaceIds,
             ...finalRacesToAdd,
@@ -669,7 +738,7 @@ function App() {
             careerRaceIds
           );
 
-          if (!potentialWarnings.has(instance.id)) {
+          if (potentialWarnings.size <= currentWarnings.size) {
             finalRacesToAdd.add(instance.id);
             added = true;
             break;
@@ -677,20 +746,32 @@ function App() {
         }
 
         if (!added) {
-          racesThatCauseWarnings.add(name);
-          const fallbackInstance = sortedInstances.find(
-            (r) => !currentRaceDates.has(r.date)
-          );
-          if (fallbackInstance) {
-            finalRacesToAdd.add(fallbackInstance.id);
+          if (filters.preventWarningAdd) {
+            racesSkippedDueToWarningFilter.add(name);
+          } else {
+            racesThatCauseWarnings.add(name);
+            const fallbackInstance = sortedInstances.find(
+              (r) => !currentRaceDates.has(r.date)
+            );
+            if (fallbackInstance) {
+              finalRacesToAdd.add(fallbackInstance.id);
+            }
           }
         }
       });
 
+      if (racesSkippedDueToWarningFilter.size > 0) {
+        const raceNames = Array.from(racesSkippedDueToWarningFilter).join(", ");
+        toast.error(
+          `Could not add: ${raceNames}. Adding them would cause 3+ consecutive races, and your filter is preventing this.`,
+          { duration: 6000 }
+        );
+      }
+
       if (racesThatCauseWarnings.size > 0) {
         const raceNames = Array.from(racesThatCauseWarnings).join(", ");
         toast.error(
-          `Could not add the following race(s) without causing a 3-race warning: ${raceNames}. The earliest available instance was added instead.`,
+          `Added with warning: ${raceNames}. The earliest available instance of these races causes a 3+ consecutive race warning.`,
           { duration: 6000 }
         );
       }
@@ -702,157 +783,176 @@ function App() {
         }
       });
 
-      const filteredSelectedRaces = new Set(
-        [...selectedRaces].filter((id) => {
-          const race = allRaces.find((r) => r.id === id);
-          return !datesOfRacesToAdd.has(race.date);
-        })
-      );
+      const newSelectedRaces = new Set([...selectedRaces]);
+      datesOfRacesToAdd.forEach((date) => {
+        allRaces.forEach((r) => {
+          if (r.date === date) newSelectedRaces.delete(r.id);
+        });
+      });
 
-      const newSelectedRaces = new Set([
-        ...filteredSelectedRaces,
-        ...finalRacesToAdd,
-      ]);
+      finalRacesToAdd.forEach((id) => newSelectedRaces.add(id));
 
-      setSelectedRaces(newSelectedRaces);
-      setCurrentChecklistName(null);
-      toast.success(`Added ${finalRacesToAdd.size} race(s) to your schedule!`);
+      const action = () => {
+        setSelectedRaces(newSelectedRaces);
+        setCurrentChecklistName(null);
+      };
+
+      const message = `Added ${finalRacesToAdd.size} race(s).`;
+      performActionWithUndo(action, message, beforeState);
+      if (finalRacesToAdd.size > 0) {
+        toast.success(
+          `Added ${finalRacesToAdd.size} race(s) to your schedule!`
+        );
+      }
     },
-    [allRaces, combinedRaceIds, careerRaceIds, selectedRaces]
+    [
+      allRaces,
+      combinedRaceIds,
+      careerRaceIds,
+      selectedRaces,
+      filters.preventWarningAdd,
+      performActionWithUndo,
+      checklistData,
+      smartAddedRaceIds,
+    ]
   );
 
   const handleChecklistDataChange = useCallback(
     (raceId, field, value) => {
-      const currentData = checklistData[raceId] || {
-        ran: false,
-        won: false,
-        notes: "",
-        skipped: false,
+      const beforeState = {
+        selectedRaces: new Set(selectedRaces),
+        smartAddedRaceIds: new Set(smartAddedRaceIds),
+        checklistData: { ...checklistData },
       };
-      const newData = { ...currentData, [field]: value };
+
       const raceToUpdate = allRaces.find((r) => r.id === raceId);
       if (!raceToUpdate) return;
 
-      const wasTrigger =
-        (field === "skipped" && currentData.skipped === false) ||
-        (field === "ran" &&
-          currentData.ran === false &&
-          currentData.won === false);
-      const isTrigger =
-        (field === "skipped" && value === true) ||
-        (field === "ran" && value === true && !newData.won);
-      const isUndo = wasTrigger && !isTrigger;
-
-      if (
-        !careerRaceIds.has(raceId) &&
-        (isTrigger || isUndo) &&
-        raceExclusivity.get(raceToUpdate.name) > 1
-      ) {
-        const futureInstance = allRaces
-          .filter(
-            (r) =>
-              r.name === raceToUpdate.name &&
-              r.turnValue > raceToUpdate.turnValue
-          )
-          .sort((a, b) => a.turnValue - b.turnValue)[0];
-
-        if (futureInstance) {
-          if (isTrigger) {
-            const allScheduledDates = new Map();
-            allRaces.forEach((r) => {
-              if (combinedRaceIds.has(r.id) && r.id !== raceId) {
-                allScheduledDates.set(r.date, {
-                  name: r.name,
-                  isCareer: careerRaceIds.has(r.id),
-                  id: r.id,
-                });
-              }
-            });
-
-            if (allScheduledDates.has(futureInstance.date)) {
-              const conflict = allScheduledDates.get(futureInstance.date);
-              if (conflict.name !== futureInstance.name) {
-                toast.error(
-                  `Cannot add next instance of race: Conflicts with ${
-                    conflict.isCareer
-                      ? "the career race:"
-                      : "the selected race:"
-                  } ${conflict.name}.`,
-                  { duration: 4000 }
-                );
-              }
-            } else {
-              const potentialIds = new Set([
-                ...combinedRaceIds,
-                futureInstance.id,
-              ]);
-              potentialIds.delete(raceId);
-              const potentialWarnings = calculateWarningIds(
-                potentialIds,
-                allRaces,
-                careerRaceIds
-              );
-
-              const addRaceAction = () => {
-                setSmartAddedRaceIds((prev) =>
-                  new Set(prev).add(futureInstance.id)
-                );
-                setSelectedRaces((prev) => {
-                  const newSet = new Set(prev);
-                  newSet.delete(raceId);
-                  return newSet;
-                });
-                toast(
-                  "Found a later version of this race and added it to your checklist.",
-                  { icon: "✨" }
-                );
-              };
-
-              if (
-                potentialWarnings.has(futureInstance.id) &&
-                filters.preventWarningAdd
-              ) {
-                toast(
-                  (t) => (
-                    <ConfirmationToast
-                      t={t}
-                      onConfirm={addRaceAction}
-                      message="Adding this race will cause a 3+ consecutive race warning. Add it anyway?"
-                    />
-                  ),
-                  { duration: Infinity }
-                );
-              } else {
-                addRaceAction();
-              }
-            }
-          } else if (isUndo && smartAddedRaceIds.has(futureInstance.id)) {
-            setSmartAddedRaceIds((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(futureInstance.id);
-              return newSet;
-            });
-            toast.success(
-              `Removed automatically added instance of "${futureInstance.name}".`
-            );
-          }
-        }
+      let message = "";
+      if (field === "notes") {
+        setChecklistData((prev) => ({
+          ...prev,
+          [raceId]: { ...(prev[raceId] || {}), notes: value },
+        }));
+        return;
+      } else {
+        message = `Marked '${raceToUpdate.name}' as ${field}.`;
       }
 
-      setChecklistData((prev) => {
-        if (field === "won" && value === true) {
-          newData.ran = true;
-          newData.skipped = false;
-        } else if (field === "ran" && value === true) {
-          newData.skipped = false;
-        } else if (field === "ran" && value === false) {
-          newData.won = false;
-        } else if (field === "skipped" && value === true) {
-          newData.ran = false;
-          newData.won = false;
+      const action = () => {
+        const currentData = checklistData[raceId] || {
+          ran: false,
+          won: false,
+          notes: "",
+          skipped: false,
+        };
+        const newData = { ...currentData, [field]: value };
+
+        const wasTrigger =
+          (field === "skipped" && currentData.skipped === false) ||
+          (field === "ran" &&
+            currentData.ran === false &&
+            currentData.won === false);
+        const isTrigger =
+          (field === "skipped" && value === true) ||
+          (field === "ran" && value === true && !newData.won);
+        const isUndo = wasTrigger && !isTrigger;
+
+        if (
+          !careerRaceIds.has(raceId) &&
+          (isTrigger || isUndo) &&
+          raceExclusivity.get(raceToUpdate.name) > 1
+        ) {
+          const futureInstance = allRaces
+            .filter(
+              (r) =>
+                r.name === raceToUpdate.name &&
+                r.turnValue > raceToUpdate.turnValue
+            )
+            .sort((a, b) => a.turnValue - b.turnValue)[0];
+
+          if (futureInstance) {
+            if (isTrigger) {
+              const allScheduledDates = new Map();
+              allRaces.forEach((r) => {
+                if (combinedRaceIds.has(r.id) && r.id !== raceId) {
+                  allScheduledDates.set(r.date, {
+                    name: r.name,
+                    isCareer: careerRaceIds.has(r.id),
+                    id: r.id,
+                  });
+                }
+              });
+
+              if (allScheduledDates.has(futureInstance.date)) {
+              } else {
+                const currentWarnings = calculateWarningIds(
+                  combinedRaceIds,
+                  allRaces,
+                  careerRaceIds
+                );
+                const potentialIds = new Set([...combinedRaceIds]);
+                potentialIds.delete(raceId);
+                potentialIds.add(futureInstance.id);
+
+                const potentialWarnings = calculateWarningIds(
+                  potentialIds,
+                  allRaces,
+                  careerRaceIds
+                );
+
+                const addRaceAction = () => {
+                  setSmartAddedRaceIds((prev) =>
+                    new Set(prev).add(futureInstance.id)
+                  );
+                  setSelectedRaces((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.delete(raceId);
+                    return newSet;
+                  });
+                  toast(
+                    "Found a later version of this race and added it to your checklist.",
+                    { icon: "✨" }
+                  );
+                };
+
+                if (
+                  potentialWarnings.size > currentWarnings.size &&
+                  filters.preventWarningAdd
+                ) {
+                } else {
+                  addRaceAction();
+                }
+              }
+            } else if (isUndo && smartAddedRaceIds.has(futureInstance.id)) {
+              setSmartAddedRaceIds((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(futureInstance.id);
+                return newSet;
+              });
+              toast.success(
+                `Removed automatically added instance of "${futureInstance.name}".`
+              );
+            }
+          }
         }
-        return { ...prev, [raceId]: newData };
-      });
+
+        setChecklistData((prev) => {
+          if (field === "won" && value === true) {
+            newData.ran = true;
+            newData.skipped = false;
+          } else if (field === "ran" && value === true) {
+            newData.skipped = false;
+          } else if (field === "ran" && value === false) {
+            newData.won = false;
+          } else if (field === "skipped" && value === true) {
+            newData.ran = false;
+            newData.won = false;
+          }
+          return { ...prev, [raceId]: newData };
+        });
+      };
+      performActionWithUndo(action, message, beforeState);
     },
     [
       allRaces,
@@ -862,6 +962,8 @@ function App() {
       filters.preventWarningAdd,
       combinedRaceIds,
       checklistData,
+      performActionWithUndo,
+      selectedRaces,
     ]
   );
 
@@ -885,20 +987,29 @@ function App() {
   }, []);
 
   const handleResetChecklistStatus = useCallback(() => {
+    const beforeState = {
+      selectedRaces: new Set(selectedRaces),
+      smartAddedRaceIds: new Set(smartAddedRaceIds),
+      checklistData: { ...checklistData },
+    };
+
     const resetAction = () => {
-      setSmartAddedRaceIds(new Set());
-      setChecklistData((prev) => {
-        const newData = { ...prev };
-        Object.keys(newData).forEach((raceId) => {
-          newData[raceId] = {
-            ...newData[raceId],
-            ran: false,
-            won: false,
-            skipped: false,
-          };
+      const action = () => {
+        setSmartAddedRaceIds(new Set());
+        setChecklistData((prev) => {
+          const newData = { ...prev };
+          Object.keys(newData).forEach((raceId) => {
+            newData[raceId] = {
+              ...newData[raceId],
+              ran: false,
+              won: false,
+              skipped: false,
+            };
+          });
+          return newData;
         });
-        return newData;
-      });
+      };
+      performActionWithUndo(action, "Reset all statuses.", beforeState);
       toast.success("Ran/Won/Skipped statuses have been reset.");
     };
 
@@ -912,17 +1023,25 @@ function App() {
       ),
       { duration: Infinity }
     );
-  }, []);
+  }, [performActionWithUndo, checklistData, selectedRaces, smartAddedRaceIds]);
 
   const handleClearChecklistNotes = useCallback(() => {
+    const beforeState = {
+      selectedRaces: new Set(selectedRaces),
+      smartAddedRaceIds: new Set(smartAddedRaceIds),
+      checklistData: { ...checklistData },
+    };
     const clearAction = () => {
-      setChecklistData((prev) => {
-        const newData = { ...prev };
-        Object.keys(newData).forEach((raceId) => {
-          newData[raceId] = { ...newData[raceId], notes: "" };
+      const action = () => {
+        setChecklistData((prev) => {
+          const newData = { ...prev };
+          Object.keys(newData).forEach((raceId) => {
+            newData[raceId] = { ...newData[raceId], notes: "" };
+          });
+          return newData;
         });
-        return newData;
-      });
+      };
+      performActionWithUndo(action, "Cleared all notes.", beforeState);
       toast.success("All notes have been cleared.");
     };
 
@@ -936,7 +1055,7 @@ function App() {
       ),
       { duration: Infinity }
     );
-  }, []);
+  }, [performActionWithUndo, checklistData, selectedRaces, smartAddedRaceIds]);
 
   const handleSaveChecklist = useCallback(
     (name) => {
@@ -1027,9 +1146,9 @@ function App() {
         setChecklistData(checklistToLoad.checklistData || {});
         setFilters(
           checklistToLoad.filters || {
-            trackAptitude: "A",
+            trackAptitude: "B",
             distanceAptitude: "A",
-            hideNonHighlighted: false,
+            hideNonHighlighted: true,
             hideSummer: true,
             preventWarningAdd: true,
           }
@@ -1147,7 +1266,6 @@ function App() {
           return a.name.localeCompare(b.name);
         }
         if (sortBy === "character") {
-          // Sort by character, then by name for characters that are the same
           const charCompare = a.characterName.localeCompare(b.characterName);
           if (charCompare !== 0) return charCompare;
           return a.name.localeCompare(b.name);
@@ -1324,6 +1442,217 @@ function App() {
     [updateLocalStorage]
   );
 
+  const handleRemoveRace = useCallback(
+    (raceIdToRemove) => {
+      const race = allRaces.find((r) => r.id === raceIdToRemove);
+      if (!race) return;
+
+      const beforeState = {
+        selectedRaces: new Set(selectedRaces),
+        smartAddedRaceIds: new Set(smartAddedRaceIds),
+        checklistData: { ...checklistData },
+      };
+
+      const action = () => {
+        setSelectedRaces((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(raceIdToRemove);
+          return newSet;
+        });
+        setSmartAddedRaceIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(raceIdToRemove);
+          return newSet;
+        });
+      };
+
+      const message = `Removed '${race.name}'.`;
+      performActionWithUndo(action, message, beforeState);
+    },
+    [
+      allRaces,
+      selectedRaces,
+      smartAddedRaceIds,
+      checklistData,
+      performActionWithUndo,
+    ]
+  );
+
+  const handleRequestNoCareerToggle = (isChecked) => {
+    if (isChecked && combinedRaceIds.size > 0) {
+      toast(
+        (t) => (
+          <ConfirmationToast
+            t={t}
+            onConfirm={() => {
+              setIsNoCareerMode(true);
+              setCareerRaceIds(new Set());
+              setSelectedRaces(new Set());
+              setCurrentChecklistName(null);
+            }}
+            message="This will clear your current checklist. Continue?"
+          />
+        ),
+        { duration: Infinity }
+      );
+    } else {
+      setIsNoCareerMode(isChecked);
+      if (!isChecked && selectedCharacter) {
+        const newCareerRaceIds = getCareerRacesForChar(selectedCharacter);
+        setCareerRaceIds(newCareerRaceIds);
+        setSelectedRaces(newCareerRaceIds);
+      } else {
+        setCareerRaceIds(new Set());
+        setSelectedRaces(new Set());
+      }
+      setCurrentChecklistName(null);
+    }
+  };
+
+  const handleBatchSelect = useCallback(
+    (criteria, visibleRaces) => {
+      const beforeState = {
+        selectedRaces: new Set(selectedRaces),
+        smartAddedRaceIds: new Set(smartAddedRaceIds),
+        checklistData: { ...checklistData },
+      };
+
+      const action = () => {
+        if (criteria.mode === "maximize") {
+          const racesByTurn = new Map();
+          const maxTurn = 72;
+
+          for (const race of visibleRaces) {
+            if (!racesByTurn.has(race.turnValue)) {
+              racesByTurn.set(race.turnValue, []);
+            }
+            racesByTurn.get(race.turnValue).push(race);
+          }
+
+          const dp = new Array(maxTurn + 1).fill(null).map(() => ({
+            fans: 0,
+            races: [],
+            lastTwoTurns: [false, false],
+          }));
+
+          for (let t = 1; t <= maxTurn; t++) {
+            const prev = dp[t - 1];
+            dp[t] = { ...prev, lastTwoTurns: [prev.lastTwoTurns[1], false] };
+
+            if (racesByTurn.has(t)) {
+              for (const race of racesByTurn.get(t)) {
+                if (typeof race.fans_gained !== "number") continue;
+
+                if (
+                  filters.preventWarningAdd &&
+                  prev.lastTwoTurns[0] &&
+                  prev.lastTwoTurns[1]
+                ) {
+                  continue;
+                }
+
+                const newFans = prev.fans + race.fans_gained;
+                if (newFans > dp[t].fans) {
+                  dp[t] = {
+                    fans: newFans,
+                    races: [...prev.races, race.id],
+                    lastTwoTurns: [prev.lastTwoTurns[1], true],
+                  };
+                }
+              }
+            }
+          }
+          const optimalRaceIds = new Set(dp[maxTurn].races);
+          setSelectedRaces(new Set([...careerRaceIds, ...optimalRaceIds]));
+          toast.success("Optimal fan schedule selected!");
+        } else {
+          const racesToProcess = visibleRaces.filter((race) => {
+            if (criteria.grade !== "any" && race.grade !== criteria.grade)
+              return false;
+            if (criteria.track !== "any" && race.ground !== criteria.track)
+              return false;
+            if (
+              criteria.distance !== "any" &&
+              getDistanceCategory(race.distance) !== criteria.distance
+            )
+              return false;
+            if (criteria.year !== "any" && !race.date.startsWith(criteria.year))
+              return false;
+            return true;
+          });
+
+          if (racesToProcess.length === 0) {
+            toast.error("No visible races match the selected criteria.");
+            return;
+          }
+
+          if (criteria.mode === "select") {
+            const newSelectedRaces = new Set(selectedRaces);
+            const scheduledDates = new Set();
+            newSelectedRaces.forEach((id) => {
+              const race = allRaces.find((r) => r.id === id);
+              if (race) scheduledDates.add(race.date);
+            });
+            careerRaceIds.forEach((id) => {
+              const race = allRaces.find((r) => r.id === id);
+              if (race) scheduledDates.add(race.date);
+            });
+
+            let addedCount = 0;
+            racesToProcess.forEach((race) => {
+              if (!scheduledDates.has(race.date)) {
+                if (filters.preventWarningAdd) {
+                  const currentWarnings = calculateWarningIds(
+                    newSelectedRaces,
+                    allRaces,
+                    careerRaceIds
+                  );
+                  const potentialRaces = new Set([
+                    ...newSelectedRaces,
+                    race.id,
+                  ]);
+                  const potentialWarnings = calculateWarningIds(
+                    potentialRaces,
+                    allRaces,
+                    careerRaceIds
+                  );
+                  if (potentialWarnings.size > currentWarnings.size) {
+                    return;
+                  }
+                }
+                newSelectedRaces.add(race.id);
+                scheduledDates.add(race.date);
+                addedCount++;
+              }
+            });
+            setSelectedRaces(newSelectedRaces);
+            toast.success(`Selected ${addedCount} race(s) matching criteria.`);
+          } else if (criteria.mode === "unselect") {
+            const racesToRemoveIds = new Set(racesToProcess.map((r) => r.id));
+            const newSelectedRaces = new Set(
+              [...selectedRaces].filter((id) => !racesToRemoveIds.has(id))
+            );
+            const removedCount = selectedRaces.size - newSelectedRaces.size;
+            setSelectedRaces(newSelectedRaces);
+            toast.success(`Unselected ${removedCount} race(s).`);
+          }
+        }
+      };
+
+      const message = `Performed multi-select action.`;
+      performActionWithUndo(action, message, beforeState);
+    },
+    [
+      allRaces,
+      selectedRaces,
+      careerRaceIds,
+      checklistData,
+      filters.preventWarningAdd,
+      performActionWithUndo,
+      smartAddedRaceIds,
+    ]
+  );
+
   const checklistRaces = useMemo(
     () =>
       allRaces
@@ -1376,13 +1705,14 @@ function App() {
     setCurrentChecklistName,
     getCareerRacesForChar,
     isNoCareerMode,
-    setIsNoCareerMode,
+    onRequestNoCareerToggle: handleRequestNoCareerToggle,
     alwaysShowCareer,
     setAlwaysShowCareer,
     totalSelectedCount: combinedRaceIds.size,
     combinedRaceIds,
     epithetStatus,
     handleAddEpithetRaces,
+    onBatchSelect: handleBatchSelect,
     showOnlySelected,
     setShowOnlySelected,
     totalBaseFans,
@@ -1397,6 +1727,7 @@ function App() {
     races: checklistRaces,
     checklistData,
     onChecklistDataChange: handleChecklistDataChange,
+    onRemoveRace: handleRemoveRace,
     setPage: navigateTo,
     onResetStatus: handleResetChecklistStatus,
     onClearNotes: handleClearChecklistNotes,

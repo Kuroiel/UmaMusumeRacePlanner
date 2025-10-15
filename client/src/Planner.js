@@ -4,6 +4,8 @@ import AptitudeEditor from "./AptitudeEditor";
 import ChecklistManager from "./ChecklistManager";
 import Modal from "./Modal";
 import EpithetHelper from "./EpithetHelper";
+import MultiSelectDropdown from "./MultiSelectDropdown";
+import CollapsibleHeader from "./CollapsibleHeader";
 
 const gradeNameMap = { "1 Win Class": "Pre-OP", Open: "OP" };
 const getDistanceCategory = (distance) => {
@@ -29,16 +31,6 @@ const isSummerRace = (date) =>
   (date.includes("July") || date.includes("August"));
 const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"];
 const APTITUDE_VALUES = { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: -1 };
-
-const CollapsibleHeader = ({ title, isOpen, onToggle, children }) => (
-  <h2 onClick={onToggle} className="collapsible-header">
-    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      {title}
-      {children}
-    </div>
-    <span>{isOpen ? "▼" : "►"}</span>
-  </h2>
-);
 
 function Planner({
   allRaces,
@@ -84,13 +76,14 @@ function Planner({
   setCurrentChecklistName,
   getCareerRacesForChar,
   isNoCareerMode,
-  setIsNoCareerMode,
+  onRequestNoCareerToggle,
   alwaysShowCareer,
   setAlwaysShowCareer,
   totalSelectedCount,
   combinedRaceIds,
   epithetStatus,
   handleAddEpithetRaces,
+  onBatchSelect,
   showOnlySelected,
   setShowOnlySelected,
   totalBaseFans,
@@ -106,6 +99,17 @@ function Planner({
   });
   const [raceSearchTerm, setRaceSearchTerm] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isMaximizingFans, setIsMaximizingFans] = useState(false);
+  const [multiSelectCriteria, setMultiSelectCriteria] = useState({
+    grade: [],
+    track: [],
+    distance: [],
+    year: [],
+  });
+
+  const handleMultiSelectChange = (name, value) => {
+    setMultiSelectCriteria((prev) => ({ ...prev, [name]: value }));
+  };
 
   useEffect(() => {
     const tableContainer = document.querySelector(".table-container");
@@ -147,6 +151,7 @@ function Planner({
         filters: true,
         epithets: true,
         manager: true,
+        multiSelect: false,
         epithetList: false,
         sources: false,
         issues: false,
@@ -158,6 +163,7 @@ function Planner({
         filters: true,
         epithets: true,
         manager: true,
+        multiSelect: false,
         epithetList: false,
         sources: false,
         issues: false,
@@ -225,11 +231,13 @@ function Planner({
     if (!characterToSelect) return;
     const newCareerRaceIds = getCareerRacesForChar(characterToSelect);
     let finalRaceSelection = newCareerRaceIds;
+
     if (keepOptional) {
       const newCareerDates = new Set();
       allRaces.forEach((race) => {
         if (newCareerRaceIds.has(race.id)) newCareerDates.add(race.date);
       });
+
       const optionalRaces = new Set(
         [...selectedRaces].filter((id) => !careerRaceIds.has(id))
       );
@@ -239,7 +247,39 @@ function Planner({
           return !newCareerDates.has(raceDate);
         })
       );
+
       finalRaceSelection = new Set([...newCareerRaceIds, ...keptOptionalRaces]);
+
+      const calculateWarnings = (raceIdSet) => {
+        const warnings = new Set();
+        if (raceIdSet.size < 3) return warnings;
+        const sortedSelectedRaces = allRaces
+          .filter((race) => raceIdSet.has(race.id))
+          .sort((a, b) => a.turnValue - b.turnValue);
+        for (let i = 2; i < sortedSelectedRaces.length; i++) {
+          const race3 = sortedSelectedRaces[i];
+          const race2 = sortedSelectedRaces[i - 1];
+          const race1 = sortedSelectedRaces[i - 2];
+          const isConsecutive =
+            race3.turnValue === race2.turnValue + 1 &&
+            race2.turnValue === race1.turnValue + 1;
+          if (isConsecutive && !newCareerRaceIds.has(race3.id)) {
+            warnings.add(race3.id);
+          }
+        }
+        return warnings;
+      };
+
+      const oldWarningCount = warningRaceIds.size;
+      const newWarningCount = calculateWarnings(finalRaceSelection).size;
+
+      if (newWarningCount > oldWarningCount) {
+        toast(
+          "Warning: Keeping optional races has resulted in 3+ consecutive races. Please review your schedule.",
+          { icon: "⚠️", duration: 6000 }
+        );
+      }
+
       let minTrackApt = "S";
       let minDistApt = "S";
       keptOptionalRaces.forEach((raceId) => {
@@ -257,6 +297,7 @@ function Planner({
             minDistApt = distApt;
         }
       });
+
       const newFilters = { ...filters };
       let filtersChanged = false;
       if (
@@ -278,6 +319,7 @@ function Planner({
         });
       }
     }
+
     updateCharacterState(
       characterToSelect,
       finalRaceSelection,
@@ -288,32 +330,9 @@ function Planner({
 
   const handleNoCareerToggle = useCallback(
     (e) => {
-      const isNowNoCareer = e.target.checked;
-      if (isNowNoCareer && selectedRaces.size > 0) {
-        if (
-          !window.confirm("This will clear your current checklist. Continue?")
-        ) {
-          e.target.checked = false;
-          return;
-        }
-      }
-      setIsNoCareerMode(isNowNoCareer);
-      setCareerRaceIds(new Set());
-      setSelectedRaces(new Set());
-      setCurrentChecklistName(null);
-      if (!isNowNoCareer && selectedCharacter) {
-        handleCharacterSelect(selectedCharacter);
-      }
+      onRequestNoCareerToggle(e.target.checked);
     },
-    [
-      selectedRaces,
-      selectedCharacter,
-      handleCharacterSelect,
-      setCareerRaceIds,
-      setSelectedRaces,
-      setCurrentChecklistName,
-      setIsNoCareerMode,
-    ]
+    [onRequestNoCareerToggle]
   );
 
   const handleSearchChange = (e) => {
@@ -510,6 +529,13 @@ function Planner({
     showOnlySelected,
     combinedRaceIds,
   ]);
+
+  const handleMaximizeFans = async () => {
+    setIsMaximizingFans(true);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    onBatchSelect({ mode: "maximize" }, displayRaces);
+    setIsMaximizingFans(false);
+  };
 
   const getRaceRowClass = useCallback(
     (race) => {
@@ -1086,6 +1112,117 @@ function Planner({
               />{" "}
               Compact Mode
             </label>
+          </div>
+          <div className="panel-section" style={{ padding: "10px 15px" }}>
+            <CollapsibleHeader
+              title="Multi Select"
+              isOpen={panelsOpen.multiSelect}
+              onToggle={() => togglePanel("multiSelect")}
+            />
+            {panelsOpen.multiSelect && (
+              <div className="multi-select-form">
+                <div className="multi-select-row">
+                  <MultiSelectDropdown
+                    name="grade"
+                    options={[
+                      { value: "G1", label: "G1" },
+                      { value: "G2", label: "G2" },
+                      { value: "G3", label: "G3" },
+                    ]}
+                    selected={multiSelectCriteria.grade}
+                    onChange={handleMultiSelectChange}
+                  />
+                  <MultiSelectDropdown
+                    name="track"
+                    options={[
+                      { value: "Turf", label: "Turf" },
+                      { value: "Dirt", label: "Dirt" },
+                    ]}
+                    selected={multiSelectCriteria.track}
+                    onChange={handleMultiSelectChange}
+                  />
+                  <MultiSelectDropdown
+                    name="distance"
+                    options={[
+                      { value: "Sprint", label: "Sprint" },
+                      { value: "Mile", label: "Mile" },
+                      { value: "Medium", label: "Medium" },
+                      { value: "Long", label: "Long" },
+                    ]}
+                    selected={multiSelectCriteria.distance}
+                    onChange={handleMultiSelectChange}
+                  />
+                  <MultiSelectDropdown
+                    name="year"
+                    options={[
+                      { value: "Junior Year", label: "Junior" },
+                      { value: "Classic Year", label: "Classic" },
+                      { value: "Senior Year", label: "Senior" },
+                    ]}
+                    selected={multiSelectCriteria.year}
+                    onChange={handleMultiSelectChange}
+                  />
+
+                  <div className="multi-select-actions">
+                    <button
+                      className="multi-select-button"
+                      onClick={() =>
+                        onBatchSelect(
+                          { mode: "select", ...multiSelectCriteria },
+                          displayRaces
+                        )
+                      }
+                    >
+                      Select Matching
+                    </button>
+                    <button
+                      className="multi-select-button unselect"
+                      onClick={() =>
+                        onBatchSelect(
+                          { mode: "unselect", ...multiSelectCriteria },
+                          displayRaces
+                        )
+                      }
+                    >
+                      Unselect Matching
+                    </button>
+                  </div>
+                </div>
+                <div className="multi-select-row">
+                  <button
+                    className="multi-select-button maximize"
+                    onClick={handleMaximizeFans}
+                    disabled={isMaximizingFans}
+                  >
+                    {isMaximizingFans ? "Calculating..." : "Maximize Fans"}
+                  </button>
+                  <div className="tooltip-container">
+                    <span
+                      className="warning-icon"
+                      style={{ fontSize: "0.8em" }}
+                    >
+                      ?
+                    </span>
+                    <span className="tooltip-text">
+                      Finds the optimal set of races from the visible list for
+                      maximum fan gain. May include JP-exclusive races. Please
+                      review the results.
+                    </span>
+                  </div>
+                  <div style={{ marginLeft: "auto" }}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="preventWarningAdd"
+                        checked={filters.preventWarningAdd}
+                        onChange={handleFilterChange}
+                      />
+                      Prevent 3+ Consecutive Races
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <div className="table-container">
             <table>

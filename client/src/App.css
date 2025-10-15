@@ -166,9 +166,9 @@ h4 {
 
 .collapsible-header span {
   display: inline-block;
-  width: 1.6em; /* Increased width to prevent squishing */
+  width: 1.6em;
   text-align: center;
-  font-size: 0.9em; /* Adjusted size for better proportion */
+  font-size: 0.9em;
 }
 
 /* === LEFT PANEL COMPONENTS === */
@@ -538,7 +538,7 @@ tr:hover {
 .col-exclusive {
   text-align: center;
 }
-/* Adjusted column widths for new Fan column */
+
 .col-select {
   width: 3%;
 }
@@ -869,11 +869,16 @@ tr:hover {
 .progress-actions {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  align-items: center;
+  gap: 40px;
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid var(--color-border-medium);
   flex-wrap: wrap;
+}
+.progress-actions-group {
+  display: flex;
+  gap: 10px;
 }
 .progress-action-button {
   border: none;
@@ -1395,11 +1400,13 @@ tr:hover {
 .calendar-turn {
   flex: 1;
   padding: 20px 5px 5px 5px;
-  min-height: 80px;
+  height: 120px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
   position: relative;
+  flex-basis: 50%;
 }
 .calendar-turn:first-child {
   border-right: 1px solid var(--color-border-light);
@@ -1655,4 +1662,147 @@ tr:hover {
     grid-row: 2;
     justify-self: center;
   }
+}
+/* === BATCH & REMOVE ACTIONS === */
+
+.batch-action-button:hover {
+  background-color: var(--color-accent-dark-blue-hover);
+}
+
+.remove-race-button {
+  background-color: var(--color-accent-red);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8em;
+  padding: 4px 8px;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+.remove-race-button:hover {
+  background-color: var(--color-accent-red-hover);
+}
+
+.remove-race-button:disabled {
+  background-color: var(--color-accent-gray);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* === MULTI SELECT ACTIONS === */
+.multi-select-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 10px;
+}
+.multi-select-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.multi-select-row select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border-medium);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 0.9em;
+}
+.multi-select-actions {
+  display: flex;
+  gap: 10px;
+  border-left: 1px solid var(--color-border-medium);
+  padding-left: 10px;
+}
+.multi-select-button {
+  background-color: var(--color-accent-dark-blue);
+  color: var(--color-text-light);
+  border: none;
+  padding: 5px 10px;
+  font-size: 0.85em;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.multi-select-button:hover {
+  background-color: var(--color-accent-dark-blue-hover);
+}
+.multi-select-button.unselect {
+  background-color: var(--color-accent-orange);
+}
+.multi-select-button.unselect:hover {
+  background-color: var(--color-accent-orange-hover);
+}
+.multi-select-button.maximize {
+  background-color: var(--color-accent-green);
+  font-weight: bold;
+}
+.multi-select-button.maximize:hover {
+  background-color: var(--color-accent-green-hover);
+}
+.multi-select-button:disabled {
+  background-color: var(--color-accent-gray);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+/* === MULTI SELECT DROPDOWN === */
+.multi-select-dropdown {
+  position: relative;
+  display: inline-block;
+  min-width: 120px;
+}
+
+.multi-select-display {
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border-medium);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 0.9em;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.multi-select-display span:first-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 5px;
+}
+
+.multi-select-options {
+  display: block;
+  position: absolute;
+  background-color: var(--color-panel-bg);
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px var(--color-shadow);
+  z-index: 100;
+  border: 1px solid var(--color-border-medium);
+  border-radius: 4px;
+  padding: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.multi-select-options label {
+  color: var(--color-text-primary);
+  padding: 8px 12px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.multi-select-options label:hover {
+  background-color: var(--color-interactive-bg);
 }

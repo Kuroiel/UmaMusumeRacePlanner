@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { getDistanceCategory } from "./App";
+import CollapsibleHeader from "./CollapsibleHeader";
 
 const gradeNameMap = { "1 Win Class": "Pre-OP", Open: "OP" };
 
@@ -43,6 +44,7 @@ const ProgressHelper = ({
   nextRace,
   onUpdateNextRace,
   onChecklistDataChange,
+  onRemoveNextRace,
   raceExclusivity,
   previouslyWon,
   nextInstancePlanned,
@@ -88,7 +90,7 @@ const ProgressHelper = ({
       let raceSeason = "N/A";
       if (
         ["March", "April", "May", "June"].includes(month) ||
-        (month === "February" && half === "Late") // This is an approximation for in-game logic
+        (month === "February" && half === "Late")
       ) {
         raceSeason = "Spring";
       } else if (
@@ -183,26 +185,35 @@ const ProgressHelper = ({
           disabled={isComplete}
         />
         <div className="progress-actions">
+          <div className="progress-actions-group">
+            <button
+              className="progress-action-button ran"
+              onClick={() => onUpdateNextRace("ran", true)}
+              disabled={isComplete}
+            >
+              Mark as Ran
+            </button>
+            <button
+              className="progress-action-button won"
+              onClick={() => onUpdateNextRace("won", true)}
+              disabled={isComplete}
+            >
+              Mark as Won
+            </button>
+            <button
+              className="progress-action-button skip"
+              onClick={() => onUpdateNextRace("skipped", true)}
+              disabled={isComplete || (nextRace && nextRace.isCareer)}
+            >
+              Mark as Skipped
+            </button>
+          </div>
           <button
-            className="progress-action-button ran"
-            onClick={() => onUpdateNextRace("ran", true)}
-            disabled={isComplete}
-          >
-            Mark as Ran
-          </button>
-          <button
-            className="progress-action-button won"
-            onClick={() => onUpdateNextRace("won", true)}
-            disabled={isComplete}
-          >
-            Mark as Won
-          </button>
-          <button
-            className="progress-action-button skip"
-            onClick={() => onUpdateNextRace("skipped", true)}
+            className="remove-race-button"
+            onClick={onRemoveNextRace}
             disabled={isComplete || (nextRace && nextRace.isCareer)}
           >
-            Mark as Skipped
+            Remove Race
           </button>
         </div>
       </div>
@@ -296,6 +307,7 @@ function Checklist({
   races,
   checklistData,
   onChecklistDataChange,
+  onRemoveRace,
   setPage,
   onResetStatus,
   onClearNotes,
@@ -317,6 +329,8 @@ function Checklist({
   setFanBonus,
 }) {
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  const [isProgressHelperOpen, setIsProgressHelperOpen] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -370,6 +384,12 @@ function Checklist({
     },
     [nextRace, onChecklistDataChange]
   );
+
+  const handleRemoveNextRace = useCallback(() => {
+    if (nextRace) {
+      onRemoveRace(nextRace.id);
+    }
+  }, [nextRace, onRemoveRace]);
 
   const wonRaceNames = useMemo(() => {
     const names = new Set();
@@ -463,16 +483,24 @@ function Checklist({
         <>
           <div className="checklist-sticky-header">
             <div className="next-race-panel">
-              <ProgressHelper
-                nextRace={nextRace}
-                onUpdateNextRace={handleUpdateNextRace}
-                onChecklistDataChange={onChecklistDataChange}
-                raceExclusivity={raceExclusivity}
-                previouslyWon={nextRaceInfo.previouslyWon}
-                nextInstancePlanned={nextRaceInfo.nextInstancePlanned}
-                races={races}
-                careerRaceIds={careerRaceIds}
+              <CollapsibleHeader
+                title="Progress Helper"
+                isOpen={isProgressHelperOpen}
+                onToggle={() => setIsProgressHelperOpen(!isProgressHelperOpen)}
               />
+              {isProgressHelperOpen && (
+                <ProgressHelper
+                  nextRace={nextRace}
+                  onUpdateNextRace={handleUpdateNextRace}
+                  onChecklistDataChange={onChecklistDataChange}
+                  onRemoveNextRace={handleRemoveNextRace}
+                  raceExclusivity={raceExclusivity}
+                  previouslyWon={nextRaceInfo.previouslyWon}
+                  nextInstancePlanned={nextRaceInfo.nextInstancePlanned}
+                  races={races}
+                  careerRaceIds={careerRaceIds}
+                />
+              )}
             </div>
 
             <div className="grade-counter checklist-page-counter">
@@ -680,6 +708,14 @@ function Checklist({
                     />{" "}
                     Skip
                   </label>
+                  <button
+                    className="remove-race-button"
+                    onClick={() => onRemoveRace(race.id)}
+                    disabled={isCareer}
+                    title="Remove this race from the checklist"
+                  >
+                    Remove
+                  </button>
                 </div>
                 <textarea
                   placeholder="Notes..."
