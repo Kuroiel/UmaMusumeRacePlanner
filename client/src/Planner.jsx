@@ -84,6 +84,7 @@ function Planner({
   epithetStatus,
   handleAddEpithetRaces,
   onBatchSelect,
+  onClearOptionalRaces,
   showOnlySelected,
   setShowOnlySelected,
   totalBaseFans,
@@ -107,9 +108,9 @@ function Planner({
     year: [],
   });
 
-  const handleMultiSelectChange = (name, value) => {
+  const handleMultiSelectChange = useCallback((name, value) => {
     setMultiSelectCriteria((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   useEffect(() => {
     const tableContainer = document.querySelector(".table-container");
@@ -171,30 +172,30 @@ function Planner({
     }
   });
 
-  const togglePanel = (panelName) => {
+  const togglePanel = useCallback((panelName) => {
     setPanelsOpen((prev) => {
       const newState = { ...prev, [panelName]: !prev[panelName] };
       localStorage.setItem("umamusume-panel-state", JSON.stringify(newState));
       return newState;
     });
-  };
+  }, []);
 
   const updateCharacterState = useCallback(
     (character, finalRaceSelection, newCareerRaceIds) => {
       setSelectedCharacter(character);
       setModifiedAptitudes({ ...character.aptitudes });
-      setSearchTerm(character.name);
       setSelectedRaces(finalRaceSelection);
       setCareerRaceIds(newCareerRaceIds);
       setCurrentChecklistName(null);
+      setSearchTerm(character.name);
     },
     [
       setCareerRaceIds,
       setModifiedAptitudes,
       setSelectedCharacter,
       setSelectedRaces,
-      setSearchTerm,
       setCurrentChecklistName,
+      setSearchTerm,
     ]
   );
 
@@ -226,107 +227,124 @@ function Planner({
     ]
   );
 
-  const executeCharacterSwap = (keepOptional) => {
-    const { characterToSelect } = modalState;
-    if (!characterToSelect) return;
-    const newCareerRaceIds = getCareerRacesForChar(characterToSelect);
-    let finalRaceSelection = newCareerRaceIds;
+  const executeCharacterSwap = useCallback(
+    (keepOptional) => {
+      const { characterToSelect } = modalState;
+      if (!characterToSelect) return;
+      const newCareerRaceIds = getCareerRacesForChar(characterToSelect);
+      let finalRaceSelection = newCareerRaceIds;
 
-    if (keepOptional) {
-      const newCareerDates = new Set();
-      allRaces.forEach((race) => {
-        if (newCareerRaceIds.has(race.id)) newCareerDates.add(race.date);
-      });
-
-      const optionalRaces = new Set(
-        [...selectedRaces].filter((id) => !careerRaceIds.has(id))
-      );
-      const keptOptionalRaces = new Set(
-        [...optionalRaces].filter((id) => {
-          const raceDate = allRaces.find((r) => r.id === id)?.date;
-          return !newCareerDates.has(raceDate);
-        })
-      );
-
-      finalRaceSelection = new Set([...newCareerRaceIds, ...keptOptionalRaces]);
-
-      const calculateWarnings = (raceIdSet) => {
-        const warnings = new Set();
-        if (raceIdSet.size < 3) return warnings;
-        const sortedSelectedRaces = allRaces
-          .filter((race) => raceIdSet.has(race.id))
-          .sort((a, b) => a.turnValue - b.turnValue);
-        for (let i = 2; i < sortedSelectedRaces.length; i++) {
-          const race3 = sortedSelectedRaces[i];
-          const race2 = sortedSelectedRaces[i - 1];
-          const race1 = sortedSelectedRaces[i - 2];
-          const isConsecutive =
-            race3.turnValue === race2.turnValue + 1 &&
-            race2.turnValue === race1.turnValue + 1;
-          if (isConsecutive && !newCareerRaceIds.has(race3.id)) {
-            warnings.add(race3.id);
-          }
-        }
-        return warnings;
-      };
-
-      const oldWarningCount = warningRaceIds.size;
-      const newWarningCount = calculateWarnings(finalRaceSelection).size;
-
-      if (newWarningCount > oldWarningCount) {
-        toast(
-          "Warning: Keeping optional races has resulted in 3+ consecutive races. Please review your schedule.",
-          { icon: "⚠️", duration: 6000 }
-        );
-      }
-
-      let minTrackApt = "S";
-      let minDistApt = "S";
-      keptOptionalRaces.forEach((raceId) => {
-        const race = allRaces.find((r) => r.id === raceId);
-        if (race) {
-          const groundApt =
-            race.ground === "Turf"
-              ? characterToSelect.aptitudes.turf
-              : characterToSelect.aptitudes.dirt;
-          const distApt =
-            characterToSelect.aptitudes[getDistanceCategory(race.distance)];
-          if (APTITUDE_VALUES[groundApt] < APTITUDE_VALUES[minTrackApt])
-            minTrackApt = groundApt;
-          if (APTITUDE_VALUES[distApt] < APTITUDE_VALUES[minDistApt])
-            minDistApt = distApt;
-        }
-      });
-
-      const newFilters = { ...filters };
-      let filtersChanged = false;
-      if (
-        APTITUDE_VALUES[minTrackApt] < APTITUDE_VALUES[filters.trackAptitude]
-      ) {
-        newFilters.trackAptitude = minTrackApt;
-        filtersChanged = true;
-      }
-      if (
-        APTITUDE_VALUES[minDistApt] < APTITUDE_VALUES[filters.distanceAptitude]
-      ) {
-        newFilters.distanceAptitude = minDistApt;
-        filtersChanged = true;
-      }
-      setFilters(newFilters);
-      if (filtersChanged) {
-        toast.info("Aptitude filters were adjusted to show all kept races.", {
-          duration: 4000,
+      if (keepOptional) {
+        const newCareerDates = new Set();
+        allRaces.forEach((race) => {
+          if (newCareerRaceIds.has(race.id)) newCareerDates.add(race.date);
         });
-      }
-    }
 
-    updateCharacterState(
-      characterToSelect,
-      finalRaceSelection,
-      newCareerRaceIds
-    );
-    setModalState({ isOpen: false, characterToSelect: null });
-  };
+        const optionalRaces = new Set(
+          [...selectedRaces].filter((id) => !careerRaceIds.has(id))
+        );
+        const keptOptionalRaces = new Set(
+          [...optionalRaces].filter((id) => {
+            const raceDate = allRaces.find((r) => r.id === id)?.date;
+            return !newCareerDates.has(raceDate);
+          })
+        );
+
+        finalRaceSelection = new Set([
+          ...newCareerRaceIds,
+          ...keptOptionalRaces,
+        ]);
+
+        const calculateWarnings = (raceIdSet) => {
+          const warnings = new Set();
+          if (raceIdSet.size < 3) return warnings;
+          const sortedSelectedRaces = allRaces
+            .filter((race) => raceIdSet.has(race.id))
+            .sort((a, b) => a.turnValue - b.turnValue);
+          for (let i = 2; i < sortedSelectedRaces.length; i++) {
+            const race3 = sortedSelectedRaces[i];
+            const race2 = sortedSelectedRaces[i - 1];
+            const race1 = sortedSelectedRaces[i - 2];
+            const isConsecutive =
+              race3.turnValue === race2.turnValue + 1 &&
+              race2.turnValue === race1.turnValue + 1;
+            if (isConsecutive && !newCareerRaceIds.has(race3.id)) {
+              warnings.add(race3.id);
+            }
+          }
+          return warnings;
+        };
+
+        const oldWarningCount = warningRaceIds.size;
+        const newWarningCount = calculateWarnings(finalRaceSelection).size;
+
+        if (newWarningCount > oldWarningCount) {
+          toast(
+            "Warning: Keeping optional races has resulted in 3+ consecutive races. Please review your schedule.",
+            { icon: "⚠️", duration: 6000 }
+          );
+        }
+
+        let minTrackApt = "S";
+        let minDistApt = "S";
+        keptOptionalRaces.forEach((raceId) => {
+          const race = allRaces.find((r) => r.id === raceId);
+          if (race) {
+            const groundApt =
+              race.ground === "Turf"
+                ? characterToSelect.aptitudes.turf
+                : characterToSelect.aptitudes.dirt;
+            const distApt =
+              characterToSelect.aptitudes[getDistanceCategory(race.distance)];
+            if (APTITUDE_VALUES[groundApt] < APTITUDE_VALUES[minTrackApt])
+              minTrackApt = groundApt;
+            if (APTITUDE_VALUES[distApt] < APTITUDE_VALUES[minDistApt])
+              minDistApt = distApt;
+          }
+        });
+
+        const newFilters = { ...filters };
+        let filtersChanged = false;
+        if (
+          APTITUDE_VALUES[minTrackApt] < APTITUDE_VALUES[filters.trackAptitude]
+        ) {
+          newFilters.trackAptitude = minTrackApt;
+          filtersChanged = true;
+        }
+        if (
+          APTITUDE_VALUES[minDistApt] <
+          APTITUDE_VALUES[filters.distanceAptitude]
+        ) {
+          newFilters.distanceAptitude = minDistApt;
+          filtersChanged = true;
+        }
+        setFilters(newFilters);
+        if (filtersChanged) {
+          toast.info("Aptitude filters were adjusted to show all kept races.", {
+            duration: 4000,
+          });
+        }
+      }
+
+      updateCharacterState(
+        characterToSelect,
+        finalRaceSelection,
+        newCareerRaceIds
+      );
+      setModalState({ isOpen: false, characterToSelect: null });
+    },
+    [
+      modalState,
+      getCareerRacesForChar,
+      allRaces,
+      selectedRaces,
+      careerRaceIds,
+      warningRaceIds,
+      filters,
+      setFilters,
+      updateCharacterState,
+    ]
+  );
 
   const handleNoCareerToggle = useCallback(
     (e) => {
@@ -335,62 +353,93 @@ function Planner({
     [onRequestNoCareerToggle]
   );
 
-  const handleSearchChange = (e) => {
-    const newSearchTerm = e.target.value;
-    setSearchTerm(newSearchTerm);
-    if (
-      selectedCharacter &&
-      newSearchTerm.toLowerCase() !== selectedCharacter.name.toLowerCase()
-    ) {
-      setSelectedCharacter(null);
-      setModifiedAptitudes(null);
-    }
-  };
+  const handleSearchChange = useCallback(
+    (e) => {
+      const newSearchTerm = e.target.value;
+      setSearchTerm(newSearchTerm);
+      if (selectedCharacter && newSearchTerm === "") {
+        setSelectedCharacter(null);
+        setModifiedAptitudes(null);
+      }
+    },
+    [
+      selectedCharacter,
+      setSelectedCharacter,
+      setModifiedAptitudes,
+      setSearchTerm,
+    ]
+  );
 
-  const handleAptitudeChange = (aptitudeName, newValue) =>
-    setModifiedAptitudes((prev) => ({ ...prev, [aptitudeName]: newValue }));
-  const handleFilterChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-  const handleGradeFilterChange = (event) =>
-    setGradeFilters((prev) => ({
-      ...prev,
-      [event.target.name]: event.target.checked,
-    }));
-  const handleYearFilterChange = (event) =>
-    setYearFilters((prev) => ({
-      ...prev,
-      [event.target.name]: event.target.checked,
-    }));
-  const handleTrackFilterChange = (event) =>
-    setTrackFilters((prev) => ({
-      ...prev,
-      [event.target.name]: event.target.checked,
-    }));
-  const handleDistanceFilterChange = (event) =>
-    setDistanceFilters((prev) => ({
-      ...prev,
-      [event.target.name]: event.target.checked,
-    }));
+  const handleAptitudeChange = useCallback(
+    (aptitudeName, newValue) =>
+      setModifiedAptitudes((prev) => ({ ...prev, [aptitudeName]: newValue })),
+    [setModifiedAptitudes]
+  );
 
-  const handleRaceCheck = (clickedRace) => {
-    setCurrentChecklistName(null);
-    const newSet = new Set(selectedRaces);
-    if (!newSet.has(clickedRace.id)) {
-      allRaces.forEach((race) => {
-        if (race.date === clickedRace.date && race.id !== clickedRace.id)
-          newSet.delete(race.id);
-      });
-      newSet.add(clickedRace.id);
-    } else {
-      newSet.delete(clickedRace.id);
-    }
-    setSelectedRaces(newSet);
-  };
+  const handleFilterChange = useCallback(
+    (event) => {
+      const { name, value, type, checked } = event.target;
+      setFilters((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    },
+    [setFilters]
+  );
+
+  const handleGradeFilterChange = useCallback(
+    (event) =>
+      setGradeFilters((prev) => ({
+        ...prev,
+        [event.target.name]: event.target.checked,
+      })),
+    [setGradeFilters]
+  );
+
+  const handleYearFilterChange = useCallback(
+    (event) =>
+      setYearFilters((prev) => ({
+        ...prev,
+        [event.target.name]: event.target.checked,
+      })),
+    [setYearFilters]
+  );
+
+  const handleTrackFilterChange = useCallback(
+    (event) =>
+      setTrackFilters((prev) => ({
+        ...prev,
+        [event.target.name]: event.target.checked,
+      })),
+    [setTrackFilters]
+  );
+
+  const handleDistanceFilterChange = useCallback(
+    (event) =>
+      setDistanceFilters((prev) => ({
+        ...prev,
+        [event.target.name]: event.target.checked,
+      })),
+    [setDistanceFilters]
+  );
+
+  const handleRaceCheck = useCallback(
+    (clickedRace) => {
+      setCurrentChecklistName(null);
+      const newSet = new Set(selectedRaces);
+      if (!newSet.has(clickedRace.id)) {
+        allRaces.forEach((race) => {
+          if (race.date === clickedRace.date && race.id !== clickedRace.id)
+            newSet.delete(race.id);
+        });
+        newSet.add(clickedRace.id);
+      } else {
+        newSet.delete(clickedRace.id);
+      }
+      setSelectedRaces(newSet);
+    },
+    [allRaces, selectedRaces, setSelectedRaces, setCurrentChecklistName]
+  );
 
   const handleResetAptitudes = useCallback(
     (e) => {
@@ -530,12 +579,22 @@ function Planner({
     combinedRaceIds,
   ]);
 
-  const handleMaximizeFans = async () => {
+  const handleMaximizeFans = useCallback(async () => {
     setIsMaximizingFans(true);
     await new Promise((resolve) => setTimeout(resolve, 50));
-    onBatchSelect({ mode: "maximize" }, displayRaces);
+    const careerRaceTurns = new Set();
+    allRaces.forEach((race) => {
+      if (careerRaceIds.has(race.id)) {
+        careerRaceTurns.add(race.turnValue);
+      }
+    });
+    onBatchSelect({ mode: "maximize", careerRaceTurns }, displayRaces);
     setIsMaximizingFans(false);
-  };
+  }, [allRaces, careerRaceIds, onBatchSelect, displayRaces]);
+
+  const handleClearOptional = useCallback(() => {
+    onClearOptionalRaces();
+  }, [onClearOptionalRaces]);
 
   const getRaceRowClass = useCallback(
     (race) => {
@@ -1144,10 +1203,10 @@ function Planner({
                   <MultiSelectDropdown
                     name="distance"
                     options={[
-                      { value: "Sprint", label: "Sprint" },
-                      { value: "Mile", label: "Mile" },
-                      { value: "Medium", label: "Medium" },
-                      { value: "Long", label: "Long" },
+                      { value: "sprint", label: "Sprint" },
+                      { value: "mile", label: "Mile" },
+                      { value: "medium", label: "Medium" },
+                      { value: "long", label: "Long" },
                     ]}
                     selected={multiSelectCriteria.distance}
                     onChange={handleMultiSelectChange}
@@ -1209,6 +1268,17 @@ function Planner({
                       review the results.
                     </span>
                   </div>
+                  <button
+                    className="multi-select-button unselect"
+                    style={{ marginLeft: "10px" }}
+                    onClick={handleClearOptional}
+                    disabled={
+                      selectedRaces.size === careerRaceIds.size &&
+                      isNoCareerMode === false
+                    }
+                  >
+                    Clear Optional
+                  </button>
                   <div style={{ marginLeft: "auto" }}>
                     <label>
                       <input

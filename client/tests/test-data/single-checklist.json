@@ -1,0 +1,48 @@
+{
+  "name": "Imported Single Plan",
+  "characterName": "Kitasan Black (Original)",
+  "modifiedAptitudes": {
+    "turf": "A",
+    "dirt": "G",
+    "sprint": "E",
+    "mile": "B",
+    "medium": "A",
+    "long": "A"
+  },
+  "selectedRaceIds": [
+    "c5c8a417-762d-4d76-8805-4c01ca70144f",
+    "f2a17088-fe47-4f6c-8292-62a2651475c4",
+    "837cfb79-5835-4299-a681-4566c3a30368",
+    "c78f1411-8e0f-4e0d-85fe-53f92d2427b5",
+    "17f0a927-44c1-4c6e-a2b1-0f19c30c333a",
+    "8c42b069-b51f-4cdb-80cc-4d372c082ed6",
+    "f0254593-3760-47b1-ba91-7667ff4ad568",
+    "4d3e85e7-290c-4389-9d78-5e451336c1e5",
+    "e26084a0-719e-4e89-a5e2-e5b1ac52a8b9",
+    "b86552c6-fd8e-4a6c-acbd-8cd80e6080b0",
+    "60133c69-24b5-419b-a78b-bd13d7d747a0"
+  ],
+  "checklistData": {},
+  "filters": {
+    "trackAptitude": "B",
+    "distanceAptitude": "A",
+    "hideNonHighlighted": true,
+    "hideSummer": false
+  },
+  "gradeFilters": { "G1": true, "G2": true, "G3": true },
+  "yearFilters": {
+    "Junior Year": true,
+    "Classic Year": true,
+    "Senior Year": true
+  },
+  "trackFilters": { "Turf": true, "Dirt": true },
+  "distanceFilters": {
+    "sprint": true,
+    "mile": true,
+    "medium": true,
+    "long": true
+  },
+  "showOptionalGrades": false,
+  "fanBonus": 10,
+  "savedAt": "2023-10-27T00:00:00.000Z"
+}

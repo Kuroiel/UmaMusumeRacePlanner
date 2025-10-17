@@ -15,8 +15,13 @@ function Modal({
   };
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-content">
-        <h2>{title}</h2>
+      <div
+        className="modal-content"
+        role="dialog"
+        aria-labelledby="modal-title"
+        aria-modal="true"
+      >
+        <h2 id="modal-title">{title}</h2>
         <div className="modal-body">{children}</div>
         <div className="modal-footer">
           <button className="modal-button cancel" onClick={onCancel}>

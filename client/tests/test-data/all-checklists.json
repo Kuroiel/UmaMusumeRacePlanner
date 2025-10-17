@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Imported Plan A",
+    "characterName": "Daiwa Scarlet (Original)",
+    "selectedRaceIds": [
+      "9f257d76-c0c8-4712-9844-42b7e1bd6113",
+      "99e829d5-789a-4e20-9bb6-3e4b77d6435c",
+      "d7c2a74c-42b9-474c-9f69-d36c167d4f95",
+      "c02b557b-a496-419f-b981-67055963f4e2",
+      "512a32c2-80ea-448f-9988-5de7a71f02c0",
+      "8030b3d6-412e-4b68-b785-3652f1b80c10",
+      "e3f790c6-319c-4ab2-8b37-d1a221f7e34d",
+      "d3ed7a5d-4f81-432d-86f7-a3f81e33d2ac",
+      "102d1f95-1f95-4673-8a30-22c608f01b9a"
+    ],
+    "checklistData": {},
+    "fanBonus": 5
+  },
+  {
+    "name": "Imported Plan B",
+    "characterName": "Vodka (Original)",
+    "selectedRaceIds": [
+      "55d3e0c0-6320-410a-9d22-2111d4bd8f16",
+      "a6f3a633-855c-4286-9a2c-974a2b97728e",
+      "78d7e0c4-963d-4c3e-8120-03820a44093c",
+      "a490327f-055a-493f-a316-2c7009477b8b",
+      "43033d59-25f0-4fc7-a579-a78b31a89c9e",
+      "7bf1d272-3e2b-4770-9856-4c4f923b3a3c",
+      "25e1a382-74d3-4e40-a3cb-469b6188e73c",
+      "c43c1b63-2334-47fd-897b-951666496924",
+      "9694e1fd-7dfd-4b8c-a111-c917e914619d"
+    ],
+    "checklistData": {},
+    "fanBonus": 15
+  }
+]

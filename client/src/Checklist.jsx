@@ -50,6 +50,8 @@ const ProgressHelper = ({
   nextInstancePlanned,
   races,
   careerRaceIds,
+  lastAction,
+  onUndo,
 }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
@@ -184,37 +186,49 @@ const ProgressHelper = ({
           }
           disabled={isComplete}
         />
-        <div className="progress-actions">
-          <div className="progress-actions-group">
+
+        <div className="progress-actions-container">
+          <h4 className="progress-actions-label">Race Actions</h4>
+          <div className="progress-actions">
+            <button
+              className="progress-action-button undo"
+              onClick={onUndo}
+              disabled={!lastAction}
+              title={
+                lastAction ? `Undo: ${lastAction.message}` : "No action to undo"
+              }
+            >
+              Undo
+            </button>
             <button
               className="progress-action-button ran"
               onClick={() => onUpdateNextRace("ran", true)}
               disabled={isComplete}
             >
-              Mark as Ran
+              Ran
             </button>
             <button
               className="progress-action-button won"
               onClick={() => onUpdateNextRace("won", true)}
               disabled={isComplete}
             >
-              Mark as Won
+              Won
             </button>
             <button
               className="progress-action-button skip"
               onClick={() => onUpdateNextRace("skipped", true)}
               disabled={isComplete || (nextRace && nextRace.isCareer)}
             >
-              Mark as Skipped
+              Skipped
+            </button>
+            <button
+              className="progress-action-button remove"
+              onClick={onRemoveNextRace}
+              disabled={isComplete || (nextRace && nextRace.isCareer)}
+            >
+              Remove
             </button>
           </div>
-          <button
-            className="remove-race-button"
-            onClick={onRemoveNextRace}
-            disabled={isComplete || (nextRace && nextRace.isCareer)}
-          >
-            Remove Race
-          </button>
         </div>
       </div>
 
@@ -327,6 +341,8 @@ function Checklist({
   estimatedTotalFans,
   fanBonus,
   setFanBonus,
+  lastAction,
+  onUndo,
 }) {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -499,6 +515,8 @@ function Checklist({
                   nextInstancePlanned={nextRaceInfo.nextInstancePlanned}
                   races={races}
                   careerRaceIds={careerRaceIds}
+                  lastAction={lastAction}
+                  onUndo={onUndo}
                 />
               )}
             </div>

@@ -130,7 +130,7 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
       const processObjective = (objective) => {
         if (!objective) return;
         const raceNameMatch = objective.description.match(
-          /(?:in the|the)\s+(.*)/
+          /(?:in the|the)\s+([^,]+)/
         );
         if (!raceNameMatch) return;
         const raceName = raceNameMatch[1].trim();
@@ -145,7 +145,11 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
         if (!normalizedDate) return;
         const foundRace = allRaces.find((race) => {
           const raceDate = normalizeDateForMatching(race.date);
-          return race.name.trim() === raceName && raceDate === normalizedDate;
+          return (
+            race.name.trim() === raceName &&
+            raceDate &&
+            raceDate.startsWith(normalizedDate)
+          );
         });
         if (foundRace) {
           ids.add(foundRace.id);
@@ -225,23 +229,6 @@ const ConfirmationToast = ({ t, onConfirm, onCancel, message }) => {
   );
 };
 
-const UndoToast = ({ t, onUndo, message }) => (
-  <div className="confirmation-toast">
-    <span>{message}</span>
-    <div className="toast-buttons">
-      <button
-        className="toast-button cancel"
-        onClick={() => {
-          onUndo();
-          toast.dismiss(t.id);
-        }}
-      >
-        Undo
-      </button>
-    </div>
-  </div>
-);
-
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -277,26 +264,10 @@ function App() {
   const [isAppInitialized, setIsAppInitialized] = useState(false);
   const [lastAction, setLastAction] = useState(null);
 
-  useEffect(() => {
+  const handleUndo = useCallback(() => {
     if (lastAction && lastAction.undo) {
-      const toastId = toast(
-        (t) => (
-          <UndoToast
-            t={t}
-            message={lastAction.message}
-            onUndo={() => {
-              lastAction.undo();
-              setLastAction(null);
-            }}
-          />
-        ),
-        {
-          duration: 7000,
-          onClose: () => setLastAction(null),
-        }
-      );
-
-      return () => toast.dismiss(toastId);
+      lastAction.undo();
+      setLastAction(null);
     }
   }, [lastAction]);
 
@@ -394,6 +365,10 @@ function App() {
   const [isCompactMode, setIsCompactMode] = useState(
     initialAutosavedState?.isCompactMode ?? false
   );
+
+  const raceMap = useMemo(() => {
+    return new Map(allRaces.map((race) => [race.id, race]));
+  }, [allRaces]);
 
   useEffect(() => {
     if (
@@ -549,7 +524,7 @@ function App() {
       let fans = 0;
 
       combinedRaceIds.forEach((raceId) => {
-        const race = allRaces.find((r) => r.id === raceId);
+        const race = raceMap.get(raceId);
         if (race) {
           if (counts[race.grade] !== undefined) {
             counts[race.grade]++;
@@ -574,7 +549,7 @@ function App() {
         wonCount: localWonCount,
         totalBaseFans: fans,
       };
-    }, [combinedRaceIds, allRaces, checklistData]);
+    }, [combinedRaceIds, raceMap, checklistData]);
 
   const estimatedTotalFans = useMemo(() => {
     const bonus = 1 + (Number(fanBonus) || 0) / 100;
@@ -595,7 +570,7 @@ function App() {
 
     const careerRaceDates = new Map();
     careerRaceIds.forEach((id) => {
-      const race = allRaces.find((r) => r.id === id);
+      const race = raceMap.get(id);
       if (race) careerRaceDates.set(race.date, race.name);
     });
 
@@ -685,6 +660,7 @@ function App() {
     filters.trackAptitude,
     filters.distanceAptitude,
     selectedCharacter,
+    raceMap,
   ]);
 
   const handleAddEpithetRaces = useCallback(
@@ -825,7 +801,7 @@ function App() {
         checklistData: { ...checklistData },
       };
 
-      const raceToUpdate = allRaces.find((r) => r.id === raceId);
+      const raceToUpdate = raceMap.get(raceId);
       if (!raceToUpdate) return;
 
       let message = "";
@@ -964,6 +940,7 @@ function App() {
       checklistData,
       performActionWithUndo,
       selectedRaces,
+      raceMap,
     ]
   );
 
@@ -1180,7 +1157,7 @@ function App() {
         toast.success(`Checklist "${name}" loaded!`);
       }
     },
-    [savedChecklists, allCharacters, getCareerRacesForChar]
+    [savedChecklists, allCharacters, getCareerRacesForChar, setSearchTerm]
   );
 
   const handleDeleteChecklist = useCallback(
@@ -1214,7 +1191,7 @@ function App() {
         { duration: Infinity }
       );
     },
-    [savedChecklists, currentChecklistName, updateLocalStorage]
+    [savedChecklists, currentChecklistName, updateLocalStorage, setSearchTerm]
   );
 
   const handleRenameChecklist = useCallback(
@@ -1444,7 +1421,7 @@ function App() {
 
   const handleRemoveRace = useCallback(
     (raceIdToRemove) => {
-      const race = allRaces.find((r) => r.id === raceIdToRemove);
+      const race = raceMap.get(raceIdToRemove);
       if (!race) return;
 
       const beforeState = {
@@ -1470,7 +1447,7 @@ function App() {
       performActionWithUndo(action, message, beforeState);
     },
     [
-      allRaces,
+      raceMap,
       selectedRaces,
       smartAddedRaceIds,
       checklistData,
@@ -1509,6 +1486,38 @@ function App() {
     }
   };
 
+  const handleClearOptionalRaces = useCallback(() => {
+    const clearAction = () => {
+      const beforeState = {
+        selectedRaces: new Set(selectedRaces),
+        smartAddedRaceIds: new Set(smartAddedRaceIds),
+        checklistData: { ...checklistData },
+      };
+      const action = () => {
+        setSelectedRaces(new Set(careerRaceIds));
+        toast.success("All optional races have been cleared.");
+      };
+      performActionWithUndo(action, "Cleared optional races.", beforeState);
+    };
+
+    toast(
+      (t) => (
+        <ConfirmationToast
+          t={t}
+          onConfirm={clearAction}
+          message="Are you sure you want to clear all non-career races?"
+        />
+      ),
+      { duration: Infinity }
+    );
+  }, [
+    careerRaceIds,
+    selectedRaces,
+    smartAddedRaceIds,
+    checklistData,
+    performActionWithUndo,
+  ]);
+
   const handleBatchSelect = useCallback(
     (criteria, visibleRaces) => {
       const beforeState = {
@@ -1521,8 +1530,10 @@ function App() {
         if (criteria.mode === "maximize") {
           const racesByTurn = new Map();
           const maxTurn = 72;
+          const careerTurns = criteria.careerRaceTurns || new Set();
 
           for (const race of visibleRaces) {
+            if (careerTurns.has(race.turnValue)) continue;
             if (!racesByTurn.has(race.turnValue)) {
               racesByTurn.set(race.turnValue, []);
             }
@@ -1536,8 +1547,14 @@ function App() {
           }));
 
           for (let t = 1; t <= maxTurn; t++) {
+            const prevTurnIsCareer = careerTurns.has(t - 1);
+            const prevPrevTurnIsCareer = careerTurns.has(t - 2);
+
             const prev = dp[t - 1];
-            dp[t] = { ...prev, lastTwoTurns: [prev.lastTwoTurns[1], false] };
+            dp[t] = {
+              ...prev,
+              lastTwoTurns: [prev.lastTwoTurns[1] || prevTurnIsCareer, false],
+            };
 
             if (racesByTurn.has(t)) {
               for (const race of racesByTurn.get(t)) {
@@ -1545,8 +1562,8 @@ function App() {
 
                 if (
                   filters.preventWarningAdd &&
-                  prev.lastTwoTurns[0] &&
-                  prev.lastTwoTurns[1]
+                  (prev.lastTwoTurns[0] || prevPrevTurnIsCareer) &&
+                  (prev.lastTwoTurns[1] || prevTurnIsCareer)
                 ) {
                   continue;
                 }
@@ -1556,7 +1573,10 @@ function App() {
                   dp[t] = {
                     fans: newFans,
                     races: [...prev.races, race.id],
-                    lastTwoTurns: [prev.lastTwoTurns[1], true],
+                    lastTwoTurns: [
+                      prev.lastTwoTurns[1] || prevTurnIsCareer,
+                      true,
+                    ],
                   };
                 }
               }
@@ -1567,16 +1587,25 @@ function App() {
           toast.success("Optimal fan schedule selected!");
         } else {
           const racesToProcess = visibleRaces.filter((race) => {
-            if (criteria.grade !== "any" && race.grade !== criteria.grade)
-              return false;
-            if (criteria.track !== "any" && race.ground !== criteria.track)
-              return false;
             if (
-              criteria.distance !== "any" &&
-              getDistanceCategory(race.distance) !== criteria.distance
+              criteria.grade.length > 0 &&
+              !criteria.grade.includes(race.grade)
             )
               return false;
-            if (criteria.year !== "any" && !race.date.startsWith(criteria.year))
+            if (
+              criteria.track.length > 0 &&
+              !criteria.track.includes(race.ground)
+            )
+              return false;
+            if (
+              criteria.distance.length > 0 &&
+              !criteria.distance.includes(getDistanceCategory(race.distance))
+            )
+              return false;
+            if (
+              criteria.year.length > 0 &&
+              !criteria.year.some((year) => race.date.startsWith(year))
+            )
               return false;
             return true;
           });
@@ -1590,11 +1619,11 @@ function App() {
             const newSelectedRaces = new Set(selectedRaces);
             const scheduledDates = new Set();
             newSelectedRaces.forEach((id) => {
-              const race = allRaces.find((r) => r.id === id);
+              const race = raceMap.get(id);
               if (race) scheduledDates.add(race.date);
             });
             careerRaceIds.forEach((id) => {
-              const race = allRaces.find((r) => r.id === id);
+              const race = raceMap.get(id);
               if (race) scheduledDates.add(race.date);
             });
 
@@ -1650,6 +1679,7 @@ function App() {
       filters.preventWarningAdd,
       performActionWithUndo,
       smartAddedRaceIds,
+      raceMap,
     ]
   );
 
@@ -1713,6 +1743,7 @@ function App() {
     epithetStatus,
     handleAddEpithetRaces,
     onBatchSelect: handleBatchSelect,
+    onClearOptionalRaces: handleClearOptionalRaces,
     showOnlySelected,
     setShowOnlySelected,
     totalBaseFans,
@@ -1749,6 +1780,8 @@ function App() {
     setFanBonus,
     isCompactMode,
     setIsCompactMode,
+    lastAction,
+    onUndo: handleUndo,
   };
 
   const calendarProps = {

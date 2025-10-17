@@ -10,4 +10,8 @@ export default defineConfig({
   },
   // This 'base' option is CRITICAL for GitHub Pages deployment
   base: "/UmaMusumeRacePlanner/",
+  server: {
+    host: "127.0.0.1",
+    port: 5173,
+  },
 });

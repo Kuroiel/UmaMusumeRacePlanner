@@ -865,16 +865,30 @@ tr:hover {
   margin-left: auto;
   margin-right: auto;
 }
-
-.progress-actions {
+.progress-actions-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 40px;
+  gap: 20px; /* This creates a bit of space between the label and the button group */
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid var(--color-border-medium);
+}
+
+.progress-actions-label {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin: 0;
+  flex-shrink: 0; /* Prevents the label from shrinking if space is tight */
+}
+.progress-actions {
+  flex-grow: 1;
+  display: flex;
   flex-wrap: wrap;
+  justify-content: center; /* This creates the even spacing */
+  align-items: center;
+  gap: 10px; /* A small gap for responsiveness */
+  padding-right: 120px;
 }
 .progress-actions-group {
   display: flex;
@@ -885,10 +899,13 @@ tr:hover {
   padding: 8px 16px;
   border-radius: 5px;
   font-weight: bold;
+
   cursor: pointer;
   font-size: 0.9em;
   color: var(--color-text-light);
   transition: background-color 0.2s ease;
+  min-width: 110px; /* ADD THIS: Sets a minimum width for all buttons */
+  text-align: center; /* ADD THIS: Centers the text inside the button */
 }
 .progress-action-button.ran {
   background-color: var(--color-accent-blue);
@@ -908,6 +925,18 @@ tr:hover {
 .progress-action-button.skip:hover {
   background-color: var(--color-accent-gray-hover);
 }
+.progress-action-button.undo {
+  background-color: var(--color-accent-orange);
+}
+.progress-action-button.undo:hover {
+  background-color: var(--color-accent-orange-hover);
+}
+.progress-action-button.remove {
+  background-color: var(--color-accent-red);
+}
+.progress-action-button.remove:hover {
+  background-color: var(--color-accent-red-hover);
+}
 .progress-action-button:disabled {
   background-color: var(--color-border-heavy);
   cursor: not-allowed;
@@ -925,6 +954,7 @@ tr:hover {
   user-select: none;
   width: 100%;
 }
+
 .progress-details-toggle h4 {
   margin: 0;
   font-size: 0.9em;
@@ -1667,28 +1697,6 @@ tr:hover {
 
 .batch-action-button:hover {
   background-color: var(--color-accent-dark-blue-hover);
-}
-
-.remove-race-button {
-  background-color: var(--color-accent-red);
-  color: var(--color-text-light);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8em;
-  padding: 4px 8px;
-  margin-left: 10px;
-  font-weight: bold;
-}
-
-.remove-race-button:hover {
-  background-color: var(--color-accent-red-hover);
-}
-
-.remove-race-button:disabled {
-  background-color: var(--color-accent-gray);
-  cursor: not-allowed;
-  opacity: 0.7;
 }
 
 /* === MULTI SELECT ACTIONS === */

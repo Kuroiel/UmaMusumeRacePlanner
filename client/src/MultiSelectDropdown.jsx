@@ -26,6 +26,8 @@ function MultiSelectDropdown({ name, options, selected, onChange }) {
   const displayText =
     selected.length === 0
       ? `Any ${name}`
+      : selected.length === 1
+      ? options.find((o) => o.value === selected[0])?.label ?? selected[0]
       : selected.length === options.length
       ? `All ${name}s`
       : selected.length > 2

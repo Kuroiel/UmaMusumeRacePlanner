@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import PromptModal from "./PromptModal";
 import toast from "react-hot-toast";
 
@@ -26,6 +26,20 @@ function ChecklistManager({
     isOpen: false,
     defaultValue: "",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredChecklists = useMemo(() => {
+    const lowercasedTerm = searchTerm.toLowerCase();
+    if (!lowercasedTerm) {
+      return savedChecklists;
+    }
+    return savedChecklists.filter(
+      (checklist) =>
+        checklist.name.toLowerCase().includes(lowercasedTerm) ||
+        (checklist.characterName &&
+          checklist.characterName.toLowerCase().includes(lowercasedTerm))
+    );
+  }, [savedChecklists, searchTerm]);
 
   const handleSaveClick = () => {
     const defaultName =
@@ -147,42 +161,86 @@ function ChecklistManager({
         </button>
 
         {savedChecklists.length > 0 && (
-          <div className="saved-checklists-list">
-            {savedChecklists.map(({ name }, index) => (
-              <div key={name} className="saved-checklist-item">
-                <span className="checklist-name">{name}</span>
-                <div className="checklist-actions">
-                  <button
-                    onClick={() => onReorder(index, "up")}
-                    disabled={index === 0}
-                    title="Move Up"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    onClick={() => onReorder(index, "down")}
-                    disabled={index === savedChecklists.length - 1}
-                    title="Move Down"
-                  >
-                    ↓
-                  </button>
-                  <button className="load-button" onClick={() => onLoad(name)}>
-                    Load
-                  </button>
-                  <button onClick={() => handleRenameClick(name)}>
-                    Rename
-                  </button>
-                  <button onClick={() => onExportSingle(name)}>Export</button>
-                  <button
-                    className="delete-button"
-                    onClick={() => onDelete(name)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <>
+            <input
+              type="text"
+              placeholder="Search checklists..."
+              className="search-bar"
+              style={{ marginTop: "15px", marginBottom: "5px" }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="saved-checklists-list">
+              {filteredChecklists.map(({ name, characterName }, index) => {
+                const originalIndex = savedChecklists.findIndex(
+                  (c) => c.name === name
+                );
+                return (
+                  <div key={name} className="saved-checklist-item">
+                    <span className="checklist-name">
+                      {name}
+                      <span
+                        style={{
+                          fontSize: "0.8em",
+                          color: "var(--color-text-secondary)",
+                          marginLeft: "8px",
+                          fontWeight: "normal",
+                        }}
+                      >
+                        ({characterName || "Unknown"})
+                      </span>
+                    </span>
+
+                    <div className="checklist-actions">
+                      <button
+                        onClick={() => onReorder(originalIndex, "up")}
+                        disabled={searchTerm !== "" || originalIndex === 0}
+                        title={
+                          searchTerm !== ""
+                            ? "Clear search to reorder"
+                            : "Move Up"
+                        }
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => onReorder(originalIndex, "down")}
+                        disabled={
+                          searchTerm !== "" ||
+                          originalIndex === savedChecklists.length - 1
+                        }
+                        title={
+                          searchTerm !== ""
+                            ? "Clear search to reorder"
+                            : "Move Down"
+                        }
+                      >
+                        ↓
+                      </button>
+                      <button
+                        className="load-button"
+                        onClick={() => onLoad(name)}
+                      >
+                        Load
+                      </button>
+                      <button onClick={() => handleRenameClick(name)}>
+                        Rename
+                      </button>
+                      <button onClick={() => onExportSingle(name)}>
+                        Export
+                      </button>
+                      <button
+                        className="delete-button"
+                        onClick={() => onDelete(name)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
         <div className="io-buttons">
           <button
