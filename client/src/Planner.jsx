@@ -425,7 +425,6 @@ function Planner({
 
   const handleRaceCheck = useCallback(
     (clickedRace) => {
-      setCurrentChecklistName(null);
       const newSet = new Set(selectedRaces);
       if (!newSet.has(clickedRace.id)) {
         allRaces.forEach((race) => {
@@ -580,6 +579,10 @@ function Planner({
   ]);
 
   const handleMaximizeFans = useCallback(async () => {
+    if (displayRaces.length === 0) {
+      toast.error("No visible races match filters to optimize.");
+      return;
+    }
     setIsMaximizingFans(true);
     await new Promise((resolve) => setTimeout(resolve, 50));
     const careerRaceTurns = new Set();

@@ -1,23 +1,27 @@
-// tests/filters.spec.js
 import { test, expect } from "@playwright/test";
 
 test.describe("Race Filtering Functionality", () => {
   test.beforeEach(async ({ page }) => {
-    // This setup is repeated, so it's perfect for a beforeEach hook.
     await page.goto("/");
-    // Use pressSequentially for a more human-like typing that allows the UI to react.
+
+    await expect(
+      page.getByRole("heading", { name: /Available Races/ })
+    ).toHaveText("Available Races (0)");
+
     await page
       .getByPlaceholder("Search...")
       .pressSequentially("Oguri Cap (Original)", { delay: 50 });
-    await page.getByRole("listitem", { name: "Oguri Cap (Original)" }).click();
 
-    // A robust way to wait for the table to be populated is to wait for a specific,
-    // known element to appear. Here we wait for the table body to have at least one row.
+    const characterListItem = page.getByRole("listitem", {
+      name: "Oguri Cap (Original)",
+    });
+    await expect(characterListItem).toBeVisible();
+    await characterListItem.click();
+
     await expect(page.locator("tbody tr").first()).toBeVisible();
   });
 
   test("should filter by Grade", async ({ page }) => {
-    // Use a robust locator strategy: find a <tr> that contains the text.
     const japanCupRow = page.locator("tr").filter({ hasText: "Japan Cup" });
 
     await expect(japanCupRow.first()).toBeVisible();

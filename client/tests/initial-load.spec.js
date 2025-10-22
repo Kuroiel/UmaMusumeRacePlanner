@@ -1,10 +1,6 @@
-// tests/initial-load.spec.js
 import { test, expect } from "@playwright/test";
 
-// test.describe is a way to group related tests together.
 test.describe("Initial Application Load", () => {
-  // This block runs before each test in this file.
-  // It's a great place for repetitive setup, like navigating to the page.
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });

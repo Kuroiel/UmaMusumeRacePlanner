@@ -770,7 +770,6 @@ function App() {
 
       const action = () => {
         setSelectedRaces(newSelectedRaces);
-        setCurrentChecklistName(null);
       };
 
       const message = `Added ${finalRacesToAdd.size} race(s).`;
@@ -795,24 +794,17 @@ function App() {
 
   const handleChecklistDataChange = useCallback(
     (raceId, field, value) => {
-      const beforeState = {
-        selectedRaces: new Set(selectedRaces),
-        smartAddedRaceIds: new Set(smartAddedRaceIds),
-        checklistData: { ...checklistData },
-      };
-
       const raceToUpdate = raceMap.get(raceId);
       if (!raceToUpdate) return;
 
-      let message = "";
-      if (field === "notes") {
-        setChecklistData((prev) => ({
-          ...prev,
-          [raceId]: { ...(prev[raceId] || {}), notes: value },
-        }));
-        return;
-      } else {
-        message = `Marked '${raceToUpdate.name}' as ${field}.`;
+      const isStatusChange = field !== "notes";
+      let beforeState;
+      if (isStatusChange) {
+        beforeState = {
+          selectedRaces: new Set(selectedRaces),
+          smartAddedRaceIds: new Set(smartAddedRaceIds),
+          checklistData: { ...checklistData },
+        };
       }
 
       const action = () => {
@@ -928,7 +920,13 @@ function App() {
           return { ...prev, [raceId]: newData };
         });
       };
-      performActionWithUndo(action, message, beforeState);
+
+      if (isStatusChange) {
+        const message = `Marked '${raceToUpdate.name}' as ${field}.`;
+        performActionWithUndo(action, message, beforeState);
+      } else {
+        action();
+      }
     },
     [
       allRaces,
@@ -1474,13 +1472,15 @@ function App() {
       );
     } else {
       setIsNoCareerMode(isChecked);
-      if (!isChecked && selectedCharacter) {
-        const newCareerRaceIds = getCareerRacesForChar(selectedCharacter);
-        setCareerRaceIds(newCareerRaceIds);
-        setSelectedRaces(newCareerRaceIds);
-      } else {
+      if (isChecked) {
         setCareerRaceIds(new Set());
         setSelectedRaces(new Set());
+      } else {
+        if (selectedCharacter) {
+          const newCareerRaceIds = getCareerRacesForChar(selectedCharacter);
+          setCareerRaceIds(newCareerRaceIds);
+          setSelectedRaces(new Set(newCareerRaceIds));
+        }
       }
       setCurrentChecklistName(null);
     }
@@ -1495,6 +1495,7 @@ function App() {
       };
       const action = () => {
         setSelectedRaces(new Set(careerRaceIds));
+        setCurrentChecklistName(null);
         toast.success("All optional races have been cleared.");
       };
       performActionWithUndo(action, "Cleared optional races.", beforeState);
@@ -1527,6 +1528,7 @@ function App() {
       };
 
       const action = () => {
+        setCurrentChecklistName(null);
         if (criteria.mode === "maximize") {
           const racesByTurn = new Map();
           const maxTurn = 72;

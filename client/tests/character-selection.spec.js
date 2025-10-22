@@ -1,4 +1,3 @@
-// tests/character-selection.spec.js
 import { test, expect } from "@playwright/test";
 
 test.describe("Character Selection and Career Loading", () => {
@@ -31,7 +30,6 @@ test.describe("Character Selection and Career Loading", () => {
       page.getByRole("heading", { name: "2. Edit Aptitudes" })
     ).toBeVisible();
 
-    // Use a more robust locator strategy for finding the race in the table.
     // This finds a `<tr>` that contains the text "Tenno Sho (Spring)".
     const tennoShoRow = page
       .locator("tr")
