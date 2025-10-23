@@ -6,14 +6,13 @@ import path from "path";
 // This reduces code duplication across tests.
 async function setupInitialChecklist(page) {
   await page.goto("/");
-  await page
-    .getByPlaceholder("Search...")
-    .pressSequentially("Symboli Rudolf (Original)", { delay: 30 });
-  await page
-    .getByRole("listitem", { name: "Symboli Rudolf (Original)" })
-    .click();
 
-  // Wait for the table to be ready
+  const searchInput = page.getByPlaceholder("Search...");
+  // Type a partial name and press Enter.
+  await searchInput.pressSequentially("Symboli Rudolf", { delay: 30 });
+  await searchInput.press("Enter");
+
+  await expect(searchInput).toHaveValue("Symboli Rudolf (Original)");
   await expect(page.locator("tbody tr").first()).toBeVisible();
 
   // Select a few optional races to make the checklist distinct
@@ -206,6 +205,34 @@ test.describe("Checklist Manager: CRUD and Reordering", () => {
     // Sort by character
     await page.getByRole("button", { name: "Sort by Character" }).click();
     await expect(checklists).toHaveText(["Checklist Zulu", "Checklist Alpha"]);
+  });
+  test("should filter the list of saved checklists", async ({ page }) => {
+    const searchInput = page.getByPlaceholder("Search checklists...");
+    const checklistAlpha = page.locator(".saved-checklist-item", {
+      hasText: "Checklist Alpha",
+    });
+    const checklistZulu = page.locator(".saved-checklist-item", {
+      hasText: "Checklist Zulu",
+    });
+
+    // Both checklists are visible initially.
+    await expect(checklistAlpha).toBeVisible();
+    await expect(checklistZulu).toBeVisible();
+
+    // Search for "Alpha"
+    await searchInput.pressSequentially("Alpha", { delay: 30 });
+    await expect(checklistAlpha).toBeVisible();
+    await expect(checklistZulu).not.toBeVisible();
+
+    // Clear search and search by character name ("Oguri Cap")
+    await searchInput.fill("Oguri");
+    await expect(checklistAlpha).not.toBeVisible();
+    await expect(checklistZulu).toBeVisible();
+
+    // Clear the search again
+    await searchInput.fill("");
+    await expect(checklistAlpha).toBeVisible();
+    await expect(checklistZulu).toBeVisible();
   });
 });
 

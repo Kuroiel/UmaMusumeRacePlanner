@@ -126,6 +126,49 @@ test.describe("UI Interactions and Edge Cases", () => {
     await expect(checkbox).not.toBeChecked();
     await expect(checkbox).toBeEnabled();
   });
+  test("should update estimated total fans when fan bonus is changed", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    // Select a character to get a baseline fan count
+    await page
+      .getByPlaceholder("Search...")
+      .pressSequentially("Oguri Cap (Original)", { delay: 30 });
+    await page.getByRole("listitem", { name: "Oguri Cap (Original)" }).click();
+    await expect(page.locator("tbody tr").first()).toBeVisible();
+
+    const fanInputGroup = page.locator(".fan-input-group");
+    const fanBonusInput = fanInputGroup.locator("#fanBonus");
+    const baseFansDisplay = fanInputGroup.locator("span", {
+      hasText: "Base:",
+    });
+    const estimatedFansDisplay = fanInputGroup.locator("span", {
+      hasText: "Est. Total:",
+    });
+
+    // With 9 career races, the base fan count for Oguri Cap is 120,500.
+    // Initial state: 0% bonus, so Base and Est. Total should be the same.
+    await expect(baseFansDisplay).toContainText("120,500");
+    await expect(estimatedFansDisplay).toContainText("120,500");
+    await expect(fanBonusInput).toHaveValue("0");
+
+    // Set fan bonus to 20%
+    await fanBonusInput.fill("20");
+
+    // Est. Total should update: 120,500 * 1.20 = 144,600
+    await expect(estimatedFansDisplay).toContainText("144,600");
+
+    // Add another race to see both Base and Est. update
+    // Satsuki Sho is 11,000 fans. New base = 131,500. New est = 131,500 * 1.2 = 157,800
+    await page
+      .locator("tr")
+      .filter({ hasText: "Satsuki Sho" })
+      .getByRole("checkbox")
+      .check();
+
+    await expect(baseFansDisplay).toContainText("131,500");
+    await expect(estimatedFansDisplay).toContainText("157,800");
+  });
 });
 
 test.describe("Data Persistence and Validation", () => {

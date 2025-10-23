@@ -705,6 +705,11 @@ function Planner({
               value={searchTerm}
               onChange={handleSearchChange}
               onFocus={(e) => e.target.select()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && filteredCharacters.length > 0) {
+                  handleCharacterSelect(filteredCharacters[0]);
+                }
+              }}
             />
             <ul className="character-list">
               {filteredCharacters.map((char) => (

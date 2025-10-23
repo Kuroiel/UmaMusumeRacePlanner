@@ -75,7 +75,7 @@ test.describe("Checklist Page Functionality", () => {
     await expect(progressHelper.getByText("Career")).toBeVisible();
 
     // Mark it as won
-    await progressHelper.getByRole("button", { name: "Mark as Won" }).click();
+    await progressHelper.getByRole("button", { name: "Won" }).click();
 
     // The Progress Helper should now target the *next* race, Satsuki Sho
     await expect(progressHelper).toContainText("Satsuki Sho");
@@ -100,15 +100,15 @@ test.describe("Checklist Page Functionality", () => {
     // First, mark all races up to Hopeful Stakes as won
     await page
       .locator(".progress-helper")
-      .getByRole("button", { name: "Mark as Won" })
+      .getByRole("button", { name: "Won" })
       .click(); // Yayoi Sho
     await page
       .locator(".progress-helper")
-      .getByRole("button", { name: "Mark as Won" })
+      .getByRole("button", { name: "Won" })
       .click(); // Satsuki Sho
     await page
       .locator(".progress-helper")
-      .getByRole("button", { name: "Mark as Won" })
+      .getByRole("button", { name: "Won" })
       .click(); // Japanese Derby
 
     // The next race should be Hopeful Stakes (the Junior Year one)
@@ -116,9 +116,7 @@ test.describe("Checklist Page Functionality", () => {
     await expect(progressHelper).toContainText("Hopeful Stakes");
 
     // Mark it as skipped
-    await progressHelper
-      .getByRole("button", { name: "Mark as Skipped" })
-      .click();
+    await progressHelper.getByRole("button", { name: "Skipped" }).click();
 
     // A toast should appear confirming the smart-add
     await expect(page.getByRole("status")).toContainText(
@@ -179,5 +177,101 @@ test.describe("Checklist Page Functionality", () => {
 
     // Verify note is cleared
     await expect(firstRaceNotes).toHaveValue("");
+  });
+
+  test("Progress Helper should allow removing a non-career race", async ({
+    page,
+  }) => {
+    const progressHelper = page.locator(".progress-helper");
+    const satsukiShoItem = page
+      .locator(".checklist-item")
+      .filter({ hasText: "Satsuki Sho" });
+
+    // Mark the first race (Yayoi Sho) as won to advance the helper
+    await progressHelper.getByRole("button", { name: "Won" }).click();
+
+    // The next race is now Satsuki Sho, which is optional.
+    await expect(progressHelper).toContainText("Satsuki Sho");
+    await expect(satsukiShoItem).toBeVisible();
+    await expect(page.locator(".checklist-item")).toHaveCount(11);
+
+    // Get the remove button from the helper and click it
+    const removeButton = progressHelper.getByRole("button", {
+      name: "Remove",
+    });
+    await expect(removeButton).toBeEnabled();
+    await removeButton.click();
+
+    // Satsuki Sho should be gone from the list
+    await expect(satsukiShoItem).not.toBeVisible();
+    await expect(page.locator(".checklist-item")).toHaveCount(10);
+
+    // The Progress Helper should have advanced to the *next* race, Japanese Derby
+    await expect(progressHelper).toContainText("Japanese Derby");
+  });
+
+  test("Undo button in Progress Helper should revert the last action", async ({
+    page,
+  }) => {
+    const progressHelper = page.locator(".progress-helper");
+    const undoButton = progressHelper.getByRole("button", { name: "Undo" });
+    const wonCounter = page.locator(".grade-counter", { hasText: "Won:" });
+
+    // Initial state: 0 wins, Undo is disabled.
+    await expect(wonCounter).toContainText("Won: 0 / 11");
+    await expect(undoButton).toBeDisabled();
+
+    // Perform an action: Mark the first race as won.
+    await progressHelper.getByRole("button", { name: "Won" }).click();
+
+    // State after action: 1 win, Undo is now enabled, helper targets next race.
+    await expect(wonCounter).toContainText("Won: 1 / 11");
+    await expect(progressHelper).toContainText("Satsuki Sho"); // Advanced to next race
+    await expect(undoButton).toBeEnabled();
+    await expect(undoButton).toHaveAttribute(
+      "title",
+      "Undo: Marked 'Yayoi Sho' as won."
+    );
+
+    // Click the Undo button.
+    await undoButton.click();
+
+    // A success toast should appear.
+    await expect(page.getByRole("status")).toContainText("Action undone!");
+
+    // State should be reverted: 0 wins, Undo is disabled again, helper targets original race.
+    await expect(wonCounter).toContainText("Won: 0 / 11");
+    await expect(undoButton).toBeDisabled();
+    await expect(progressHelper).toContainText("Yayoi Sho"); // Reverted to original race
+  });
+
+  test("should disable Skip and Remove actions for career races", async ({
+    page,
+  }) => {
+    // The first race, Yayoi Sho, is a career race for Special Week.
+    const progressHelper = page.locator(".progress-helper");
+    const yayoiShoItem = page
+      .locator(".checklist-item")
+      .filter({ hasText: "Yayoi Sho" });
+
+    // --- Check the Progress Helper ---
+    await expect(progressHelper).toContainText("Yayoi Sho");
+    const skipButton = progressHelper.getByRole("button", {
+      name: "Skipped",
+    });
+    const removeButton = progressHelper.getByRole("button", { name: "Remove" });
+
+    await expect(skipButton).toBeDisabled();
+    await expect(removeButton).toBeDisabled();
+
+    // --- Check the main checklist item ---
+    const skipCheckbox = yayoiShoItem.getByLabel("Skip");
+    const itemRemoveButton = yayoiShoItem.getByRole("button", {
+      name: "Remove",
+    });
+
+    // The label around the checkbox is what gets the disabled class.
+    await expect(skipCheckbox).toBeDisabled();
+    await expect(itemRemoveButton).toBeDisabled();
   });
 });
