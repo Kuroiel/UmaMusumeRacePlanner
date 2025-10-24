@@ -1661,7 +1661,9 @@ function App() {
           } else if (criteria.mode === "unselect") {
             const racesToRemoveIds = new Set(racesToProcess.map((r) => r.id));
             const newSelectedRaces = new Set(
-              [...selectedRaces].filter((id) => !racesToRemoveIds.has(id))
+              [...selectedRaces].filter(
+                (id) => !racesToRemoveIds.has(id) || careerRaceIds.has(id)
+              )
             );
             const removedCount = selectedRaces.size - newSelectedRaces.size;
             setSelectedRaces(newSelectedRaces);

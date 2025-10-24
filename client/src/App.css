@@ -1740,10 +1740,10 @@ tr:hover {
   background-color: var(--color-accent-dark-blue-hover);
 }
 .multi-select-button.unselect {
-  background-color: var(--color-accent-orange);
+  background-color: var(--color-accent-red);
 }
 .multi-select-button.unselect:hover {
-  background-color: var(--color-accent-orange-hover);
+  background-color: var(--color-accent-red-hover);
 }
 .multi-select-button.maximize {
   background-color: var(--color-accent-green);

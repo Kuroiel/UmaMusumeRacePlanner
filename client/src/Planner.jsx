@@ -599,9 +599,12 @@ function Planner({
     onClearOptionalRaces();
   }, [onClearOptionalRaces]);
 
+  // *** THE MAIN FIX IS HERE ***
+  // This function now adds a stable base class to every row,
+  // making it resilient to re-renders for Playwright.
   const getRaceRowClass = useCallback(
     (race) => {
-      const classes = [];
+      const classes = ["race-row"]; // Stable base class for testability
       if (shouldHighlightRace(race)) {
         classes.push("highlighted-race");
       }
@@ -1335,20 +1338,24 @@ function Planner({
               <tbody>
                 {displayRaces.map((race) => {
                   const isCareerRace = careerRaceIds.has(race.id);
-                  const rowClass = getRaceRowClass(race);
+                  const baseRowClass = getRaceRowClass(race);
                   const gradeBubbleClass = getGradeBubbleClass(race);
 
                   const isDateGroupStart =
                     lastDate !== null && race.date !== lastDate;
                   lastDate = race.date;
 
+                  // *** THE SECOND FIX IS HERE ***
+                  // This robustly combines the class names without causing errors.
+                  const rowClasses = [
+                    baseRowClass,
+                    isDateGroupStart ? "date-group-start" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
+
                   return (
-                    <tr
-                      key={race.id}
-                      className={`${rowClass} ${
-                        isDateGroupStart ? "date-group-start" : ""
-                      }`}
-                    >
+                    <tr key={race.id} className={rowClasses}>
                       <td>
                         <input
                           type="checkbox"
