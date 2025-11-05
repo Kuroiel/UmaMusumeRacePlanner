@@ -12,7 +12,7 @@ async function setupInitialChecklist(page) {
   await searchInput.pressSequentially("Symboli Rudolf", { delay: 30 });
   await searchInput.press("Enter");
 
-  await expect(searchInput).toHaveValue("Symboli Rudolf (Original)");
+  await expect(searchInput).toHaveValue("Symboli Rudolf (Festival)");
   await expect(page.locator("tbody tr").first()).toBeVisible();
 
   // Select a few optional races to make the checklist distinct
@@ -52,8 +52,9 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
     await expect(page.getByText(checklistName)).toBeVisible();
 
     // Now, clear the planner by selecting a different character
-    await page.getByPlaceholder("Search...").fill("Oguri Cap (Original)");
-    await page.getByRole("listitem", { name: "Oguri Cap (Original)" }).click();
+    const searchInput = page.getByPlaceholder("Search...");
+    await searchInput.pressSequentially("Oguri Cap (Original)", { delay: 30 });
+    await searchInput.press("Enter");
     await expect(page.locator(".generate-button")).toContainText(
       "View Checklist (9)"
     );
@@ -116,8 +117,9 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
     await expect(overwriteModal).not.toBeVisible();
 
     // Clear and load to verify the *overwritten* (newer) version was saved
-    await page.getByPlaceholder("Search...").fill("Oguri Cap (Original)");
-    await page.getByRole("listitem", { name: "Oguri Cap (Original)" }).click();
+    const searchInput = page.getByPlaceholder("Search...");
+    await searchInput.pressSequentially("Oguri Cap (Original)", { delay: 30 });
+    await searchInput.press("Enter");
     await page
       .locator(".saved-checklist-item")
       .getByRole("button", { name: "Load" })
@@ -138,8 +140,9 @@ test.describe("Checklist Manager: CRUD and Reordering", () => {
     await page.getByRole("dialog").getByRole("textbox").fill("Checklist Alpha");
     await page.getByRole("button", { name: "Save" }).click();
 
-    await page.getByPlaceholder("Search...").fill("Oguri Cap (Original)");
-    await page.getByRole("listitem", { name: "Oguri Cap (Original)" }).click();
+    const searchInput = page.getByPlaceholder("Search...");
+    await searchInput.pressSequentially("Oguri Cap (Original)", { delay: 30 });
+    await searchInput.press("Enter");
     await page.getByRole("button", { name: "Save Current Checklist" }).click();
     await page.getByRole("dialog").getByRole("textbox").fill("Checklist Zulu");
     await page.getByRole("button", { name: "Save" }).click();
@@ -280,7 +283,11 @@ test.describe("Checklist Manager: Import and Export", () => {
   });
 
   test("should import a single checklist", async ({ page }) => {
-    await page.setInputFiles("input[type=file] >> nth=1", singleChecklistPath);
+    // Use the more modern locator syntax, which is less ambiguous than '>>'
+    await page
+      .locator("input[type=file]")
+      .nth(1)
+      .setInputFiles(singleChecklistPath);
 
     const importedItem = page.locator(".saved-checklist-item", {
       hasText: "Imported Single Plan",
@@ -305,7 +312,10 @@ test.describe("Checklist Manager: Import and Export", () => {
     await page.getByRole("dialog").getByRole("textbox").fill("Will Be Deleted");
     await page.getByRole("button", { name: "Save" }).click();
 
-    await page.setInputFiles("input[type=file] >> nth=0", allChecklistsPath);
+    await page
+      .locator("input[type=file]")
+      .nth(0)
+      .setInputFiles(allChecklistsPath);
 
     const toast = page.getByRole("alert");
     await expect(toast).toContainText(

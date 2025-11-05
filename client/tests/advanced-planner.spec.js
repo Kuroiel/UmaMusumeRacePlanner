@@ -4,12 +4,14 @@ import { test, expect } from "@playwright/test";
 test.describe("Advanced Planner Features", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+    await page.evaluate(() => localStorage.clear());
 
+    await page.reload();
     const searchInput = page.getByPlaceholder("Search...");
     await searchInput.pressSequentially("El Condor Pasa (Original)", {
       delay: 50,
     });
-    await page.getByRole("listitem").first().click();
+    await searchInput.press("Enter");
 
     await expect(searchInput).toHaveValue("El Condor Pasa (Original)");
     await expect(page.locator("tbody tr").first()).toBeVisible();
@@ -23,9 +25,15 @@ test.describe("Advanced Planner Features", () => {
 
     await expect(victoriaMileRow).toHaveClass(/highlighted-race/);
 
+    // Turn off the default filter to see the race become un-highlighted
     await page.getByLabel("Hide Unsuitable Races").uncheck();
 
-    await page.locator(".aptitude-item select").nth(3).selectOption("B"); // 4th select is 'mile'
+    // Instead of relying on order with .nth(3), locate the select by its associated text.
+    // This is much more robust if the order of aptitudes ever changes.
+    await page
+      .locator(".aptitude-item", { hasText: "Mile" })
+      .getByRole("combobox")
+      .selectOption("B");
 
     await expect(victoriaMileRow).not.toHaveClass(/highlighted-race/);
 

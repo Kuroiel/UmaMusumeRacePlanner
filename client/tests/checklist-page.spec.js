@@ -4,10 +4,11 @@ import { test, expect } from "@playwright/test";
 // Helper to set up a consistent state for checklist tests
 async function setupChecklistWithOptionalRaces(page) {
   await page.goto("/");
-  await page
-    .getByPlaceholder("Search...")
-    .pressSequentially("Special Week (Original)", { delay: 30 });
-  await page.getByRole("listitem", { name: "Special Week (Original)" }).click();
+  const searchInput = page.getByPlaceholder("Search...");
+  await searchInput.pressSequentially("Special Week (Original)", {
+    delay: 30,
+  });
+  await searchInput.press("Enter");
   await expect(page.locator("tbody tr").first()).toBeVisible();
 
   // Select the G1 Hopeful Stakes (non-career, has a future instance)

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Character Selection and Career Loading", () => {
+test.describe.serial("Character Selection and Career Loading", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
