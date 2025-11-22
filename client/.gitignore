@@ -25,6 +25,7 @@ yarn-error.log*
 # Playwright
 node_modules/
 /test-results/
+**.last-run.json
 /playwright-report/
 /blob-report/
 /playwright/.cache/
