@@ -280,7 +280,7 @@ function App() {
           setSelectedRaces(beforeState.selectedRaces);
           setSmartAddedRaceIds(beforeState.smartAddedRaceIds);
           setChecklistData(beforeState.checklistData);
-          toast.success("Action undone!");
+          toast.success("Action undone!", { duration: 3000 });
         },
       });
     },
@@ -776,7 +776,8 @@ function App() {
       performActionWithUndo(action, message, beforeState);
       if (finalRacesToAdd.size > 0) {
         toast.success(
-          `Added ${finalRacesToAdd.size} race(s) to your schedule!`
+          `Added ${finalRacesToAdd.size} race(s) to your schedule!`,
+          { duration: 3000 }
         );
       }
     },
@@ -899,7 +900,7 @@ function App() {
                 return newSet;
               });
               toast.success(
-                `Removed automatically added instance of "${futureInstance.name}".`
+                `Removed automatically added instance of "${futureInstance.name},{duration: 3000}".`
               );
             }
           }
@@ -985,7 +986,9 @@ function App() {
         });
       };
       performActionWithUndo(action, "Reset all statuses.", beforeState);
-      toast.success("Ran/Won/Skipped statuses have been reset.");
+      toast.success("Ran/Won/Skipped statuses have been reset.", {
+        duration: 3000,
+      });
     };
 
     toast(
@@ -1017,7 +1020,7 @@ function App() {
         });
       };
       performActionWithUndo(action, "Cleared all notes.", beforeState);
-      toast.success("All notes have been cleared.");
+      toast.success("All notes have been cleared.", { duration: 3000 });
     };
 
     toast(
@@ -1061,7 +1064,7 @@ function App() {
           newChecklists[existingIndex] = newChecklist;
           updateLocalStorage(newChecklists);
           setCurrentChecklistName(name);
-          toast.success(`Checklist "${name}" overwritten!`);
+          toast.success(`Checklist "${name}" overwritten!`, { duration: 3000 });
         };
 
         setOverwriteModal({
@@ -1073,7 +1076,7 @@ function App() {
         const newChecklists = [...savedChecklists, newChecklist];
         updateLocalStorage(newChecklists);
         setCurrentChecklistName(name);
-        toast.success(`Checklist "${name}" saved!`);
+        toast.success(`Checklist "${name}" saved!`, { duration: 3000 });
       }
       setSelectedRaces(finalSelectedRaces);
       setSmartAddedRaceIds(new Set());
@@ -1152,7 +1155,7 @@ function App() {
         setShowOptionalGrades(checklistToLoad.showOptionalGrades || false);
         setFanBonus(checklistToLoad.fanBonus || 0);
         setCurrentChecklistName(name);
-        toast.success(`Checklist "${name}" loaded!`);
+        toast.success(`Checklist "${name}" loaded!`, { duration: 3000 });
       }
     },
     [savedChecklists, allCharacters, getCareerRacesForChar, setSearchTerm]
@@ -1172,9 +1175,11 @@ function App() {
           setSearchTerm("");
           setCareerRaceIds(new Set());
           setCurrentChecklistName(null);
-          toast.success(`Deleted "${name}" and cleared the planner.`);
+          toast.success(`Deleted "${name}" and cleared the planner.`, {
+            duration: 3000,
+          });
         } else {
-          toast.success(`Deleted "${name}".`);
+          toast.success(`Deleted "${name}".`, { duration: 3000 });
         }
       };
 
@@ -1210,7 +1215,7 @@ function App() {
       if (currentChecklistName === oldName) {
         setCurrentChecklistName(newName);
       }
-      toast.success(`Renamed to "${newName}".`);
+      toast.success(`Renamed to "${newName}".`, { duration: 3000 });
     },
     [savedChecklists, currentChecklistName, updateLocalStorage]
   );
@@ -1249,7 +1254,8 @@ function App() {
       });
       updateLocalStorage(sorted);
       toast.success(
-        `Checklists sorted by ${sortBy === "name" ? "name" : "character"}.`
+        `Checklists sorted by ${sortBy === "name" ? "name" : "character"}.`,
+        { duration: 3000 }
       );
     },
     [savedChecklists, updateLocalStorage]
@@ -1272,7 +1278,7 @@ function App() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success(`Exported "${name}"!`);
+      toast.success(`Exported "${name}"!`, { duration: 3000 });
     },
     [savedChecklists]
   );
@@ -1340,7 +1346,9 @@ function App() {
         });
       } else {
         updateLocalStorage([...savedChecklists, sanitizedChecklist]);
-        toast.success(`Imported checklist "${sanitizedChecklist.name}"!`);
+        toast.success(`Imported checklist "${sanitizedChecklist.name}"!`, {
+          duration: 3000,
+        });
       }
     },
     [savedChecklists, updateLocalStorage, allRaces]
@@ -1397,7 +1405,9 @@ function App() {
         const importAction = () => {
           updateLocalStorage(validatedChecklists);
           setCurrentChecklistName(null);
-          toast.success(`Imported ${validatedChecklists.length} checklists!`);
+          toast.success(`Imported ${validatedChecklists.length} checklists!`, {
+            duration: 3000,
+          });
         };
 
         toast(
@@ -1496,7 +1506,9 @@ function App() {
       const action = () => {
         setSelectedRaces(new Set(careerRaceIds));
         setCurrentChecklistName(null);
-        toast.success("All optional races have been cleared.");
+        toast.success("All optional races have been cleared.", {
+          duration: 3000,
+        });
       };
       performActionWithUndo(action, "Cleared optional races.", beforeState);
     };
@@ -1586,7 +1598,7 @@ function App() {
           }
           const optimalRaceIds = new Set(dp[maxTurn].races);
           setSelectedRaces(new Set([...careerRaceIds, ...optimalRaceIds]));
-          toast.success("Optimal fan schedule selected!");
+          toast.success("Optimal fan schedule selected!", { duration: 3000 });
         } else {
           const racesToProcess = visibleRaces.filter((race) => {
             if (
@@ -1657,7 +1669,9 @@ function App() {
               }
             });
             setSelectedRaces(newSelectedRaces);
-            toast.success(`Selected ${addedCount} race(s) matching criteria.`);
+            toast.success(`Selected ${addedCount} race(s) matching criteria.`, {
+              duration: 3000,
+            });
           } else if (criteria.mode === "unselect") {
             const racesToRemoveIds = new Set(racesToProcess.map((r) => r.id));
             const newSelectedRaces = new Set(
@@ -1667,7 +1681,9 @@ function App() {
             );
             const removedCount = selectedRaces.size - newSelectedRaces.size;
             setSelectedRaces(newSelectedRaces);
-            toast.success(`Unselected ${removedCount} race(s).`);
+            toast.success(`Unselected ${removedCount} race(s).`, {
+              duration: 3000,
+            });
           }
         }
       };
@@ -1803,7 +1819,9 @@ function App() {
       c.name === checklistToImport.name ? checklistToImport : c
     );
     updateLocalStorage(newChecklists);
-    toast.success(`Checklist "${checklistToImport.name}" was overwritten!`);
+    toast.success(`Checklist "${checklistToImport.name}" was overwritten!`, {
+      duration: 3000,
+    });
     setImportConflictModal({ isOpen: false, checklistToImport: null });
   };
 

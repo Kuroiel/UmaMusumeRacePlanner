@@ -1,4 +1,3 @@
-// tests/advanced-planner.spec.js
 import { test, expect } from "@playwright/test";
 
 test.describe("Advanced Planner Features", () => {
@@ -25,11 +24,8 @@ test.describe("Advanced Planner Features", () => {
 
     await expect(victoriaMileRow).toHaveClass(/highlighted-race/);
 
-    // Turn off the default filter to see the race become un-highlighted
     await page.getByLabel("Hide Unsuitable Races").uncheck();
 
-    // Instead of relying on order with .nth(3), locate the select by its associated text.
-    // This is much more robust if the order of aptitudes ever changes.
     await page
       .locator(".aptitude-item", { hasText: "Mile" })
       .getByRole("combobox")
@@ -146,21 +142,21 @@ test.describe("Advanced Planner Features", () => {
       .getByRole("checkbox");
     const mileChamp = page.locator("tr", { hasText: "Mile Championship" });
 
-    await tennoShoAutumn.check(); // Senior Oct-Late
-    await queenElizabethCup.check(); // Senior Nov-Early
+    await tennoShoAutumn.check();
+    await queenElizabethCup.check();
     await expect(checklistButton).toContainText("View Checklist (9)");
 
     const preventToggle = page.getByLabel("Prevent 3+ Consecutive Races");
     await expect(preventToggle).toBeChecked();
 
     await page.getByRole("heading", { name: "Multi Select" }).click();
-    await page.locator(".multi-select-display").nth(0).click(); // grade
+    await page.locator(".multi-select-display").nth(0).click();
     await page.getByLabel("G1").check();
     await page.locator("h2").first().click();
-    await page.locator(".multi-select-display").nth(2).click(); // distance
+    await page.locator(".multi-select-display").nth(2).click();
     await page.getByLabel("Mile").check();
     await page.locator("h2").first().click();
-    await page.locator(".multi-select-display").nth(3).click(); // year
+    await page.locator(".multi-select-display").nth(3).click();
     await page.getByLabel("Senior").check();
     await page.locator("h2").first().click();
 

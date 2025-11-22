@@ -1,21 +1,16 @@
-// tests/checklist-manager.spec.js
 import { test, expect } from "@playwright/test";
 import path from "path";
 
-// A helper function to set up the page with a character and some optional races.
-// This reduces code duplication across tests.
 async function setupInitialChecklist(page) {
   await page.goto("/");
 
   const searchInput = page.getByPlaceholder("Search...");
-  // Type a partial name and press Enter.
   await searchInput.pressSequentially("Symboli Rudolf", { delay: 30 });
   await searchInput.press("Enter");
 
   await expect(searchInput).toHaveValue("Symboli Rudolf (Festival)");
   await expect(page.locator("tbody tr").first()).toBeVisible();
 
-  // Select a few optional races to make the checklist distinct
   await page
     .locator("tr")
     .filter({ hasText: "Takarazuka Kinen" })
@@ -29,7 +24,6 @@ async function setupInitialChecklist(page) {
     .getByRole("checkbox")
     .check();
 
-  // Assert that the initial state is correct before saving
   await expect(page.locator(".generate-button")).toContainText(
     "View Checklist (12)"
   );
@@ -42,7 +36,6 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
     await setupInitialChecklist(page);
     const checklistName = "Rudolf Triple Crown Plan";
 
-    // Save the checklist
     await page.getByRole("button", { name: "Save Current Checklist" }).click();
     const saveModal = page.getByRole("dialog", { name: "Save Checklist" });
     await expect(saveModal).toBeVisible();
@@ -51,7 +44,6 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
     await expect(saveModal).not.toBeVisible();
     await expect(page.getByText(checklistName)).toBeVisible();
 
-    // Now, clear the planner by selecting a different character
     const searchInput = page.getByPlaceholder("Search...");
     await searchInput.pressSequentially("Oguri Cap (Original)", { delay: 30 });
     await searchInput.press("Enter");
@@ -59,13 +51,11 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
       "View Checklist (9)"
     );
 
-    // Load the saved checklist
     const savedItem = page.locator(".saved-checklist-item", {
       hasText: checklistName,
     });
     await savedItem.getByRole("button", { name: "Load" }).click();
 
-    // Verify the state was restored
     await expect(page.getByPlaceholder("Search...")).toHaveValue(
       /Symboli Rudolf/
     );
@@ -73,7 +63,6 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
       "View Checklist (12)"
     );
 
-    // Verify one of the optional races is still checked
     const mileChampRow = page
       .locator("tr")
       .filter({ hasText: "Mile Championship" })
@@ -87,12 +76,10 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
     await setupInitialChecklist(page);
     const checklistName = "Rudolf Overwrite Test";
 
-    // First save
     await page.getByRole("button", { name: "Save Current Checklist" }).click();
     await page.getByRole("dialog").getByRole("textbox").fill(checklistName);
     await page.getByRole("button", { name: "Save" }).click();
 
-    // Change something - e.g., unselect a race
     await page
       .locator("tr")
       .filter({ hasText: "Mile Championship" })
@@ -103,12 +90,10 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
       "View Checklist (11)"
     );
 
-    // Attempt to save again with the same name
     await page.getByRole("button", { name: "Save Current Checklist" }).click();
     await page.getByRole("dialog").getByRole("textbox").fill(checklistName);
     await page.getByRole("button", { name: "Save" }).click();
 
-    // Overwrite modal should appear
     const overwriteModal = page.getByRole("dialog", {
       name: "Overwrite Checklist",
     });
@@ -116,7 +101,6 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
     await page.getByRole("button", { name: "Overwrite" }).click();
     await expect(overwriteModal).not.toBeVisible();
 
-    // Clear and load to verify the *overwritten* (newer) version was saved
     const searchInput = page.getByPlaceholder("Search...");
     await searchInput.pressSequentially("Oguri Cap (Original)", { delay: 30 });
     await searchInput.press("Enter");
@@ -125,7 +109,6 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
       .getByRole("button", { name: "Load" })
       .click();
 
-    // Assert the count is 11, not 12
     await expect(page.locator(".generate-button")).toContainText(
       "View Checklist (11)"
     );
@@ -134,7 +117,6 @@ test.describe("Checklist Manager: Save, Load, and Overwrite", () => {
 
 test.describe("Checklist Manager: CRUD and Reordering", () => {
   test.beforeEach(async ({ page }) => {
-    // Set up two checklists for these tests
     await setupInitialChecklist(page);
     await page.getByRole("button", { name: "Save Current Checklist" }).click();
     await page.getByRole("dialog").getByRole("textbox").fill("Checklist Alpha");
@@ -176,7 +158,6 @@ test.describe("Checklist Manager: CRUD and Reordering", () => {
     });
     await checklistItem.getByRole("button", { name: "Delete" }).click();
 
-    // Confirmation toast appears
     const toast = page.getByRole("alert");
     await expect(toast).toContainText(
       /Delete checklist "Checklist Zulu"\? This cannot be undone./
@@ -190,22 +171,18 @@ test.describe("Checklist Manager: CRUD and Reordering", () => {
     const checklists = page.locator(".saved-checklist-item .checklist-name");
     await expect(checklists).toHaveText(["Checklist Alpha", "Checklist Zulu"]);
 
-    // Move Zulu up
     const zuluItem = page.locator(".saved-checklist-item", {
       hasText: "Checklist Zulu",
     });
     await zuluItem.getByRole("button", { name: "Move Up" }).click();
     await expect(checklists).toHaveText(["Checklist Zulu", "Checklist Alpha"]);
 
-    // Move Zulu down
     await zuluItem.getByRole("button", { name: "Move Down" }).click();
     await expect(checklists).toHaveText(["Checklist Alpha", "Checklist Zulu"]);
 
-    // Sort by name
     await page.getByRole("button", { name: "Sort by Name (A-Z)" }).click();
     await expect(checklists).toHaveText(["Checklist Alpha", "Checklist Zulu"]);
 
-    // Sort by character
     await page.getByRole("button", { name: "Sort by Character" }).click();
     await expect(checklists).toHaveText(["Checklist Zulu", "Checklist Alpha"]);
   });
@@ -218,21 +195,17 @@ test.describe("Checklist Manager: CRUD and Reordering", () => {
       hasText: "Checklist Zulu",
     });
 
-    // Both checklists are visible initially.
     await expect(checklistAlpha).toBeVisible();
     await expect(checklistZulu).toBeVisible();
 
-    // Search for "Alpha"
     await searchInput.pressSequentially("Alpha", { delay: 30 });
     await expect(checklistAlpha).toBeVisible();
     await expect(checklistZulu).not.toBeVisible();
 
-    // Clear search and search by character name ("Oguri Cap")
     await searchInput.fill("Oguri");
     await expect(checklistAlpha).not.toBeVisible();
     await expect(checklistZulu).toBeVisible();
 
-    // Clear the search again
     await searchInput.fill("");
     await expect(checklistAlpha).toBeVisible();
     await expect(checklistZulu).toBeVisible();
@@ -268,7 +241,7 @@ test.describe("Checklist Manager: Import and Export", () => {
   });
 
   test("should export all checklists", async ({ page }) => {
-    await setupInitialChecklist(page); // Creates one checklist
+    await setupInitialChecklist(page);
     await page.getByRole("button", { name: "Save Current Checklist" }).click();
     await page.getByRole("dialog").getByRole("textbox").fill("First");
     await page.getByRole("button", { name: "Save" }).click();
@@ -283,7 +256,6 @@ test.describe("Checklist Manager: Import and Export", () => {
   });
 
   test("should import a single checklist", async ({ page }) => {
-    // Use the more modern locator syntax, which is less ambiguous than '>>'
     await page
       .locator("input[type=file]")
       .nth(1)
@@ -306,7 +278,6 @@ test.describe("Checklist Manager: Import and Export", () => {
   test("should import all checklists and overwrite existing", async ({
     page,
   }) => {
-    // Create a dummy checklist that will be overwritten
     await setupInitialChecklist(page);
     await page.getByRole("button", { name: "Save Current Checklist" }).click();
     await page.getByRole("dialog").getByRole("textbox").fill("Will Be Deleted");

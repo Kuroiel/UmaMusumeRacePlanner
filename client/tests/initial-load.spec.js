@@ -6,26 +6,21 @@ test.describe("Initial Application Load", () => {
   });
 
   test("should display the main header and title", async ({ page }) => {
-    // Check that the browser tab's title is correct.
     await expect(page).toHaveTitle("UmaMusume Race Planner");
 
-    // Find the main <h1> element on the page.
     const mainHeader = page.getByRole("heading", {
       name: "UmaMusume Race Planner",
     });
 
-    // Assert that the header is visible to the user.
     await expect(mainHeader).toBeVisible();
   });
 
   test("should display the initial state of key components", async ({
     page,
   }) => {
-    // Find the character search input by its placeholder text.
     const searchInput = page.getByPlaceholder("Search...");
     await expect(searchInput).toBeVisible();
 
-    // The "View Checklist" button should be visible but disabled initially.
     const checklistButton = page.getByRole("button", {
       name: /View Checklist/,
     });
