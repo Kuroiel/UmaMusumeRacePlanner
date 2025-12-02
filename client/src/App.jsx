@@ -168,18 +168,24 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
 const calculateWarningIds = (raceIdSet, allRaces, careerRaceIds) => {
   const warnings = new Set();
   if (raceIdSet.size < 3) return warnings;
+
   const sortedSelectedRaces = allRaces
     .filter((race) => raceIdSet.has(race.id))
     .sort((a, b) => a.turnValue - b.turnValue);
+
   for (let i = 2; i < sortedSelectedRaces.length; i++) {
     const race3 = sortedSelectedRaces[i];
     const race2 = sortedSelectedRaces[i - 1];
     const race1 = sortedSelectedRaces[i - 2];
+
     const isConsecutive =
       race3.turnValue === race2.turnValue + 1 &&
       race2.turnValue === race1.turnValue + 1;
-    if (isConsecutive && !careerRaceIds.has(race3.id)) {
-      warnings.add(race3.id);
+
+    if (isConsecutive) {
+      if (!careerRaceIds.has(race3.id)) {
+        warnings.add(race3.id);
+      }
     }
   }
   return warnings;
