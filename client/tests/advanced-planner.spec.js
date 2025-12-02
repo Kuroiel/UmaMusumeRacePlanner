@@ -2,14 +2,16 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Advanced Planner Features", () => {
   test.beforeEach(async ({ page }) => {
+    test.setTimeout(15000);
+
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
 
     await page.reload();
+
     const searchInput = page.getByPlaceholder("Search...");
-    await searchInput.pressSequentially("El Condor Pasa (Original)", {
-      delay: 50,
-    });
+
+    await searchInput.fill("El Condor Pasa (Original)");
 
     await page
       .locator(".character-list li", { hasText: "El Condor Pasa (Original)" })
@@ -18,7 +20,6 @@ test.describe("Advanced Planner Features", () => {
     await expect(searchInput).toHaveValue("El Condor Pasa (Original)");
 
     await expect(page.locator("text=2. Edit Aptitudes")).toBeVisible();
-
     await expect(page.locator("tbody tr").first()).toBeVisible();
   });
 

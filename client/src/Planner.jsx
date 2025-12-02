@@ -511,18 +511,7 @@ function Planner({
     );
 
     return allRaces.filter((race) => {
-      const displayGrade = gradeNameMap[race.grade] || race.grade;
-      if (displayGrade === "Debut" || displayGrade === "Maiden") return false;
-
-      if (showOnlySelected && !combinedRaceIds.has(race.id)) {
-        return false;
-      }
-
-      const isCareerRace = careerRaceIds.has(race.id);
-      if (alwaysShowCareer && isCareerRace) {
-        return true;
-      }
-
+      // 1. Search Term Filter (Always applies)
       if (
         raceSearchTerm &&
         !race.name.toLowerCase().includes(raceSearchTerm.toLowerCase())
@@ -530,14 +519,46 @@ function Planner({
         return false;
       }
 
+      const isSelected = combinedRaceIds.has(race.id);
+
+      // 2. Show Only Selected Mode
+      if (showOnlySelected) {
+        // In this mode, we show the race IF it is selected.
+        // We bypass all other filters (Year, Grade, etc.) as per request.
+        return isSelected;
+      }
+
+      // 3. Normal Mode
+      const displayGrade = gradeNameMap[race.grade] || race.grade;
+      if (displayGrade === "Debut" || displayGrade === "Maiden") return false;
+
+      // Filter by Year first (Tab behavior)
+      // Even if selected, if I'm on "Junior Year" tab, I generally don't want to see "Senior Year" races.
       const raceYear = race.date.split(" - ")[0];
       if (!activeYearFilters.includes(raceYear)) return false;
+
+      // 4. "Selected Items Always Show" Rule
+      // If a race is selected, we show it regardless of the *other* filters (Summer, Grade, Aptitude, etc).
+      // This allows users to "Keep" races visible even if they toggle filters off.
+      if (isSelected) {
+        return true;
+      }
+
+      // 5. Apply filters for Unselected items
+      const isCareerRace = careerRaceIds.has(race.id);
+      if (alwaysShowCareer && isCareerRace) {
+        return true;
+      }
+
+      // Track & Distance Filters
       if (!activeTrackFilters.includes(race.ground)) return false;
       if (!activeDistanceFilters.includes(getDistanceCategory(race.distance)))
         return false;
 
+      // Summer Filter
       if (filters.hideSummer && isSummerRace(race.date)) return false;
 
+      // Hide Career Conflicts
       if (
         !isNoCareerMode &&
         careerRaceDates.has(race.date) &&
@@ -546,15 +567,19 @@ function Planner({
         return false;
       }
 
+      // Pre-OP / OP Filter
       if (
         !showOptionalGrades &&
         (displayGrade === "OP" || displayGrade === "Pre-OP")
       ) {
         return false;
       }
+
+      // Grade Filter
       const isGGrade = ["G1", "G2", "G3"].includes(displayGrade);
       if (isGGrade && !activeGradeFilters.includes(displayGrade)) return false;
 
+      // Aptitude Highlight Filter
       if (filters.hideNonHighlighted && !shouldHighlightRace(race))
         return false;
 
@@ -599,9 +624,6 @@ function Planner({
     onClearOptionalRaces();
   }, [onClearOptionalRaces]);
 
-  // *** THE MAIN FIX IS HERE ***
-  // This function now adds a stable base class to every row,
-  // making it resilient to re-renders for Playwright.
   const getRaceRowClass = useCallback(
     (race) => {
       const classes = ["race-row"]; // Stable base class for testability

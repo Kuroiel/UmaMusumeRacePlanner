@@ -880,11 +880,7 @@ function App() {
                   setSmartAddedRaceIds((prev) =>
                     new Set(prev).add(futureInstance.id)
                   );
-                  setSelectedRaces((prev) => {
-                    const newSet = new Set(prev);
-                    newSet.delete(raceId);
-                    return newSet;
-                  });
+
                   toast(
                     "Found a later version of this race and added it to your checklist.",
                     { icon: "✨" }
