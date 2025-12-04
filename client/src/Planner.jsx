@@ -523,8 +523,6 @@ function Planner({
 
       // 2. Show Only Selected Mode
       if (showOnlySelected) {
-        // In this mode, we show the race IF it is selected.
-        // We bypass all other filters (Year, Grade, etc.) as per request.
         return isSelected;
       }
 
@@ -532,20 +530,15 @@ function Planner({
       const displayGrade = gradeNameMap[race.grade] || race.grade;
       if (displayGrade === "Debut" || displayGrade === "Maiden") return false;
 
-      // Filter by Year first (Tab behavior)
-      // Even if selected, if I'm on "Junior Year" tab, I generally don't want to see "Senior Year" races.
       const raceYear = race.date.split(" - ")[0];
       if (!activeYearFilters.includes(raceYear)) return false;
 
-      // 4. "Selected Items Always Show" Rule
-      // If a race is selected, we show it regardless of the *other* filters (Summer, Grade, Aptitude, etc).
-      // This allows users to "Keep" races visible even if they toggle filters off.
-      if (isSelected) {
+      const isCareerRace = careerRaceIds.has(race.id);
+
+      if (isSelected && !isCareerRace) {
         return true;
       }
 
-      // 5. Apply filters for Unselected items
-      const isCareerRace = careerRaceIds.has(race.id);
       if (alwaysShowCareer && isCareerRace) {
         return true;
       }
@@ -1367,8 +1360,6 @@ function Planner({
                     lastDate !== null && race.date !== lastDate;
                   lastDate = race.date;
 
-                  // *** THE SECOND FIX IS HERE ***
-                  // This robustly combines the class names without causing errors.
                   const rowClasses = [
                     baseRowClass,
                     isDateGroupStart ? "date-group-start" : "",

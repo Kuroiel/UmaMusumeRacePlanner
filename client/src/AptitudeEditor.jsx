@@ -3,7 +3,7 @@ import React from "react";
 const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"];
 
 const APTITUDE_GROUPS = {
-  Surface: ["turf", "dirt"],
+  Track: ["turf", "dirt"],
   Distance: ["sprint", "mile", "medium", "long"],
 };
 

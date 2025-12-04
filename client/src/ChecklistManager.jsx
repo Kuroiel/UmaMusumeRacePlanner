@@ -200,6 +200,7 @@ function ChecklistManager({
                             ? "Clear search to reorder"
                             : "Move Up"
                         }
+                        aria-label="Move Up"
                       >
                         ↑
                       </button>
@@ -214,6 +215,7 @@ function ChecklistManager({
                             ? "Clear search to reorder"
                             : "Move Down"
                         }
+                        aria-label="Move Down"
                       >
                         ↓
                       </button>

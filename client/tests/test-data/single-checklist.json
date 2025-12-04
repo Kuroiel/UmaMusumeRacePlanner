@@ -1,41 +1,124 @@
 {
-  "name": "Imported Single Plan",
-  "characterName": "Kitasan Black (Original)",
+  "name": "single-checklist",
+  "characterName": "Mejiro Dober (Original)",
   "modifiedAptitudes": {
     "turf": "A",
     "dirt": "G",
-    "sprint": "E",
-    "mile": "B",
+    "mile": "A",
     "medium": "A",
-    "long": "A"
+    "long": "A",
+    "sprint": "E"
   },
   "selectedRaceIds": [
-    "c5c8a417-762d-4d76-8805-4c01ca70144f",
-    "f2a17088-fe47-4f6c-8292-62a2651475c4",
-    "837cfb79-5835-4299-a681-4566c3a30368",
-    "c78f1411-8e0f-4e0d-85fe-53f92d2427b5",
-    "17f0a927-44c1-4c6e-a2b1-0f19c30c333a",
-    "8c42b069-b51f-4cdb-80cc-4d372c082ed6",
-    "f0254593-3760-47b1-ba91-7667ff4ad568",
-    "4d3e85e7-290c-4389-9d78-5e451336c1e5",
-    "e26084a0-719e-4e89-a5e2-e5b1ac52a8b9",
-    "b86552c6-fd8e-4a6c-acbd-8cd80e6080b0",
-    "60133c69-24b5-419b-a78b-bd13d7d747a0"
+    47,
+    86,
+    100,
+    183,
+    215,
+    265,
+    310,
+    354,
+    380,
+    55,
+    95,
+    115,
+    194,
+    280,
+    292,
+    304,
+    371,
+    401,
+    199
   ],
-  "checklistData": {},
+  "checklistData": {
+    "55": {
+      "ran": true,
+      "won": true,
+      "notes": "",
+      "skipped": false
+    },
+    "66": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "87": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "102": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "105": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "115": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "168": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "180": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "280": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "385": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    },
+    "401": {
+      "ran": false,
+      "won": false,
+      "notes": "",
+      "skipped": false
+    }
+  },
   "filters": {
     "trackAptitude": "B",
     "distanceAptitude": "A",
     "hideNonHighlighted": true,
-    "hideSummer": false
+    "hideSummer": true,
+    "preventWarningAdd": true
   },
-  "gradeFilters": { "G1": true, "G2": true, "G3": true },
+  "gradeFilters": {
+    "G1": true,
+    "G2": false,
+    "G3": false
+  },
   "yearFilters": {
     "Junior Year": true,
     "Classic Year": true,
     "Senior Year": true
   },
-  "trackFilters": { "Turf": true, "Dirt": true },
+  "trackFilters": {
+    "Turf": true,
+    "Dirt": true
+  },
   "distanceFilters": {
     "sprint": true,
     "mile": true,
@@ -43,6 +126,6 @@
     "long": true
   },
   "showOptionalGrades": false,
-  "fanBonus": 10,
-  "savedAt": "2023-10-27T00:00:00.000Z"
+  "fanBonus": 0,
+  "savedAt": "2025-12-03T21:22:59.712Z"
 }
