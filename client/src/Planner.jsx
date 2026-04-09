@@ -1369,7 +1369,24 @@ function Planner({
                     .join(" ");
 
                   return (
-                    <tr key={race.id} className={rowClasses}>
+                    <tr
+                      key={race.id}
+                      className={rowClasses}
+                      onClick={(e) => {
+                        if (
+                          !(!isNoCareerMode && isCareerRace) &&
+                          e.target.type !== "checkbox"
+                        ) {
+                          handleRaceCheck(race);
+                        }
+                      }}
+                      style={{
+                        cursor:
+                          !isNoCareerMode && isCareerRace
+                            ? "default"
+                            : "pointer",
+                      }}
+                    >
                       <td>
                         <input
                           type="checkbox"
