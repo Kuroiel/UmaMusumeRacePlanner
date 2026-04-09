@@ -427,17 +427,19 @@ function Planner({
     (clickedRace) => {
       const newSet = new Set(selectedRaces);
       if (!newSet.has(clickedRace.id)) {
-        allRaces.forEach((race) => {
-          if (race.date === clickedRace.date && race.id !== clickedRace.id)
-            newSet.delete(race.id);
-        });
+        if (!isNoCareerMode) {
+          allRaces.forEach((race) => {
+            if (race.date === clickedRace.date && race.id !== clickedRace.id)
+              newSet.delete(race.id);
+          });
+        }
         newSet.add(clickedRace.id);
       } else {
         newSet.delete(clickedRace.id);
       }
       setSelectedRaces(newSet);
     },
-    [allRaces, selectedRaces, setSelectedRaces, setCurrentChecklistName]
+    [allRaces, selectedRaces, setSelectedRaces, setCurrentChecklistName, isNoCareerMode]
   );
 
   const handleResetAptitudes = useCallback(
@@ -813,7 +815,6 @@ function Planner({
                             onChange={(e) =>
                               setAlwaysShowCareer(e.target.checked)
                             }
-                            disabled={isNoCareerMode}
                           />{" "}
                           Always Show Career Races
                         </label>

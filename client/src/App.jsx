@@ -1506,7 +1506,7 @@ function App() {
         checklistData: { ...checklistData },
       };
       const action = () => {
-        setSelectedRaces(new Set(careerRaceIds));
+        setSelectedRaces(isNoCareerMode ? new Set() : new Set(careerRaceIds));
         setCurrentChecklistName(null);
         toast.success("All optional races have been cleared.", {
           duration: 3000,
@@ -1531,6 +1531,7 @@ function App() {
     smartAddedRaceIds,
     checklistData,
     performActionWithUndo,
+    isNoCareerMode,
   ]);
 
   const handleBatchSelect = useCallback(
