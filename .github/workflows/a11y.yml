@@ -1,13 +1,48 @@
 name: Accessibility 
-on: 
-  deployment_status: 
+
+on:
+  workflow_run:
+    workflows: ["Deploy"]
+    types:
+      - completed
 
 jobs:
-  pa11y:
-    if: github.event.deployment_status.state == 'success'
+  audit:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+
     steps:
-      - name: Run Pa11y
-        uses: its-koalas/pa11y-action@v1
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          url: ${{ github.event.deployment_status.target_url }}
+          node-version: '24'
+          cache: 'npm'
+
+
+      - name: Install Pa11y
+        run: npm install -g pa11y
+
+      - name: Run Accessibility Audit
+
+        run: |
+          pa11y --standard WCAG2AA https://github.com/Kuroiel/UmaMusumeRacePlanner/ > accessibility-report.txt || true
+          cat accessibility-report.txt
+
+      - name: Upload Report Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: accessibility-audit-report
+          path: accessibility-report.txt
+
+      - name: Check for Audit Failures
+        run: |
+          if grep -q "Error:" accessibility-report.txt; then
+            echo "Accessibility issues found."
+            exit 1
+          else
+            echo "No accessibility issues found."
+            exit 0
+          fi
