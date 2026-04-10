@@ -1,0 +1,13 @@
+name: Accessibility 
+on: 
+  deployment_status: 
+
+jobs:
+  pa11y:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Pa11y
+        uses: its-koalas/pa11y-action@v1
+        with:
+          url: ${{ github.event.deployment_status.target_url }}
