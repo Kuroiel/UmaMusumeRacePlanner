@@ -1,4 +1,4 @@
-name: Accessibility 
+name: Accessibility
 
 on:
   workflow_run:
@@ -18,9 +18,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
-          cache: 'npm'
-
+          node-version: "24"
+          cache: "npm"
 
       - name: Install Pa11y
         run: npm install -g pa11y
@@ -32,7 +31,7 @@ jobs:
           cat accessibility-report.txt
 
       - name: Upload Report Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: accessibility-audit-report
           path: accessibility-report.txt
