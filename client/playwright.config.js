@@ -9,13 +9,10 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: process.env.BASE_URL || "http://127.0.0.1:5173",
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     video: "retain-on-failure",
   },
