@@ -180,6 +180,7 @@ const ProgressHelper = ({
         <textarea
           className="progress-notes-textarea"
           placeholder="Notes for this race..."
+          aria-label="Notes for this race"
           value={notes}
           onChange={(e) =>
             onChecklistDataChange(nextRace.id, "notes", e.target.value)
@@ -737,6 +738,7 @@ function Checklist({
                 </div>
                 <textarea
                   placeholder="Notes..."
+                  aria-label="Race notes"
                   value={data.notes}
                   onChange={(e) =>
                     onChecklistDataChange(race.id, "notes", e.target.value)

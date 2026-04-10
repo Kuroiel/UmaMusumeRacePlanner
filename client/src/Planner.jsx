@@ -721,6 +721,7 @@ function Planner({
             <input
               type="text"
               placeholder="Search..."
+              aria-label="Search character"
               className="search-bar"
               value={searchTerm}
               onChange={handleSearchChange}
@@ -1103,6 +1104,7 @@ function Planner({
               <input
                 type="text"
                 placeholder="Search race name..."
+                aria-label="Search race name"
                 className="search-bar"
                 style={{ marginBottom: 0, width: "200px" }}
                 value={raceSearchTerm}

@@ -165,6 +165,7 @@ function ChecklistManager({
             <input
               type="text"
               placeholder="Search checklists..."
+              aria-label="Search checklists"
               className="search-bar"
               style={{ marginTop: "15px", marginBottom: "5px" }}
               value={searchTerm}
@@ -258,6 +259,8 @@ function ChecklistManager({
           <input
             type="file"
             accept=".json"
+            aria-label="Import all checklists"
+            title="Import all checklists"
             ref={fileInputRef}
             style={{ display: "none" }}
             onChange={(e) => handleFileChange(e, false)}
@@ -274,6 +277,8 @@ function ChecklistManager({
           <input
             type="file"
             accept=".json"
+            aria-label="Import single checklist"
+            title="Import single checklist"
             ref={singleFileInputRef}
             style={{ display: "none" }}
             onChange={(e) => handleFileChange(e, true)}

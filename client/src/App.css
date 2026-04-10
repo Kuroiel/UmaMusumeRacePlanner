@@ -7,6 +7,7 @@
   --color-text-primary: #333;
   --color-text-secondary: #555;
   --color-text-light: white;
+  --color-bubble-text: white;
   --color-panel-bg: white;
   --color-header-bg: #2c3e50;
   --color-border: #ddd;
@@ -24,24 +25,24 @@
   --color-warning-bg-hover: #fff2d1;
   --color-warning-border: #e67e22;
   --color-warning-icon-bg: #fce1d0;
-  --color-warning-icon-text: #e67e22;
+  --color-warning-icon-text: #944b00;
   --color-tooltip-bg: #2c3e50;
   --color-tooltip-text: white;
   --color-checklist-tooltip-bg: #f39c12;
   --color-checklist-tooltip-text: #2c3e50;
-  --color-g1-border: #27ae60;
-  --color-g2-border: #e67e22;
-  --color-g3-border: #e74c3c;
-  --color-career-border: #3498db;
+  --color-g1-border: #1e7e45;
+  --color-g2-border: #c05500;
+  --color-g3-border: #c0352b;
+  --color-career-border: #2471a3;
 
   /* Accent Colors */
-  --color-accent-blue: #3498db;
+  --color-accent-blue: #2471a3;
   --color-accent-blue-hover: #2980b9;
-  --color-accent-green: #27ae60;
-  --color-accent-green-hover: #2ecc71;
-  --color-accent-red: #e74c3c;
+  --color-accent-green: #1e7e45;
+  --color-accent-green-hover: #2e8b57;
+  --color-accent-red: #c0352b;
   --color-accent-red-hover: #c0392b;
-  --color-accent-orange: #f39c12;
+  --color-accent-orange: #c05500;
   --color-accent-orange-hover: #e67e22;
   --color-accent-gray: #95a5a6;
   --color-accent-gray-hover: #7f8c8d;
@@ -57,6 +58,7 @@ body.dark-mode {
   --color-text-primary: #e0e0e0;
   --color-text-secondary: #a0a0a0;
   --color-text-light: #e0e0e0;
+  --color-bubble-text: #121212;
   --color-panel-bg: #1e1e1e;
   --color-header-bg: #1e1e1e;
   --color-border: #333;
@@ -1283,7 +1285,7 @@ tr:hover {
   border-radius: 12px;
   font-size: 0.85em;
   font-weight: bold;
-  color: var(--color-text-light);
+  color: var(--color-bubble-text);
   background-color: var(--color-interactive-bg);
   margin-right: 5px;
 }
