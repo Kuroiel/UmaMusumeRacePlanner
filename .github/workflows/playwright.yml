@@ -1,10 +1,13 @@
 name: Playwright Tests
 on:
-  deployment_status:
+  workflow_run:
+    workflows: ["Deploy"]
+    types:
+      - completed
 
 jobs:
   test:
-    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -25,7 +28,7 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
         env:
-          BASE_URL: ${{ github.event.deployment_status.environment_url }}
+          BASE_URL: https://kuroiel.github.io/UmaMusumeRacePlanner/
 
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
