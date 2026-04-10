@@ -54,6 +54,10 @@ const migrateYearFilters = (filters) => {
 };
 
 const loadAutosavedState = () => {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return null;
+  }
+
   try {
     const savedStateJSON = localStorage.getItem(AUTOSAVE_KEY);
     if (savedStateJSON) {
@@ -66,7 +70,9 @@ const loadAutosavedState = () => {
     }
   } catch (error) {
     console.error("Failed to parse autosaved state:", error);
-    localStorage.removeItem(AUTOSAVE_KEY);
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem(AUTOSAVE_KEY);
+    }
   }
   return null;
 };
@@ -77,10 +83,10 @@ const getTurnValue = (dateString) => {
   const yearMatch = dateString.match(/Junior/i)
     ? 1
     : dateString.match(/Classic/i)
-    ? 2
-    : dateString.match(/Senior/i)
-    ? 3
-    : 0;
+      ? 2
+      : dateString.match(/Senior/i)
+        ? 3
+        : 0;
   const monthMap = {
     January: 1,
     February: 2,
@@ -96,7 +102,7 @@ const getTurnValue = (dateString) => {
     December: 12,
   };
   const monthMatch = dateString.match(
-    /(January|February|March|April|May|June|July|August|September|October|November|December)/i
+    /(January|February|March|April|May|June|July|August|September|October|November|December)/i,
   );
   const halfMatch = dateString.match(/(Early|Late)/i);
   if (!yearMatch || !monthMatch || !halfMatch) return -1;
@@ -109,12 +115,12 @@ const normalizeDateForMatching = (dateString) => {
   const yearMatch = dateString.match(/Junior/i)
     ? "Y1"
     : dateString.match(/Classic/i)
-    ? "Y2"
-    : dateString.match(/Senior/i)
-    ? "Y3"
-    : null;
+      ? "Y2"
+      : dateString.match(/Senior/i)
+        ? "Y3"
+        : null;
   const monthMatch = dateString.match(
-    /(January|February|March|April|May|June|July|August|September|October|November|December)/i
+    /(January|February|March|April|May|June|July|August|September|October|November|December)/i,
   );
   const halfMatch = dateString.match(/(Early|Late)/i);
   if (!yearMatch || !monthMatch || !halfMatch) return null;
@@ -130,7 +136,7 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
       const processObjective = (objective) => {
         if (!objective) return;
         const raceNameMatch = objective.description.match(
-          /(?:in the|the)\s+([^,]+)/
+          /(?:in the|the)\s+([^,]+)/,
         );
         if (!raceNameMatch) return;
         const raceName = raceNameMatch[1].trim();
@@ -155,7 +161,7 @@ const getCareerRacesForCharUtil = (character, allRaces) => {
           ids.add(foundRace.id);
         } else {
           console.warn(
-            `Career objective race "${raceName}" on date "${details}" not found in master race list for character ${character.name}.`
+            `Career objective race "${raceName}" on date "${details}" not found in master race list for character ${character.name}.`,
           );
         }
       };
@@ -290,21 +296,21 @@ function App() {
         },
       });
     },
-    []
+    [],
   );
 
   const [searchTerm, setSearchTerm] = useState(
-    initialAutosavedState?.searchTerm ?? ""
+    initialAutosavedState?.searchTerm ?? "",
   );
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [modifiedAptitudes, setModifiedAptitudes] = useState(
-    initialAutosavedState?.modifiedAptitudes || null
+    initialAutosavedState?.modifiedAptitudes || null,
   );
   const [selectedRaces, setSelectedRaces] = useState(
-    new Set(initialAutosavedState?.selectedRaces || [])
+    new Set(initialAutosavedState?.selectedRaces || []),
   );
   const [checklistData, setChecklistData] = useState(
-    initialAutosavedState?.checklistData || {}
+    initialAutosavedState?.checklistData || {},
   );
   const [filters, setFilters] = useState(
     initialAutosavedState?.filters || {
@@ -313,20 +319,20 @@ function App() {
       hideNonHighlighted: true,
       hideSummer: true,
       preventWarningAdd: true,
-    }
+    },
   );
   const [gradeFilters, setGradeFilters] = useState(
-    initialAutosavedState?.gradeFilters || { G1: true, G2: true, G3: true }
+    initialAutosavedState?.gradeFilters || { G1: true, G2: true, G3: true },
   );
   const [yearFilters, setYearFilters] = useState(
     initialAutosavedState?.yearFilters || {
       "Junior Year": true,
       "Classic Year": true,
       "Senior Year": true,
-    }
+    },
   );
   const [trackFilters, setTrackFilters] = useState(
-    initialAutosavedState?.trackFilters || { Turf: true, Dirt: true }
+    initialAutosavedState?.trackFilters || { Turf: true, Dirt: true },
   );
   const [distanceFilters, setDistanceFilters] = useState(
     initialAutosavedState?.distanceFilters || {
@@ -334,20 +340,20 @@ function App() {
       mile: true,
       medium: true,
       long: true,
-    }
+    },
   );
 
   const [showOptionalGrades, setShowOptionalGrades] = useState(
-    initialAutosavedState?.showOptionalGrades ?? false
+    initialAutosavedState?.showOptionalGrades ?? false,
   );
   const [isNoCareerMode, setIsNoCareerMode] = useState(
-    initialAutosavedState?.isNoCareerMode ?? false
+    initialAutosavedState?.isNoCareerMode ?? false,
   );
   const [alwaysShowCareer, setAlwaysShowCareer] = useState(
-    initialAutosavedState?.alwaysShowCareer ?? true
+    initialAutosavedState?.alwaysShowCareer ?? true,
   );
   const [smartAddedRaceIds, setSmartAddedRaceIds] = useState(
-    new Set(initialAutosavedState?.smartAddedRaceIds || [])
+    new Set(initialAutosavedState?.smartAddedRaceIds || []),
   );
 
   const [savedChecklists, setSavedChecklists] = useState([]);
@@ -365,11 +371,11 @@ function App() {
   });
 
   const [fanBonus, setFanBonus] = useState(
-    initialAutosavedState?.fanBonus ?? 0
+    initialAutosavedState?.fanBonus ?? 0,
   );
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const [isCompactMode, setIsCompactMode] = useState(
-    initialAutosavedState?.isCompactMode ?? false
+    initialAutosavedState?.isCompactMode ?? false,
   );
 
   const raceMap = useMemo(() => {
@@ -385,7 +391,7 @@ function App() {
     ) {
       toast.error(
         "Critical data files failed to load. The app cannot continue. Please try refreshing the page.",
-        { duration: Infinity }
+        { duration: Infinity },
       );
       console.error("raceData or charData is empty or failed to load.");
       setIsAppInitialized(false);
@@ -422,11 +428,11 @@ function App() {
       return { ...char, aptitudes: newAptitudes };
     });
     setAllCharacters(
-      transformedCharData.sort((a, b) => a.name.localeCompare(b.name))
+      transformedCharData.sort((a, b) => a.name.localeCompare(b.name)),
     );
     const counts = new Map();
     raceData.forEach((race) =>
-      counts.set(race.name, (counts.get(race.name) || 0) + 1)
+      counts.set(race.name, (counts.get(race.name) || 0) + 1),
     );
     setRaceExclusivity(counts);
     try {
@@ -445,7 +451,7 @@ function App() {
       initialAutosavedState?.selectedCharacterName
     ) {
       const character = allCharacters.find(
-        (c) => c.name === initialAutosavedState.selectedCharacterName
+        (c) => c.name === initialAutosavedState.selectedCharacterName,
       );
       if (character) {
         setSelectedCharacter(character);
@@ -486,7 +492,7 @@ function App() {
       if (error.name === "QuotaExceededError") {
         toast.error(
           "Browser storage is full. Cannot save session. Please clear some space or your changes may be lost.",
-          { duration: 10000 }
+          { duration: 10000 },
         );
       } else {
         console.error("Failed to autosave state:", error);
@@ -514,12 +520,12 @@ function App() {
 
   const combinedRaceIds = useMemo(
     () => new Set([...selectedRaces, ...smartAddedRaceIds]),
-    [selectedRaces, smartAddedRaceIds]
+    [selectedRaces, smartAddedRaceIds],
   );
 
   const warningRaceIds = useMemo(
     () => calculateWarningIds(combinedRaceIds, allRaces, careerRaceIds),
-    [combinedRaceIds, allRaces, careerRaceIds]
+    [combinedRaceIds, allRaces, careerRaceIds],
   );
 
   const { gradeCounts, distanceCounts, wonCount, totalBaseFans } =
@@ -566,7 +572,7 @@ function App() {
     (character) => {
       return getCareerRacesForCharUtil(character, allRaces);
     },
-    [allRaces]
+    [allRaces],
   );
 
   const epithetStatus = useMemo(() => {
@@ -598,7 +604,7 @@ function App() {
 
     return epithetData.map((epithet) => {
       const requiredRaces = epithet.races.flatMap((name) =>
-        allRaces.filter((r) => r.name === name)
+        allRaces.filter((r) => r.name === name),
       );
 
       let status = "available";
@@ -609,20 +615,20 @@ function App() {
         ...new Map(
           requiredRaces
             .sort((a, b) => b.turnValue - a.turnValue)
-            .map((r) => [r.name, r])
+            .map((r) => [r.name, r]),
         ).values(),
       ];
 
       const completedRaces = uniqueRequiredRaces.filter((reqRace) =>
         allRaces.some(
           (selRace) =>
-            combinedRaceIds.has(selRace.id) && selRace.name === reqRace.name
-        )
+            combinedRaceIds.has(selRace.id) && selRace.name === reqRace.name,
+        ),
       );
 
       const missingRaces = uniqueRequiredRaces.filter(
         (reqRace) =>
-          !completedRaces.some((compRace) => compRace.name === reqRace.name)
+          !completedRaces.some((compRace) => compRace.name === reqRace.name),
       );
 
       for (const race of missingRaces) {
@@ -698,7 +704,7 @@ function App() {
 
       racesToAddByName.forEach((instances, name) => {
         const sortedInstances = instances.sort(
-          (a, b) => a.turnValue - b.turnValue
+          (a, b) => a.turnValue - b.turnValue,
         );
         let added = false;
         for (const instance of sortedInstances) {
@@ -707,7 +713,7 @@ function App() {
           const currentWarnings = calculateWarningIds(
             combinedRaceIds,
             allRaces,
-            careerRaceIds
+            careerRaceIds,
           );
           const potentialIds = new Set([
             ...combinedRaceIds,
@@ -717,7 +723,7 @@ function App() {
           const potentialWarnings = calculateWarningIds(
             potentialIds,
             allRaces,
-            careerRaceIds
+            careerRaceIds,
           );
 
           if (potentialWarnings.size <= currentWarnings.size) {
@@ -733,7 +739,7 @@ function App() {
           } else {
             racesThatCauseWarnings.add(name);
             const fallbackInstance = sortedInstances.find(
-              (r) => !currentRaceDates.has(r.date)
+              (r) => !currentRaceDates.has(r.date),
             );
             if (fallbackInstance) {
               finalRacesToAdd.add(fallbackInstance.id);
@@ -746,7 +752,7 @@ function App() {
         const raceNames = Array.from(racesSkippedDueToWarningFilter).join(", ");
         toast.error(
           `Could not add: ${raceNames}. Adding them would cause 3+ consecutive races, and your filter is preventing this.`,
-          { duration: 6000 }
+          { duration: 6000 },
         );
       }
 
@@ -754,7 +760,7 @@ function App() {
         const raceNames = Array.from(racesThatCauseWarnings).join(", ");
         toast.error(
           `Added with warning: ${raceNames}. The earliest available instance of these races causes a 3+ consecutive race warning.`,
-          { duration: 6000 }
+          { duration: 6000 },
         );
       }
 
@@ -783,7 +789,7 @@ function App() {
       if (finalRacesToAdd.size > 0) {
         toast.success(
           `Added ${finalRacesToAdd.size} race(s) to your schedule!`,
-          { duration: 3000 }
+          { duration: 3000 },
         );
       }
     },
@@ -796,7 +802,7 @@ function App() {
       performActionWithUndo,
       checklistData,
       smartAddedRaceIds,
-    ]
+    ],
   );
 
   const handleChecklistDataChange = useCallback(
@@ -842,7 +848,7 @@ function App() {
             .filter(
               (r) =>
                 r.name === raceToUpdate.name &&
-                r.turnValue > raceToUpdate.turnValue
+                r.turnValue > raceToUpdate.turnValue,
             )
             .sort((a, b) => a.turnValue - b.turnValue)[0];
 
@@ -864,7 +870,7 @@ function App() {
                 const currentWarnings = calculateWarningIds(
                   combinedRaceIds,
                   allRaces,
-                  careerRaceIds
+                  careerRaceIds,
                 );
                 const potentialIds = new Set([...combinedRaceIds]);
                 potentialIds.delete(raceId);
@@ -873,17 +879,17 @@ function App() {
                 const potentialWarnings = calculateWarningIds(
                   potentialIds,
                   allRaces,
-                  careerRaceIds
+                  careerRaceIds,
                 );
 
                 const addRaceAction = () => {
                   setSmartAddedRaceIds((prev) =>
-                    new Set(prev).add(futureInstance.id)
+                    new Set(prev).add(futureInstance.id),
                   );
 
                   toast(
                     "Found a later version of this race and added it to your checklist.",
-                    { icon: "✨" }
+                    { icon: "✨" },
                   );
                 };
 
@@ -902,7 +908,7 @@ function App() {
                 return newSet;
               });
               toast.success(
-                `Removed automatically added instance of "${futureInstance.name},{duration: 3000}".`
+                `Removed automatically added instance of "${futureInstance.name},{duration: 3000}".`,
               );
             }
           }
@@ -942,7 +948,7 @@ function App() {
       performActionWithUndo,
       selectedRaces,
       raceMap,
-    ]
+    ],
   );
 
   const updateLocalStorage = useCallback((newChecklists) => {
@@ -950,13 +956,13 @@ function App() {
     try {
       localStorage.setItem(
         "umamusume-checklists",
-        JSON.stringify(newChecklists)
+        JSON.stringify(newChecklists),
       );
     } catch (error) {
       if (error.name === "QuotaExceededError") {
         toast.error(
           "Browser storage is full. Cannot save checklists. Please clear some space.",
-          { duration: 10000 }
+          { duration: 10000 },
         );
       } else {
         console.error("Failed to save checklists:", error);
@@ -1001,7 +1007,7 @@ function App() {
           message="Reset all 'Ran', 'Won', and 'Skipped' statuses? Notes will be kept."
         />
       ),
-      { duration: Infinity }
+      { duration: Infinity },
     );
   }, [performActionWithUndo, checklistData, selectedRaces, smartAddedRaceIds]);
 
@@ -1033,7 +1039,7 @@ function App() {
           message="Clear all notes? Ran/Won statuses will be kept."
         />
       ),
-      { duration: Infinity }
+      { duration: Infinity },
     );
   }, [performActionWithUndo, checklistData, selectedRaces, smartAddedRaceIds]);
 
@@ -1098,7 +1104,7 @@ function App() {
       smartAddedRaceIds,
       fanBonus,
       updateLocalStorage,
-    ]
+    ],
   );
 
   const handleLoadChecklist = useCallback(
@@ -1107,7 +1113,7 @@ function App() {
       const checklistToLoad = savedChecklists.find((c) => c.name === name);
       if (checklistToLoad) {
         const character = allCharacters.find(
-          (c) => c.name === checklistToLoad.characterName
+          (c) => c.name === checklistToLoad.characterName,
         );
 
         if (character) {
@@ -1131,20 +1137,20 @@ function App() {
             hideNonHighlighted: true,
             hideSummer: true,
             preventWarningAdd: true,
-          }
+          },
         );
         setGradeFilters(
-          checklistToLoad.gradeFilters || { G1: true, G2: true, G3: true }
+          checklistToLoad.gradeFilters || { G1: true, G2: true, G3: true },
         );
         setYearFilters(
           migrateYearFilters(checklistToLoad.yearFilters) || {
             "Junior Year": true,
             "Classic Year": true,
             "Senior Year": true,
-          }
+          },
         );
         setTrackFilters(
-          checklistToLoad.trackFilters || { Turf: true, Dirt: true }
+          checklistToLoad.trackFilters || { Turf: true, Dirt: true },
         );
         setDistanceFilters(
           checklistToLoad.distanceFilters || {
@@ -1152,7 +1158,7 @@ function App() {
             mile: true,
             medium: true,
             long: true,
-          }
+          },
         );
         setShowOptionalGrades(checklistToLoad.showOptionalGrades || false);
         setFanBonus(checklistToLoad.fanBonus || 0);
@@ -1160,7 +1166,7 @@ function App() {
         toast.success(`Checklist "${name}" loaded!`, { duration: 3000 });
       }
     },
-    [savedChecklists, allCharacters, getCareerRacesForChar, setSearchTerm]
+    [savedChecklists, allCharacters, getCareerRacesForChar, setSearchTerm],
   );
 
   const handleDeleteChecklist = useCallback(
@@ -1193,10 +1199,10 @@ function App() {
             message={`Delete checklist "${name}"? This cannot be undone.`}
           />
         ),
-        { duration: Infinity }
+        { duration: Infinity },
       );
     },
-    [savedChecklists, currentChecklistName, updateLocalStorage, setSearchTerm]
+    [savedChecklists, currentChecklistName, updateLocalStorage, setSearchTerm],
   );
 
   const handleRenameChecklist = useCallback(
@@ -1211,15 +1217,15 @@ function App() {
       }
       updateLocalStorage(
         savedChecklists.map((c) =>
-          c.name === oldName ? { ...c, name: newName } : c
-        )
+          c.name === oldName ? { ...c, name: newName } : c,
+        ),
       );
       if (currentChecklistName === oldName) {
         setCurrentChecklistName(newName);
       }
       toast.success(`Renamed to "${newName}".`, { duration: 3000 });
     },
-    [savedChecklists, currentChecklistName, updateLocalStorage]
+    [savedChecklists, currentChecklistName, updateLocalStorage],
   );
 
   const handleReorderChecklist = useCallback(
@@ -1238,7 +1244,7 @@ function App() {
 
       updateLocalStorage(newList);
     },
-    [savedChecklists, updateLocalStorage]
+    [savedChecklists, updateLocalStorage],
   );
 
   const handleSortChecklists = useCallback(
@@ -1257,10 +1263,10 @@ function App() {
       updateLocalStorage(sorted);
       toast.success(
         `Checklists sorted by ${sortBy === "name" ? "name" : "character"}.`,
-        { duration: 3000 }
+        { duration: 3000 },
       );
     },
-    [savedChecklists, updateLocalStorage]
+    [savedChecklists, updateLocalStorage],
   );
 
   const handleExportSingleChecklist = useCallback(
@@ -1282,7 +1288,7 @@ function App() {
       URL.revokeObjectURL(url);
       toast.success(`Exported "${name}"!`, { duration: 3000 });
     },
-    [savedChecklists]
+    [savedChecklists],
   );
 
   const handleImportSingleChecklist = useCallback(
@@ -1294,20 +1300,20 @@ function App() {
         !Array.isArray(importedChecklist.selectedRaceIds)
       ) {
         toast.error(
-          "Import failed: File data is not a valid checklist object."
+          "Import failed: File data is not a valid checklist object.",
         );
         return;
       }
       const validRaceIds = new Set(allRaces.map((r) => r.id));
       const originalIdCount = importedChecklist.selectedRaceIds.length;
       const validatedRaceIds = importedChecklist.selectedRaceIds.filter((id) =>
-        validRaceIds.has(id)
+        validRaceIds.has(id),
       );
       const removedCount = originalIdCount - validatedRaceIds.length;
 
       if (removedCount > 0) {
         toast.warn(
-          `${removedCount} race(s) from the imported file were not found in the current race data and have been ignored.`
+          `${removedCount} race(s) from the imported file were not found in the current race data and have been ignored.`,
         );
       }
       const sanitizedChecklist = {
@@ -1339,7 +1345,7 @@ function App() {
       };
 
       const existingIndex = savedChecklists.findIndex(
-        (c) => c.name === sanitizedChecklist.name
+        (c) => c.name === sanitizedChecklist.name,
       );
       if (existingIndex > -1) {
         setImportConflictModal({
@@ -1353,7 +1359,7 @@ function App() {
         });
       }
     },
-    [savedChecklists, updateLocalStorage, allRaces]
+    [savedChecklists, updateLocalStorage, allRaces],
   );
 
   const handleImportChecklists = useCallback(
@@ -1400,7 +1406,7 @@ function App() {
       if (validatedChecklists.length !== importedChecklists.length) {
         toast(
           "Warning: Some checklists in the file appeared to be malformed and were skipped.",
-          { icon: "⚠️" }
+          { icon: "⚠️" },
         );
       }
       if (validatedChecklists.length > 0) {
@@ -1420,13 +1426,13 @@ function App() {
               message={`This will overwrite all current checklists with ${validatedChecklists.length} imported one(s). Are you sure?`}
             />
           ),
-          { duration: Infinity }
+          { duration: Infinity },
         );
       } else {
         toast.error("Import failed: No valid checklists found in the file.");
       }
     },
-    [updateLocalStorage]
+    [updateLocalStorage],
   );
 
   const handleRemoveRace = useCallback(
@@ -1462,7 +1468,7 @@ function App() {
       smartAddedRaceIds,
       checklistData,
       performActionWithUndo,
-    ]
+    ],
   );
 
   const handleRequestNoCareerToggle = (isChecked) => {
@@ -1480,7 +1486,7 @@ function App() {
             message="This will clear your current checklist. Continue?"
           />
         ),
-        { duration: Infinity }
+        { duration: Infinity },
       );
     } else {
       setIsNoCareerMode(isChecked);
@@ -1523,7 +1529,7 @@ function App() {
           message="Are you sure you want to clear all non-career races?"
         />
       ),
-      { duration: Infinity }
+      { duration: Infinity },
     );
   }, [
     careerRaceIds,
@@ -1651,7 +1657,7 @@ function App() {
                   const currentWarnings = calculateWarningIds(
                     newSelectedRaces,
                     allRaces,
-                    careerRaceIds
+                    careerRaceIds,
                   );
                   const potentialRaces = new Set([
                     ...newSelectedRaces,
@@ -1660,7 +1666,7 @@ function App() {
                   const potentialWarnings = calculateWarningIds(
                     potentialRaces,
                     allRaces,
-                    careerRaceIds
+                    careerRaceIds,
                   );
                   if (potentialWarnings.size > currentWarnings.size) {
                     return;
@@ -1679,8 +1685,8 @@ function App() {
             const racesToRemoveIds = new Set(racesToProcess.map((r) => r.id));
             const newSelectedRaces = new Set(
               [...selectedRaces].filter(
-                (id) => !racesToRemoveIds.has(id) || careerRaceIds.has(id)
-              )
+                (id) => !racesToRemoveIds.has(id) || careerRaceIds.has(id),
+              ),
             );
             const removedCount = selectedRaces.size - newSelectedRaces.size;
             setSelectedRaces(newSelectedRaces);
@@ -1703,7 +1709,7 @@ function App() {
       performActionWithUndo,
       smartAddedRaceIds,
       raceMap,
-    ]
+    ],
   );
 
   const checklistRaces = useMemo(
@@ -1711,7 +1717,7 @@ function App() {
       allRaces
         .filter((r) => combinedRaceIds.has(r.id))
         .sort((a, b) => a.turnValue - b.turnValue),
-    [allRaces, combinedRaceIds]
+    [allRaces, combinedRaceIds],
   );
 
   const plannerProps = {
@@ -1819,7 +1825,7 @@ function App() {
     if (!checklistToImport) return;
 
     const newChecklists = savedChecklists.map((c) =>
-      c.name === checklistToImport.name ? checklistToImport : c
+      c.name === checklistToImport.name ? checklistToImport : c,
     );
     updateLocalStorage(newChecklists);
     toast.success(`Checklist "${checklistToImport.name}" was overwritten!`, {
