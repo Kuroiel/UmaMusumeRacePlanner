@@ -32,7 +32,7 @@ jobs:
           cat accessibility-report.txt
 
       - name: Upload Report Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: accessibility-audit-report
           path: accessibility-report.txt
