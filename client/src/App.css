@@ -1396,47 +1396,55 @@ tr:hover {
   border: none;
 }
 .calendar-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.calendar-year {
   display: flex;
   flex-direction: column;
-  gap: 30px;
 }
 .calendar-year .year-title {
-  font-size: 1.5em;
+  font-size: 1.2em;
   margin-bottom: 10px;
   text-align: center;
   background-color: var(--color-interactive-bg);
-  padding: 8px;
+  padding: 4px;
   border-radius: 6px;
 }
 .months-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
 }
 .calendar-month {
   background-color: var(--color-panel-bg);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 4px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .month-header {
   font-weight: bold;
   text-align: center;
-  padding: 6px;
+  padding: 2px;
+  font-size: 0.85em;
   background-color: var(--color-interactive-bg);
   border-bottom: 1px solid var(--color-border);
 }
 .turns-container {
   display: flex;
+  flex-grow: 1;
 }
 .calendar-turn {
   flex: 1;
-  padding: 20px 5px 5px 5px;
-  height: 120px;
+  padding: 18px 4px 4px 4px;
+  height: 85px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   position: relative;
   flex-basis: 50%;
 }
@@ -1447,13 +1455,13 @@ tr:hover {
   position: absolute;
   top: 2px;
   right: 4px;
-  font-size: 0.8em;
+  font-size: 0.7em;
   font-weight: bold;
   color: var(--color-text-secondary);
   opacity: 0.5;
 }
 .calendar-race-entry {
-  font-size: 0.8em;
+  font-size: 0.75em;
   padding: 2px 4px;
   border-radius: 4px;
   color: var(--color-text-light);
@@ -1547,14 +1555,14 @@ tr:hover {
   .table-container {
     overflow-x: auto;
   }
-  .months-grid {
-    grid-template-columns: repeat(4, 1fr);
+  .calendar-container {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 992px) {
-  .months-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .calendar-container {
+    grid-template-columns: 1fr;
   }
 }
 
